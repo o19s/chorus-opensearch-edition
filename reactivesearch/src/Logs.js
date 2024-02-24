@@ -18,20 +18,20 @@ class LogTable extends Component {
 	}
 	state = {
 	};
-  
+
 	handleSearch = value => {
 	  this.setState({
 		value
 	  });
 	};
-  
+
 	componentDidMount(){
 	  console.log('logs mounted ' + this);
-  
+
 	}
-  
-	
-  
+
+
+
 	render(){
 	return (
 	  //TODO: move url and other configs to proerties file
@@ -40,20 +40,20 @@ class LogTable extends Component {
 		app={log_store_events }
 		credentials="elastic:ElasticRocks"
 		enableAppbase={false}
-		headers={{   
-		 
+		headers={{
+
 		}}
 		transformResponse={async (response, componentId) => {
 
-		  
+
 		  return response;
 		}}
 		transformRequest={async (request) => {
 
 		  return request;
 		}}
-  
-			  
+
+
 	  >
 		<StateProvider
 			onChange={(prevState, nextState) => {
@@ -61,7 +61,7 @@ class LogTable extends Component {
 			  //console.log('Page.onChange - ' + queryString.searchbox.value);
 			  //this.search_text = queryString.searchbox.value;
 			}}
-			
+
 		/>
 		<div style={{ height: "200px", width: "100%"}}>
 			<h3>Event Log</h3>
@@ -75,25 +75,20 @@ class LogTable extends Component {
 			//TODO: once timestamp is in the schema
 				//sortBy
 				//sortOptions { sortyBy, dataField, label}
-            size={6}
+            size={7}
             showSearch={false}
-			onChangeonData={  
-				function(data) {
-					console.warn('on log change');
-				}
-			  }
-            onQueryChange={  
+            onQueryChange={
               function(prevQuery, nextQuery) {
                 if(nextQuery != prevQuery){
                   console.log('log events fire');
-                
+
                 }
               }
             }
             style={{ "paddingBottom": "10px", "paddingTop": "10px", "height":"50px" }}
             pagination={true}
             react={{
-              or: ["market-place", "searchbox", "brandfilter", "typefilter"]
+              and: ["searchbox"]
             }}
             render={({ data }) => (
             <ReactiveList.ResultListWrapper>
@@ -101,14 +96,14 @@ class LogTable extends Component {
                     <ResultList key={item._id}>
                         <ResultList.Content>
 
-							<div style={{  
-								display: "table", 
+							<div style={{
+								display: "table",
 								textAlign: "left",
 								width: "500px",
 								}}>
 								<div style={{display: "table-row-group"}}>
 									<div style={{display: "table-row", height: "15px"}}>
-										<div 
+										<div
 										  style={{
 											display: "table-cell",
 											flexDirection: "column",
@@ -136,7 +131,7 @@ class LogTable extends Component {
 									</div>
 								</div>
 							</div>
-                    
+
                         </ResultList.Content>
                     </ResultList>
                 ))}
@@ -158,7 +153,7 @@ class LogTable extends Component {
               }
             }
           />
-      
+
       </div>
     </ReactiveBase>
   );
