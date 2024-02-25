@@ -58,8 +58,6 @@ class LogTable extends Component {
 		<StateProvider
 			onChange={(prevState, nextState) => {
 			  let queryString = nextState;
-			  //console.log('Page.onChange - ' + queryString.searchbox.value);
-			  //this.search_text = queryString.searchbox.value;
 			}}
 
 		/>
@@ -75,8 +73,13 @@ class LogTable extends Component {
 			//TODO: once timestamp is in the schema
 				//sortBy
 				//sortOptions { sortyBy, dataField, label}
-            size={7}
+            size={6}
             showSearch={false}
+			onChangeonData={
+				function(data) {
+					console.warn('on log change');
+				}
+			  }
             onQueryChange={
               function(prevQuery, nextQuery) {
                 if(nextQuery != prevQuery){
@@ -88,53 +91,106 @@ class LogTable extends Component {
             style={{ "paddingBottom": "10px", "paddingTop": "10px", "height":"50px" }}
             pagination={true}
             react={{
-              and: ["searchbox"]
+              or: ["market-place", "searchbox", "brandfilter", "typefilter"]
             }}
             render={({ data }) => (
-            <ReactiveList.ResultListWrapper>
+            <ReactiveList.ResultListWrapper >
+				{/*
+				<div style={{  display: "table", textAlign: "left", }}>
+					<div style={{display: "table-row-group", textAlign: 'left'}}>
+			*/}
+						<div style={{display: "table-row", height: "15px", textAlign:'center', margin:'5px', fontWeight: '800'}}>
+							<div style={{ display: "table-cell", width: "270px", }}>
+								&nbsp;user_id
+							</div>
+							<div style={{ display: "table-cell", width: "100px", }}>
+								&nbsp;timestamp
+							</div>
+							<div style={{ display: "table-cell", width: "60px", }}>
+								&nbsp;type
+							</div>
+							<div style={{ display: "table-cell", width: "110px", }}>
+								&nbsp;action
+							</div>
+							<div style={{ display: "table-cell", width: "250px", }}>
+								&nbsp;log message
+							</div>
+							<div style={{ display: "table-cell", width: "210px", }}>
+								&nbsp;object type
+							</div>
+						</div>
                 {data.map((item) => (
-                    <ResultList key={item._id}>
-                        <ResultList.Content>
 
-							<div style={{
-								display: "table",
-								textAlign: "left",
-								width: "500px",
-								}}>
-								<div style={{display: "table-row-group"}}>
-									<div style={{display: "table-row", height: "15px"}}>
+                    <ResultList key={item._id}>
+                        <ResultList.Content >
+						<div style={{  display: "table", textAlign: "left", }}>
+									<div style={{display: "table-row", height: "15px", width:'1500px'}}>
 										<div
 										  style={{
 											display: "table-cell",
 											flexDirection: "column",
-											width: "290px",
+											width: "275px",
 											margin: "5px",
-											marginTop: "3px"
+											marginTop: "2px"
 										  }}
 										>&nbsp;{item.user_id}</div>
 										<div style={{
 											display: "table-cell",
 											flexDirection: "column",
+											width: "100px",
 											textAlign: "left",
-											margin: "3px",
-											marginTop: "3px"
+											margin: "5px",
+											marginTop: "2px"
+										}}
+										>&nbsp;<em>timestamp</em>{item.timestamp}</div>
+										<div style={{
+											display: "table-cell",
+											flexDirection: "column",
+											width: "60px",
+											textAlign: "left",
+											margin: "5px",
+											marginTop: "2px"
 										  }}
 										>&nbsp;{item.message_type}</div>
 										<div style={{
 											display: "table-cell",
 											flexDirection: "column",
+											width: "110px",
 											textAlign: "left",
 											margin: "3px",
-											marginTop: "3px"
+											marginTop: "2px"
 										  }}
 										>&nbsp;{item.action_name}</div>
+
+										<div style={{
+											display: "table-cell",
+											flexDirection: "column",
+											width: "250px",
+											textAlign: "left",
+											margin: "3px",
+											marginTop: "2px",
+										  }}
+										>&nbsp;{item.message}</div>
+										<div style={{
+											display: "table-cell",
+											flexDirection: "column",
+											width: "210px",
+											textAlign: "left",
+											margin: "3px",
+											marginTop: "2px"
+										  }}
+										>&nbsp;{
+											(item.data != null ) ? 'has related object' : 'no object'
+										}</div>
 									</div>
-								</div>
 							</div>
+
 
                         </ResultList.Content>
                     </ResultList>
                 ))}
+				{//</div>
+						}
               </ReactiveList.ResultListWrapper>
             )}
 			renderError={(error) => (
@@ -154,7 +210,7 @@ class LogTable extends Component {
             }
           />
 
-      </div>
+	     </div>
     </ReactiveBase>
   );
 }}
