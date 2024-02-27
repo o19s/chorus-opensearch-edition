@@ -19,7 +19,7 @@ So now let’s look at the events that we saw happening in this communication.  
 
 
 Now, let’s go look at this data in the backend.  We can actually do a curl command:
-curl "localhost:9200/.ubl_log_queries/_search?size=100" | jq
+curl "localhost:9200/.ubi_log_queries/_search?size=100" | jq
 
 
 
@@ -29,7 +29,7 @@ We can also look at the data in Dev Tools:
 
 http://localhost:5601/app/dev_tools#/console
 
-GET /.ubl_log_queries/_search
+GET /.ubi_log_queries/_search
 {
   "query": {
     "match_all": {}
@@ -37,7 +37,7 @@ GET /.ubl_log_queries/_search
 }
 
 http://localhost:5601/app/observability-notebooks#/7W9W1o0BHx42AElNA4mi?view=view_both 
-source=.ubl_log_events | where user_id = 'fake user id' | fields query_id, action_name
+source=.ubi_log_events | where user_id = 'fake user id' | fields query_id, action_name
 
 Stavros, one reason our “session_id” is fake session id, is because we really need to figure out if Session is a concept that makes sense in UBL or is using “session” misleading.  Maybe what we really need is a “client_id” that is persistent and passed in, and a “query_text”....
 
@@ -52,11 +52,11 @@ We currently are logging queries and events INDEPENDENTLY, and will soon have th
 
 
 
-Select * from .ubl_log_events limit 100;
+Select * from .ubi_log_events limit 100;
 
 
 And for our last bit, let’s show that we are starting to track some of the changes that a user makes on the front end.  Here is Alice changing her algorithm......    And if we look in the console, we see these event changes…
 
 {"action_name":"algo_change","user_id":"user123","query_id":"","message_type":"INFO","message":"Algorithm changed to undefined","event_attributes":{}}
 
-select * from .ubl_log_events where action_name = 'algo_change' and user_id = 'user123'
+select * from .ubi_log_events where action_name = 'algo_change' and user_id = 'user123'
