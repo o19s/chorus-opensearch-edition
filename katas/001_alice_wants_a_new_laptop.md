@@ -1,12 +1,12 @@
 # Kata 001: Alice needs a new Laptop!
 
-Alice needs a new laptop!  And where does she go shopping for electronics, her favorite website, Chorus Electronics.   
+Alice needs a new projector!  And where does she go shopping for electronics, her favorite website, Chorus Electronics.   
 
-She brings up the website, at http://localhost:4000, and she knows what she wants, a laptop, but doesn't have a specific make or model in mind, so she searches for `laptop`.   Uh oh!   She’s got nothing but laptop bags.... 
+She brings up the website, at http://localhost:4000, and she knows what she wants, a project, but doesn't have a specific type or brand in mind, so she searches for `projector`.   Uh oh!   She’s got nothing but projector parts....
 
 Now those of us in the search business know that this is the classic accessories problem!
 
-Option A --> She immediately refines to product_type laptop.   We don’t have this for today.
+Option A --> She immediately refines to product_type Portable.   
 
 Option B --> She is frustrated with what is being shown, but she loves shopping at Chorus so she tries Notebook...   And while the results aren’t great, she does see notebooks starting at rank #9 and filling the THIRD row of results.   She mouses over the various laptops on the third row and clicks a laptop “Quick View” to pop open the detail.  <-- We do not yet have this button.
 
@@ -18,8 +18,13 @@ So now let’s look at the events that we saw happening in this communication.  
 
 
 
-Now, let’s go look at this data in the backend.  We can actually do a curl command:
-curl "localhost:9200/.ubi_log_queries/_search?size=100" | jq
+Now, let’s go look at this data in the backend.  We can actually do a curl command to look at the queries that have been made:
+
+```
+curl "localhost:9200/.ubl_log_queries/_search?size=100" | jq
+```
+
+We can also look at
 
 
 
@@ -36,7 +41,7 @@ GET /.ubi_log_queries/_search
   }
 }
 
-http://localhost:5601/app/observability-notebooks#/7W9W1o0BHx42AElNA4mi?view=view_both 
+http://localhost:5601/app/observability-notebooks#/7W9W1o0BHx42AElNA4mi?view=view_both
 source=.ubi_log_events | where user_id = 'fake user id' | fields query_id, action_name
 
 Stavros, one reason our “session_id” is fake session id, is because we really need to figure out if Session is a concept that makes sense in UBL or is using “session” misleading.  Maybe what we really need is a “client_id” that is persistent and passed in, and a “query_text”....
