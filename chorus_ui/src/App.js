@@ -14,6 +14,7 @@ import { UbiClient } from "./ts/UbiClient.ts";
 var UbiEvent = require('./ts/UbiEvent.ts').UbiEvent;
 var UbiAttributes = require('./ts/UbiEvent.ts').UbiEventAttributes;
 var UbiData = require('./ts/UbiEvent.ts').UbiEventData;
+var UbiPosition = require('./ts/UbiEvent.ts').UbiPosition;
 
 
 //######################################
@@ -21,8 +22,8 @@ var UbiData = require('./ts/UbiEvent.ts').UbiEventData;
 const event_server = "http://127.0.0.1:9200";
 const search_credentials = "*:*";
 const search_index = 'ecommerce'
-const index_field = 'name'
-const ubi_store = 'log'
+const id_field = 'name'
+const ubi_store = 'ubi_log'
 
 const user_id = 'USER-eeed-43de-959d-90e6040e84f9'; // demo user id
 const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
@@ -41,7 +42,7 @@ sessionStorage.setItem('session_id', session_id);
 sessionStorage.setItem('search_index', search_index);
 
 // only needed to initialize the store.  if it's already initialized, this is not needed
-sessionStorage.setItem('index_field', index_field);
+sessionStorage.setItem('id_field', id_field);
 
 
 //######################################
@@ -167,12 +168,9 @@ function logClickPosition(event) {
   e.session_id = session_id;
   e.page_id = window.location.pathname;
 
-  e.event_attributes.data = new UbiData('location', genObjectId(), e.message, event);
-  e.event_attributes.data.data_type = 'click_location';
-  e.event_attributes['offsetX'] = event.offsetX;
-  e.event_attributes['offsetY'] = event.offsetY;
-  e.event_attributes['clientX'] = event.clientX;
-  e.event_attributes['clientY'] = event.clientY;
+  e.event_attributes.object = new UbiData('location', genObjectId(), e.message, event);
+  e.event_attributes.object.object_type = 'click_location';
+  e.event_attributes.position = new UbiPosition(x=event.clientX, y=event.clientY);
   ubi_client.log_event(e);
    
   }
@@ -309,7 +307,7 @@ class App extends Component {
                   e.session_id = session_id;
                   e.page_id = window.location.pathname;
 
-                  e.event_attributes.data = new UbiData('filter_data', genObjectId(), nextQuery);
+                  e.event_attributes.object = new UbiData('filter_data', genObjectId(), nextQuery);
                   ubi_client.log_event(e);
                 }
               }
@@ -334,7 +332,7 @@ class App extends Component {
                   e.session_id = session_id;
                   e.page_id = window.location.pathname;
 
-                  e.event_attributes.data = new UbiData('filter_data', genObjectId(), nextQuery);
+                  e.event_attributes.object = new UbiData('filter_data', genObjectId(), nextQuery);
                   ubi_client.log_event(e);
                 }
               }
@@ -428,9 +426,9 @@ class App extends Component {
                         e.session_id = session_id;
                         e.page_id = window.location.pathname;
       
-                        e.event_attributes.data = new UbiData('product', genObjectId(), item.title, item);
-                        e.event_attributes.data.data_id = item.id;
-                        e.event_attributes.data.data_type = item.name;
+                        e.event_attributes.object = new UbiData('product', genObjectId(), item.title, item);
+                        e.event_attributes.object.object_id = item.id;
+                        e.event_attributes.object.object_type = item.name;
                         ubi_client.log_event(e);
                     }
                   }
@@ -444,10 +442,10 @@ class App extends Component {
                         e.session_id = session_id;
                         e.page_id = window.location.pathname;
       
-                        e.event_attributes.data = new UbiData('product', genObjectId(), item.title, item);
-                        e.event_attributes.data.data_id = item.id;
-                        e.event_attributes.data.transaction_id = genTransactionId()
-                        e.event_attributes.data.data_type = item.name;
+                        e.event_attributes.object = new UbiData('product', genObjectId(), item.title, item);
+                        e.event_attributes.object.object_id = item.id;
+                        e.event_attributes.object.transaction_id = genTransactionId()
+                        e.event_attributes.object.object_type = item.name;
                         ubi_client.log_event(e);
                         console.log('User just bought ' + item.title);
                       } else {
@@ -457,9 +455,9 @@ class App extends Component {
                         e.session_id = session_id
                         e.page_id = window.location.pathname;
       
-                        e.event_attributes.data = new UbiData('product', genObjectId(), item.title, item);
-                        e.event_attributes.data.data_id = item.id;
-                        e.event_attributes.data.data_type = item.name;
+                        e.event_attributes.object = new UbiData('product', genObjectId(), item.title, item);
+                        e.event_attributes.object.object_id = item.id;
+                        e.event_attributes.object.object_type = item.name;
                         ubi_client.log_event(e);
                         console.log('User declined to buy ' + item.title);
                       }

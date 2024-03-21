@@ -17,21 +17,40 @@ export class UbiEventData {
 		this.data_detail = details;
 	}
 }
+export class UbiPosition{
+	public ordinal:integer|null=null;
+	public x:integer|null=null;
+	public y:integer|null=null;
+	public trail:string|null=null;
+
+	constructor(ordinal=null, x=null, y=null, trail=null) {
+		this.ordinal = ordinal;
+		this.x = x;
+		this.y = y;
+		this.trail = trail;
+	}
+}
 
 export class UbiEventAttributes {
 	/**
-	 * Attributes should be in the form of
+	 * Attributes, other than `object` or `position` should be in the form of
 	 * attributes['item1'] = 1
 	 * attributes['item2'] = '2'
 	 * 
-	 * The data member is reserved for further, relevant data payloads or classes
+	 * The object member is reserved for further, relevant object payloads or classes
 	 */
-	public data:UbiEventData ; //any data object
-	constructor(data:UbiEventData=null) {
-		if(data)
-			this.data = data;
+	public object:UbiEventData|null=null; 		//any data object
+	public position:UbiPosition|null = null;	//click or other location
+	constructor(object:UbiEventData|null=null, position:UbiPosition|null=null) {
+		if(object)
+			this.object = object;
+
+		if(position)
+			this.position = position;
 	}
 }
+
+
 
 export class UbiEvent {
 	/**
@@ -47,6 +66,7 @@ export class UbiEvent {
 	public message:string;
 	public timestamp:number=Date.now();
 	public event_attributes:UbiEventAttributes = new UbiEventAttributes();
+	public position:UbiPosition|null=null;
 
 	constructor(action_name:string, user_id:string, query_id:string, message:string=null) {
 		this.action_name = action_name;

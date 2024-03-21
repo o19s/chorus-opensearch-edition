@@ -22,7 +22,7 @@ export class UbiClient {
     private user_id:string;
     private session_id:string;
     private search_index:string;
-    private index_field:string;
+    private id_field:string;
     private verbose:number=0;
 
 
@@ -42,7 +42,7 @@ export class UbiClient {
 
         //TODO: make these parameters when the interface is more finalized
         this.search_index = sessionStorage.getItem('search_index');
-        this.index_field = sessionStorage.getItem('index_field');
+        this.id_field = sessionStorage.getItem('id_field');
 
 
         //TODO: add authentication
@@ -79,6 +79,7 @@ export class UbiClient {
 
 
         //if the ubi store doesn't exist, create it
+        let stores = this.get_stores();
         if(this.get_stores().indexOf(this.ubi_store) != -1){
             this.init();
         }
@@ -90,21 +91,19 @@ export class UbiClient {
      * @returns All available Ubi stores
      */
     get_stores(){
-        const response = this._get(this.url).then(
+        let stores = []
+        this._get(this.url).then(
         (response) => {
-            if(response.status == 200){
-                console.log('Listing stores: ' + JSON.stringify(response));
-                return response['data']['stores'];
-            }
+                stores = response['stores'];
             }
         ).catch(
             (error) => {
                 console.warn('Error querying stores: ' + error);
                 console.warn('Ubi Store ' + this.ubi_store + ' needs to be initialized');
-                } 
+            } 
         )
     
-        return []
+        return stores;
     }
 
     /**
@@ -112,7 +111,7 @@ export class UbiClient {
      * @returns true, if the store is created
      */
     init(){
-        if( this.search_index == null || this.index_field == null){
+        if( this.search_index == null || this.id_field == null){
             try{
                 const response = this._put(this.url + this.ubi_store + '/index=' + this.search_index).then(
                     (response) => {
@@ -133,7 +132,7 @@ export class UbiClient {
         return false;
     }
 
-    async log_event(e:UbiEvent, message:string=null, message_type:string=null){
+    async log_event(e:UbiEvent, message:string|null=null, message_type:string|null=null){
         if(message){
             if(e.message){
                 e['extra_info'] = message;
