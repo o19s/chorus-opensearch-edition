@@ -120,7 +120,7 @@ if [ ! -f ./transformed_data.json ]; then
   ./opensearch/transform_data.sh > transformed_data.json
 fi
 echo -e "${MAJOR}Indexing the sample product data, please wait...\n${RESET}"
-curl -s -X POST "localhost:9200/ecommerce/_bulk?pretty" -H 'Content-Type: application/json' --data-binary @transformed_data.json
+curl -s -X POST "localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items" -H 'Content-Type: application/json' --data-binary @transformed_data.json
 
 
 if $offline_lab; then
