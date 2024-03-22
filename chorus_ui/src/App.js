@@ -444,8 +444,8 @@ class App extends Component {
                     function(_event) {
                       
                       if (window.confirm('Do you want to buy ' + item.title)) {
-                        let e = new UbiEvent('product_purchase', user_id, QueryId());
-                        e.message_type = 'PURCHASE';
+                        let e = new UbiEvent('add_to_cart', user_id, QueryId());
+                        e.message_type = 'CONVERSION';
                         e.message = item.title + ' (' + item.id + ')';
                         e.session_id = session_id;
                         e.page_id = window.location.pathname;
