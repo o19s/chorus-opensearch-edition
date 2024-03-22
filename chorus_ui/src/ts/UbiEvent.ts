@@ -23,7 +23,7 @@ export class UbiPosition{
 	public y:integer|null=null;
 	public trail:string|null=null;
 
-	constructor(ordinal=null, x=null, y=null, trail=null) {
+	constructor({ordinal=null, x=null, y=null, trail=null}={}) {
 		this.ordinal = ordinal;
 		this.x = x;
 		this.y = y;

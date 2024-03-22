@@ -3,15 +3,18 @@ import { render } from 'react-dom';
 import { ReactiveBase, ReactiveList, StateProvider, ResultList, ReactiveComponent} from "@appbaseio/reactivesearch";
 
 
-const logging_credentials="*:*"
+//TODO: make these configurable properties
+const ubi_credentials="*:*"
+const default_ubi_store = 'ubi_log'
+
 const event_server =  ((sessionStorage.hasOwnProperty('event_server')) ?
           sessionStorage.getItem('event_server')  
           : "http://localhost:9200");
 
-const log_store_events =  ((sessionStorage.hasOwnProperty('log_store')) ?
+const ubi_store_events =  ((sessionStorage.hasOwnProperty('log_store')) ?
 			//convert the log_store into just the event log store
           '.' + sessionStorage.getItem('log_store') + '_events'
-          : '.' + 'log' + '_events');
+          : '.' + default_ubi_store + '_events');
 
 
 //TODO: auto refresh.
@@ -56,8 +59,8 @@ class LogTable extends Component {
 	  <ReactiveBase
         componentId="eventlogs"
 		url={event_server}
-		app={ log_store_events }
-		credentials={logging_credentials}
+		app={ ubi_store_events }
+		credentials={ubi_credentials}
 		enableAppbase={false}
 		initialQueriesSyncTime={100}
 		

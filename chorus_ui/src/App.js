@@ -19,6 +19,7 @@ var UbiPosition = require('./ts/UbiEvent.ts').UbiPosition;
 
 //######################################
 // global variables
+// TODO: move to property configs
 const event_server = "http://127.0.0.1:9200";
 const search_credentials = "*:*";
 const search_index = 'ecommerce'
@@ -170,7 +171,7 @@ function logClickPosition(event) {
 
   e.event_attributes.object = new UbiData('location', genObjectId(), e.message, event);
   e.event_attributes.object.object_type = 'click_location';
-  e.event_attributes.position = new UbiPosition(x=event.clientX, y=event.clientY);
+  e.event_attributes.position = new UbiPosition({x:event.clientX, y:event.clientY});
   ubi_client.log_event(e);
    
   }

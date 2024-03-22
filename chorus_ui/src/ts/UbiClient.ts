@@ -26,9 +26,7 @@ export class UbiClient {
     private verbose:number=0;
 
 
-    //TODO: ubi headers/cookies
     //TODO: capture response and request headers
-
     constructor(baseUrl:string, ubi_store:string, user_id:string=null, session_id:string=null) {
 
 
@@ -37,6 +35,7 @@ export class UbiClient {
         this.url = baseUrl + UbiClient.API;
         this.ubi_store = ubi_store;
 
+        //TODO: use sessionStorage? it only works in the browser, not server side by default
         this.user_id = (user_id != null) ? user_id : sessionStorage.getItem('user_id');
         this.session_id = (session_id != null) ? session_id : sessionStorage.getItem('session_id');
 
@@ -79,30 +78,19 @@ export class UbiClient {
 
 
         //if the ubi store doesn't exist, create it
-        let stores = this.get_stores();
-        if(this.get_stores().indexOf(this.ubi_store) != -1){
-            this.init();
-        }
-
+        this.get_stores().then(data => {
+            if(data.stores.indexOf(this.ubi_store) == -1){
+                this.init();
+            }
+        })
     }
 
     /**
      * 
      * @returns All available Ubi stores
      */
-    get_stores(){
-        let stores = []
-        this._get(this.url).then(
-        (response) => {
-                stores = response['stores'];
-            }
-        ).catch(
-            (error) => {
-                console.warn('Error querying stores: ' + error);
-                console.warn('Ubi Store ' + this.ubi_store + ' needs to be initialized');
-            } 
-        )
-    
+     async get_stores(){
+        const stores = await this._get(this.url).then(data => data);
         return stores;
     }
 
@@ -167,8 +155,17 @@ export class UbiClient {
     */
     async _get(url) {
         try {
-            const response = await this.rest_client.get(url, this.rest_config);
-            return response.data;
+            const data = this.rest_client.get(url, this.rest_config).then(
+                function(response){
+                return response.data;
+                }
+            ).catch(
+                (error) => {
+                    console.warn('GET Error: ' + error);
+                    console.warn(url);
+                } 
+            )
+            return data;
         } catch (error) {
             console.error(error);
         }

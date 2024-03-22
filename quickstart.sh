@@ -95,11 +95,13 @@ echo -e "${MAJOR}Waiting for OpenSearch to start up and be online.${RESET}"
 
 echo -e "${MAJOR}Creating ecommerce index, defining its mapping & settings\n${RESET}"
 curl -s -X PUT "localhost:9200/ecommerce/" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
+# TODO: move this setting into the schema.json
+curl -s -X PUT "localhost:9200/ecommerce/_settings"  -H 'Content-Type: application/json' -d '{"index.mapping.total_fields.limit": 20000}'
 echo -e "\n"
 
-# Initialize the UBI store for the ecommerce setup
+# Initialize the UBI store for the ecommerce index, pointing to the index field name, `name`
 echo -e "${MAJOR}Creating UBI settings, defining its mapping & settings\n${RESET}"
-curl -X PUT "localhost:9200/_plugins/ubi/log?index=ecommerce"
+curl -X PUT "localhost:9200/_plugins/ubi/ubi_log?index=ecommerce&id_field=name"
 echo -e "\n"
 
 # Populating product data for non-vector search
@@ -129,7 +131,6 @@ if [ ! -f ./transformed_data.json ]; then
   done
 fi
 echo -e "${MAJOR}Indexing the sample product data, please wait...\n${RESET}"
-curl -s -X PUT "localhost:9200/ecommerce/_settings"  -H 'Content-Type: application/json' -d '{"index.mapping.total_fields.limit": 20000}'
 curl -s -X POST "localhost:9200/ecommerce/_bulk?pretty" -H 'Content-Type: application/json' --data-binary @transformed_data.json
 
 
