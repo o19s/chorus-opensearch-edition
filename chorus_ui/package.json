@@ -1,11 +1,12 @@
 {
   "name": "reactivesearch-starter-app",
   "version": "1.0.0",
+  "license": "Apache-2.0",
   "description": "",
   "keywords": [],
   "main": "src/index.js",
   "engines": {
-    "node": "<20"
+    "node": ">=18.0.0 <19.0.0"
   },
   "dependencies": {
     "@appbaseio/reactivesearch": "^3.28.0",
@@ -35,6 +36,7 @@
     "v8": "^0.1.0",
     "vm-browserify": "^1.1.2",
     "webpack": "^5.90.3",
+    "yarn": "^1.22.22",
     "zlib": "^1.0.5"
   },
   "scripts": {

@@ -1,15 +1,14 @@
-FROM node:16
+FROM node:18
 
 RUN mkdir /usr/src/app
 WORKDIR /usr/src/app
 
 ENV PATH /usr/src/app/node_modules/.bin:$PATH
 
-RUN     npm install -g typescript
+RUN npm install -g typescript
 
-COPY ["package.json", "package-lock.json*", "./"]
-RUN     npm install
+COPY ["package.json", "yarn.lock", "./"]
 
-RUN yarn
+RUN yarn install
 
 CMD [ "yarn", "start"]
