@@ -1,23 +1,10 @@
 # Kata 001: Alice needs a new Laptop!
 
-Alice just started a new on the ecommerce team at Chorus Electronics.  A perk of the job is that she can select any laptop computer they sell.   So off she goes, to their website to pick out her perfect laptop computer.
-
-OPTION A ERIC: If this is too hard, see OPTION B
-
-She brings up the website, at http://localhost:4000, and she knows that she wants a laptop style computer, but doesn't have a specific type or brand in mind, so she searches for `laptop`.   Uh oh!   She’s got nothing but laptop accessories parts....
-
-Now those of us in the search business suspect that this is the classic accessories problem!  However, clicking through the pages of results, Alice realize there are NO laptops coming back, but she knows Chorus Electronics carries them.  Taking a wild guess, she changes her query to `notebook`, and gets a new set of results.   She still has the accessories coming back, but right there on the third row of results are some actual laptop computers!  
-
-Alice knows that at this point, to improve search, she needs to just add a new synonyms to the index for `notebook` and `laptop`.   So she adds that to her list of tasks.   (See 002_alice_adds_a_synonum).
-
-
-She is curious though, how many other people do a search, click through the results not finding what they want, and then do a fresh query and immediately start popping open search details?
-
-OPTION B: Other Story
+Alice just started a new job on the ecommerce team at Chorus Electronics.  A perk of the job is that she can select any laptop computer they sell to use for work.   So off she goes to their website to pick out her perfect laptop computer.
 
 She brings up the website, at http://localhost:4000, and she knows that she needs a laptop style computer, but doesn't have a specific type or brand in mind, so she searches for `notebook`.   Uh oh!  The first set of results are all accessories for a laptop computer, not the laptop itself.   
 
-Now those of us in the search business suspect that this is the classic accessories problem!  She chooses from the "Filter by Product Type" set of options the "Notebook" filter, and is immediately rewarded with just laptop computers.  She picks the third laptop shown, a _HP EliteBook 2530p Notebook_ to add to her cart.
+Now those of us in the search business suspect that this is the classic accessories problem!  She chooses from the "Filter by Product Type" set of options the "Notebook" filter, and is immediately rewarded with just laptop computers.  She picks the third laptop shown, a _HP EliteBook 2530p Notebook_ to add to her cart (by double clicking the product image).
 
 We now have a signal from Alice that when she searches for first “notebook” and then picks a option from Filter by Product Type that our query "notebook" is underperforming as it requires additional filtering to be applied before reasonable products are returned.
 

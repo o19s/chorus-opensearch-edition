@@ -40,7 +40,7 @@ We are trying to strike a balance between making the setup process as easy and f
 
 If you are impatient, we provide a quick start script, `./quickstart.sh` that sets Chorus up for you. However, I recommend you go through [Kata 0: Setting up Chorus](katas/000_setting_up_chorus.md), to get a picture of what's running in the stack.
 
-After setting up Chorus you can check out [Kata 1: Alice Wants a New Laptop](katas/001_alice_wants_a_new_laptop.md) to learn about getting some insight into your user's behavior!
+After setting up Chorus you can check out [Kata 1: Alice Wants a New Laptop](katas/001_alice_needs_a_new_laptop.md) to learn about getting some insight into your user's behavior!
 
 [More Katas can be found in the Solr version of Chorus](https://github.com/querqy/chorus#structured-learning-using-chorus) and many can be transferred to this OpenSearch based stack. Some are also covered in a video series called [Meet Pete](https://opensourceconnections.com/blog/2020/07/07/meet-pete-the-e-commerce-search-product-manager/). Feel free to open PRs to add Katas you find useful or open issues if you want to see specific Katas included. Every contribution is welcome! 
 
