@@ -24,7 +24,7 @@ var UbiPosition = require('./ts/UbiEvent.ts').UbiPosition;
 const event_server = "http://127.0.0.1:9200";
 const search_credentials = "*:*";
 const search_index = 'ecommerce'
-const id_field = 'name'
+const id_field = 'id'
 const ubi_store = 'ubi_log'
 
 const user_id = 'USER-eeed-43de-959d-90e6040e84f9'; // demo user id
@@ -44,8 +44,6 @@ sessionStorage.setItem('event_server', event_server);
 sessionStorage.setItem('user_id', user_id);
 sessionStorage.setItem('session_id', session_id);
 sessionStorage.setItem('search_index', search_index);
-
-// only needed to initialize the store.  if it's already initialized, this is not needed
 sessionStorage.setItem('id_field', id_field);
 
 

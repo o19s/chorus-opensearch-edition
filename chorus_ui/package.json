@@ -40,7 +40,7 @@
     "zlib": "^1.0.5"
   },
   "scripts": {
-    "build:view": "shx cp -R src/views/*.* public/",
+    "build:view": "shx mkdir -p public && shx cp -R src/views/*.* public/",
     "build:ts": "webpack --mode=development",
     "watch:ts": "onchange \"src/ts\" -- npm run build:ts",
     "start": "run-p build:* && cross-env NODE_OPTIONS=--openssl-legacy-provider && react-scripts start && npm run watch:ts",
