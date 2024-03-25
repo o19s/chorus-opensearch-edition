@@ -101,7 +101,7 @@ echo -e "\n"
 
 # Initialize the UBI store for the ecommerce index, pointing to the index field name, `name`
 echo -e "${MAJOR}Creating UBI settings, defining its mapping & settings\n${RESET}"
-curl -X PUT "localhost:9200/_plugins/ubi/ubi_log?index=ecommerce&id_field=ean"
+curl -X PUT "localhost:9200/_plugins/ubi/ubi_log?index=ecommerce&id_field=id"
 echo -e "\n"
 
 echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"
