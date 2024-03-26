@@ -1,4 +1,4 @@
-import React, {Component} from "react";
+import React, {Component, useState} from "react";
 import {
   ReactiveBase,
   DataSearch,
@@ -399,11 +399,11 @@ class App extends Component {
               and: ["searchbox", "brandfilter", "typefilter"]
             }}
             onClick={
-            function(results) {
-              //page scrolling
-              console.warn('on click');
+              function(results) {
+                //page scrolling
+                console.warn('on click');
+              }
             }
-          }
             onPageClick={
               function(results) {
                 //page scrolling
@@ -475,8 +475,8 @@ class App extends Component {
                       }}
                     />
                     <ResultCard.Description>
-                      {item.price/100 +
-                        " $ | " +
+                      {"$" + item.price/100 +
+                        " | " +
                         item.supplier}
                     </ResultCard.Description>
                     
