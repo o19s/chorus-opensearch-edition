@@ -1,4 +1,4 @@
-import axios, {AxiosRequestConfig, AxiosProxyConfig, AxiosInstance} from "axios";
+import axios, {AxiosRequestConfig, AxiosInstance} from "axios";
 import { UbiEvent } from "./UbiEvent";
 
 /**
@@ -6,21 +6,16 @@ import { UbiEvent } from "./UbiEvent";
  * for logging events
  */
 
-
-
 /**
  * Class to handle OpenSearch authentication (eventually) log connectivity
  */
 export class UbiClient {
     static readonly API = '/_plugins/ubi/';
 
-    private readonly baseUrl:string;
     private readonly url:string;
     private readonly ubi_store:string;
-	private readonly rest_client:AxiosInstance; //client for direct http work
-	private readonly rest_config:AxiosRequestConfig;
-    private user_id:string;
-    private session_id:string;
+    private readonly rest_client:AxiosInstance; //client for direct http work
+    private readonly rest_config:AxiosRequestConfig;
     private search_index:string;
     private id_field:string;
     private verbose:number=0;
@@ -29,9 +24,6 @@ export class UbiClient {
     //TODO: capture response and request headers
     constructor(baseUrl:string, ubi_store:string, user_id:string=null, session_id:string=null) {
 
-
-        //TODO: param checking
-        this.baseUrl = baseUrl;
         this.url = baseUrl + UbiClient.API;
         this.ubi_store = ubi_store;
 
@@ -43,31 +35,15 @@ export class UbiClient {
         this.search_index = sessionStorage.getItem('search_index');
         this.id_field = sessionStorage.getItem('id_field');
 
-
         //TODO: add authentication
         this.rest_config = {
-			//url
-			//method
-			//baseUrl
-			headers :{
-				//'Content-Type':'application/x-www-form-urlencoded',
-				'Content-type': 'application/json',
-                'X-ubi-store': ubi_store,
-                //'X-ubi-query-id': query_id,
-                'X-ubi-user-id': user_id,
-                'X-ubi-session-id':session_id,
-			},
-			//httpAgent
-			//httpsAgent
-			//proxy :proxy
-			//data
-            //data: {'X-ubi-store': this.ubi_store}
-			//timeout
-			//withCredentials
-			//responseType
-			//responseEncoding
-			//env:FormData
-		};
+     			headers :{
+      				'Content-type': 'application/json',
+              'X-ubi-store': ubi_store,
+              'X-ubi-user-id': user_id,
+              'X-ubi-session-id':session_id,
+     			},
+    		};
 
         //TODO: replace with more precise client configuration
         this.rest_client = axios.create({

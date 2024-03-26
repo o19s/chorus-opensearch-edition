@@ -259,14 +259,7 @@ class App extends Component {
       }}
       
     >
-      <StateProvider
-          onChange={(prevState, nextState) => {
-            let queryString = nextState;
-            console.log('Page.onChange - ' + queryString.searchbox.value);
-            
-          }}
-          
-      />
+      
       <div style={{ height: "200px", width: "100%"}}>
         <img style={{ height: "100%", class: "center"  }} src={chorusLogo} />
       </div>
@@ -329,11 +322,14 @@ class App extends Component {
                   console.log('filtering on product types');
                   let e = new UbiEvent('type_filter', user_id, QueryId());
                   e.message = 'filtering on product types';
-                  e.message_type = 'FILTER';
+                  //e.message_type = 'FILTER';
                   e.session_id = session_id;
                   e.page_id = window.location.pathname;
 
-                  e.event_attributes.object = new UbiData('filter_data', genObjectId(), nextQuery);
+                  //e.event_attributes.object = new UbiData('filter_data', genObjectId(), nextQuery);
+                  e.event_attributes.object = new UbiData('product', genObjectId(), "eric", "eric");
+                  e.event_attributes.object.object_id = "eric";
+                  e.event_attributes.object.object_type = "eric";
                   ubi_client.log_event(e);
                 }
               }
