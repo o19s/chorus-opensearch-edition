@@ -12,7 +12,7 @@ import { UbiClient } from "./ts/UbiClient.ts";
 import chorusLogo from './assets/chorus-logo.png';
 
 var UbiEvent = require('./ts/UbiEvent.ts').UbiEvent;
-var UbiData = require('./ts/UbiEvent.ts').UbiEventData;
+var UbiEventData = require('./ts/UbiEvent.ts').UbiEventData;
 var UbiPosition = require('./ts/UbiEvent.ts').UbiPosition;
 
 
@@ -166,7 +166,7 @@ function logClickPosition(event) {
   e.session_id = session_id;
   e.page_id = window.location.pathname;
 
-  e.event_attributes.object = new UbiData('location', genObjectId(), e.message, event);
+  e.event_attributes.object = new UbiEventData('location', genObjectId(), e.message, event);
   e.event_attributes.object.object_type = 'click_location';
   e.event_attributes.position = new UbiPosition({x:event.clientX, y:event.clientY});
   ubi_client.log_event(e);
@@ -300,7 +300,7 @@ class App extends Component {
                   e.session_id = session_id;
                   e.page_id = window.location.pathname;
 
-                  e.event_attributes.object = new UbiData('filter_data', genObjectId(), nextQuery);
+                  e.event_attributes.object = new UbiEventData('filter_data', genObjectId(), nextQuery);
                   ubi_client.log_event(e);
                 }
               }
@@ -326,8 +326,8 @@ class App extends Component {
                   e.session_id = session_id;
                   e.page_id = window.location.pathname;
 
-                  //e.event_attributes.object = new UbiData('filter_data', genObjectId(), nextQuery);
-                  e.event_attributes.object = new UbiData('product', genObjectId(), "eric", "eric");
+                  //e.event_attributes.object = new UbiEventData('filter_data', genObjectId(), nextQuery);
+                  e.event_attributes.object = new UbiEventData('product', genObjectId(), "eric", "eric");
                   e.event_attributes.object.object_id = "eric";
                   e.event_attributes.object.object_type = "eric";
                   ubi_client.log_event(e);
@@ -423,7 +423,7 @@ class App extends Component {
                         e.session_id = session_id;
                         e.page_id = window.location.pathname;
       
-                        e.event_attributes.object = new UbiData('product', genObjectId(), item.title, item);
+                        e.event_attributes.object = new UbiEventData('product', genObjectId(), item.title, item);
                         e.event_attributes.object.object_id = item.id;
                         e.event_attributes.object.object_type = item.name;
                         ubi_client.log_event(e);
@@ -439,7 +439,7 @@ class App extends Component {
                         e.session_id = session_id;
                         e.page_id = window.location.pathname;
       
-                        e.event_attributes.object = new UbiData('product', genObjectId(), item.title, item);
+                        e.event_attributes.object = new UbiEventData('product', genObjectId(), item.title, item);
                         e.event_attributes.object.object_id = item.id;
                         e.event_attributes.object.transaction_id = genTransactionId()
                         e.event_attributes.object.object_type = item.name;
@@ -452,7 +452,7 @@ class App extends Component {
                         e.session_id = session_id
                         e.page_id = window.location.pathname;
       
-                        e.event_attributes.object = new UbiData('product', genObjectId(), item.title, item);
+                        e.event_attributes.object = new UbiEventData('product', genObjectId(), item.title, item);
                         e.event_attributes.object.object_id = item.id;
                         e.event_attributes.object.object_type = item.name;
                         ubi_client.log_event(e);

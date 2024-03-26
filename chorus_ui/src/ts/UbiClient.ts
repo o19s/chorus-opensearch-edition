@@ -27,10 +27,6 @@ export class UbiClient {
         this.url = baseUrl + UbiClient.API;
         this.ubi_store = ubi_store;
 
-        //TODO: use sessionStorage? it only works in the browser, not server side by default
-        this.user_id = (user_id != null) ? user_id : sessionStorage.getItem('user_id');
-        this.session_id = (session_id != null) ? session_id : sessionStorage.getItem('session_id');
-
         //TODO: make these parameters when the interface is more finalized
         this.search_index = sessionStorage.getItem('search_index');
         this.id_field = sessionStorage.getItem('id_field');
