@@ -1,4 +1,4 @@
-import React, {Component} from "react";
+import React, {Component, useState} from "react";
 import {
   ReactiveBase,
   DataSearch,
@@ -14,18 +14,18 @@ import chorusLogo from './assets/chorus-logo.png';
 
 var UbiEvent = require('./ts/UbiEvent.ts').UbiEvent;
 var UbiAttributes = require('./ts/UbiEvent.ts').UbiEventAttributes;
-var UbiData = require('./ts/UbiEvent.ts').UbiEventData;
+var UbiEventData = require('./ts/UbiEvent.ts').UbiEventData;
 var UbiPosition = require('./ts/UbiEvent.ts').UbiPosition;
 
 
 //######################################
 // global variables
-// TODO: move to property configs
 const event_server = "http://127.0.0.1:9200";
 const search_credentials = "*:*";
 const search_index = 'ecommerce'
 const id_field = 'id'
 const ubi_store = 'ubi_log'
+const verbose_ubi_client = true;
 
 const user_id = 'USER-eeed-43de-959d-90e6040e84f9'; // demo user id
 const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
@@ -36,8 +36,8 @@ const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
 
 const ubi_client = new  UbiClient(event_server, ubi_store, user_id, session_id);
 
-//write each event to the console
-ubi_client.verbose = 1;
+//decide if we write each event to the console
+ubi_client.verbose = verbose_ubi_client;
 
 sessionStorage.setItem('ubi_store', ubi_store);
 sessionStorage.setItem('event_server', event_server);
@@ -116,7 +116,7 @@ function genTransactionId(){
 (function(send) { 
   XMLHttpRequest.prototype.send = function(data) { 
       this.addEventListener('readystatechange', function() { 
-        if (this.readyState == 4 ){//} && this.status == 200) {
+        if (this.readyState == 4 ) {
           /**
            * only pull query_id out for searches on the main store
            * otherwise, this also runs for ubi client calls
@@ -124,9 +124,9 @@ function genTransactionId(){
             if(this.responseURL.includes(search_index)){
               let headers = this.getAllResponseHeaders();
               if(headers.includes('query_id:')) {
-              try{
+              try {
                 let query_id = this.getResponseHeader('query_id');
-                if(query_id == null || query_id == 'null' || query_id==''){
+                if(query_id == null || query_id == 'null' || query_id=='') {
 
                   query_id = genQueryId()
                   console.warn('Received null query id.  Generated - ' + query_id);
@@ -136,12 +136,12 @@ function genTransactionId(){
             catch(error){
               console.log(error);
             }
-          }else {
+          } 
+          else {
             console.warn('No query id in the search response headers => ' + headers);
           }
         } 
       }
-
       }, false); 
       try{
         send.call(this, data);
@@ -170,7 +170,7 @@ function logClickPosition(event) {
   e.session_id = session_id;
   e.page_id = window.location.pathname;
 
-  e.event_attributes.object = new UbiData('location', genObjectId(), e.message, event);
+  e.event_attributes.object = new UbiEventData('location', genObjectId(), e.message, event);
   e.event_attributes.object.object_type = 'click_location';
   e.event_attributes.position = new UbiPosition({x:event.clientX, y:event.clientY});
   ubi_client.log_event(e);
@@ -218,8 +218,7 @@ class App extends Component {
 
   render(){
   return (
-    //TODO: move url and other configs to properties file
-    <ReactiveBase
+        <ReactiveBase
       componentId="market-place"
       url={event_server}
       app={search_index}
@@ -263,21 +262,13 @@ class App extends Component {
         return request;
       }}
 
-            
-    >
-      <StateProvider
-          onChange={(prevState, nextState) => {
-            let queryString = nextState;
-            console.log('Page.onChange - ' + queryString.searchbox.value);
-            
-          }}
-          
-      />
+            >
+      
       <div style={{ height: "200px", width: "100%"}}>
         <img style={{ height: "100%", class: "center"  }} src={chorusLogo} />
       </div>
       
-      Your User ID: {user_id} | Your Session ID: {session_id}
+      <small><code>Your User ID: {user_id} | Your Session ID: {session_id}</code></small>
       
       <div style={{ display: "flex", flexDirection: "row" }}>
         <div
@@ -308,11 +299,12 @@ class App extends Component {
                 if(nextQuery != prevQuery){
                   console.log('filtering on brands');
                   let e = new UbiEvent('brand_filter', user_id, QueryId());
-                  e.message = 'filtering on supplier brands';
+                  e.message = 'filtering on brands';
+                  e.message_type = 'FILTER';
                   e.session_id = session_id;
                   e.page_id = window.location.pathname;
 
-                  e.event_attributes.object = new UbiData('filter_data', genObjectId(), 'filter query', nextQuery);
+                  e.event_attributes.object = new UbiEventData('filter_data', genObjectId(), nextQuery);
                   ubi_client.log_event(e);
                 }
               }
@@ -334,10 +326,13 @@ class App extends Component {
                   console.log('filtering on product types');
                   let e = new UbiEvent('type_filter', user_id, QueryId());
                   e.message = 'filtering on product types';
+                  //e.message_type = 'FILTER';
                   e.session_id = session_id;
                   e.page_id = window.location.pathname;
 
-                  e.event_attributes.object = new UbiData('filter_data', genObjectId(), 'filter query', nextQuery);
+                  e.event_attributes.object = new UbiEventData('filter_data', genObjectId(), nextQuery);
+                  e.event_attributes.object.object_id = "eric";
+                  e.event_attributes.object.object_type = "eric";
                   ubi_client.log_event(e);
                 }
               }
@@ -431,7 +426,7 @@ class App extends Component {
                         e.session_id = session_id;
                         e.page_id = window.location.pathname;
       
-                        e.event_attributes.object = new UbiData('product', genObjectId(), item.title, item);
+                        e.event_attributes.object = new UbiEventData('product', genObjectId(), item.title, item);
                         e.event_attributes.object.object_id = item.id;
                         e.event_attributes.object.object_type = item.name;
                         ubi_client.log_event(e);
@@ -447,7 +442,7 @@ class App extends Component {
                         e.session_id = session_id;
                         e.page_id = window.location.pathname;
       
-                        e.event_attributes.object = new UbiData('product', genObjectId(), item.title, item);
+                        e.event_attributes.object = new UbiEventData('product', genObjectId(), item.title, item);
                         e.event_attributes.object.object_id = item.id;
                         e.event_attributes.object.transaction_id = genTransactionId()
                         e.event_attributes.object.object_type = item.name;
@@ -460,7 +455,7 @@ class App extends Component {
                         e.session_id = session_id
                         e.page_id = window.location.pathname;
       
-                        e.event_attributes.object = new UbiData('product', genObjectId(), item.title, item);
+                        e.event_attributes.object = new UbiEventData('product', genObjectId(), item.title, item);
                         e.event_attributes.object.object_id = item.id;
                         e.event_attributes.object.object_type = item.name;
                         ubi_client.log_event(e);
