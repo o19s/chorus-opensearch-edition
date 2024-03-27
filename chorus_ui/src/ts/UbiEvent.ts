@@ -10,7 +10,7 @@ export class UbiEventData {
 	public data_id:string;
 	public description:string;
 	public data_detail:{};
-	constructor(type:string, id:string=null, description=null, details=null) {
+	constructor(type:string, id:string=null, description:string=null, details=null) {
 		this.data_type = type;
 		this.data_id = id;
 		this.description = description;
@@ -82,11 +82,17 @@ export class UbiEvent {
 		this.message_type = message_type
 	}
 
+	static replacer(key, value){
+		if(value == null)
+			return undefined;
+		return value;
+	}
+
 	/**
 	 * 
 	 * @returns json string
 	 */
 	toJson():string {
-		return JSON.stringify(this);
+		return JSON.stringify(this, UbiEvent.replacer);
 	}
 }
