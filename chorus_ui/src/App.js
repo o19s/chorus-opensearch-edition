@@ -176,7 +176,7 @@ function logClickPosition(event) {
   ubi_client.log_event(e);
    
   }
-  //document.addEventListener("click", logClickPosition);
+  document.addEventListener("click", logClickPosition);
 //EVENTS ###############################################################
 
 
