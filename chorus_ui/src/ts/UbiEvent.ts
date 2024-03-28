@@ -6,15 +6,15 @@ import { integer } from "@opensearch-project/opensearch/api/types";
 
 
 export class UbiEventData {
-	public readonly data_type:string;
-	public data_id:string;
+	public readonly object_type:string;
+	public object_id:string;
 	public description:string;
-	public data_detail:{};
+	public object_detail:{};
 	constructor(type:string, id:string=null, description:string=null, details=null) {
-		this.data_type = type;
-		this.data_id = id;
+		this.object_type = type;
+		this.object_id = id;
 		this.description = description;
-		this.data_detail = details;
+		this.object_detail = details;
 	}
 }
 export class UbiPosition{
