@@ -63,10 +63,22 @@ export class UbiEvent {
 	}
 
 	/**
+	 * Use to suppress null objects in the json output
+	 * @param key 
+	 * @param value 
+	 * @returns 
+	 */
+	static replacer(key, value){
+		if(value == null)
+			return undefined;
+		return value;
+	}
+
+	/**
 	 * 
 	 * @returns json string
 	 */
 	toJson():string {
-		return JSON.stringify(this);
+		return JSON.stringify(this, UbiEvent.replacer);
 	}
 }
