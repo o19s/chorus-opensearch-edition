@@ -62,3 +62,5 @@ For example, let's see how the click position changes when there is a purchase, 
 
 Or let's see what event messages include "UBI" in them.
 ![UBI](images/ubi.png "UBI")
+
+You now have a basic dashboard that lets you look at the data.  In the next Katas we'll focus on some typical ecommerce driven scenarios.
