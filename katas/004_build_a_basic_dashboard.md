@@ -1,5 +1,5 @@
-# Kata x: Build an analytic dashboard!
-Whether you've been collecting user events and queries for a while, or [you uploaded some sample events](00X.a_import_UBI_data_events.md), now you're ready to visualize them in the dashboard!
+# Kata 4: Build an analytic dashboard!
+Whether you've been collecting user events and queries for a while, or [you uploaded some sample events](003_import_preexisting_event_data.md), now you're ready to visualize them in the dashboard!
 
 
 ## 1) Fire up the OpenSearch dashboards
@@ -62,8 +62,3 @@ For example, let's see how the click position changes when there is a purchase, 
 
 Or let's see what event messages include "UBI" in them.
 ![UBI](images/ubi.png "UBI")
-
-
-
-
-
