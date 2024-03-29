@@ -44,6 +44,14 @@ After setting up Chorus you can check out [Kata 1: Alice Wants a New Laptop](kat
 
 [More Katas can be found in the Solr version of Chorus](https://github.com/querqy/chorus#structured-learning-using-chorus) and many can be transferred to this OpenSearch based stack. Some are also covered in a video series called [Meet Pete](https://opensourceconnections.com/blog/2020/07/07/meet-pete-the-e-commerce-search-product-manager/). Feel free to open PRs to add Katas you find useful or open issues if you want to see specific Katas included. Every contribution is welcome! 
 
+# Structured Learning using Chorus OpenSearch Edition
+Learn more by following this sequence of Katas:
+
+1. First Kata: [Alice Wants a New Laptop](katas/001_alice_wants_a_new_laptop.md)
+2. Second Kata: [Personalize Query](katas/002_personalize_query.md)
+3. Third Kata: [Importing Pre-Existing Event Data](katas/003_import_preexisting_event_data.md)
+4. Fourth Kata: [Build a Basic Dashboard](katas/004_build_a_basic_dashboard.md)
+
 # Useful Commands for Chorus
 
 To start your environment, but still run each command to set up the integrations manually, run:

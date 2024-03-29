@@ -22,7 +22,7 @@ setInterval(function(){
 	
 	//TODO: sort custom query by changing timestamp
 	window.logs.timestamp = Date.now();
-	console.log('intervale');
+	//console.log('intervale');
   }, 30000);
 
 
