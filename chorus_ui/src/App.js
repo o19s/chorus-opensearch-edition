@@ -303,8 +303,7 @@ class App extends Component {
                   e.message_type = 'FILTER';
                   e.session_id = session_id;
                   e.page_id = window.location.pathname;
-
-                  e.event_attributes.object = new UbiEventData('filter_data', genObjectId(), nextQuery);
+                  e.event_attributes.object = new UbiEventData('filter_data', genObjectId(), "brandfilter", nextQuery);
                   ubi_client.log_event(e);
                 }
               }
@@ -329,10 +328,7 @@ class App extends Component {
                   //e.message_type = 'FILTER';
                   e.session_id = session_id;
                   e.page_id = window.location.pathname;
-
-                  e.event_attributes.object = new UbiEventData('filter_data', genObjectId(), nextQuery);
-                  e.event_attributes.object.object_id = "eric";
-                  e.event_attributes.object.object_type = "eric";
+                  e.event_attributes.object = new UbiEventData('filter_data', genObjectId(),"filter_product_type", nextQuery);
                   ubi_client.log_event(e);
                 }
               }

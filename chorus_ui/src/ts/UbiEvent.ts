@@ -6,15 +6,28 @@ import { integer } from "@opensearch-project/opensearch/api/types";
 
 
 export class UbiEventData {
-	public readonly data_type:string;
-	public data_id:string;
+	public readonly object_type:string;
+	public object_id:string;
 	public description:string;
-	public data_detail:{};
+	public object_detail:{};
 	constructor(type:string, id:string=null, description:string=null, details=null) {
-		this.data_type = type;
-		this.data_id = id;
+		this.object_type = type;
+		this.object_id = id;
 		this.description = description;
-		this.data_detail = details;
+		this.object_detail = details;
+	}
+}
+export class UbiPosition{
+	public ordinal:integer|null=null;
+	public x:integer|null=null;
+	public y:integer|null=null;
+	public trail:string|null=null;
+
+	constructor({ordinal=null, x=null, y=null, trail=null}={}) {
+		this.ordinal = ordinal;
+		this.x = x;
+		this.y = y;
+		this.trail = trail;
 	}
 }
 export class UbiPosition{
@@ -80,6 +93,12 @@ export class UbiEvent {
 	setMessage(message:string, message_type:string='INFO'){
 		this.message = message
 		this.message_type = message_type
+	}
+
+	static replacer(key, value){
+		if(value == null)
+			return undefined;
+		return value;
 	}
 
 	/**

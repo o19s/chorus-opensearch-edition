@@ -202,8 +202,8 @@ class LogTable extends Component {
   											width: "310px", margin: "3px", marginTop: "2px"
   										  }}
   										>&nbsp;{
-  											(item.event_attributes != null && item.event_attributes.data != null ) 
-  												? item.event_attributes.data.data_type + ': ' +  item.event_attributes.data.data_id
+  											(item.event_attributes != null && item.event_attributes.object != null ) 
+  												? item.event_attributes.object.object_type + ': ' +  item.event_attributes.object.object_id
   												: 'no object'
   										}</div>
   									</div>
