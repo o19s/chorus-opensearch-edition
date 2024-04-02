@@ -100,7 +100,7 @@ echo -e "\n"
 # Initialize the UBI store, chorus_log for the ecommerce index, pointing to the index field name, `primary_ean`
 echo -e "${MAJOR}Creating UBI settings, defining its mapping & settings\n${RESET}"
 #TODO: rename to key_field once we align on plugin versions
-curl -X PUT "localhost:9200/_plugins/ubi/chorus_log?index=ecommerce&id_field=primary_ean"
+curl -X PUT "localhost:9200/_plugins/ubi/chorus_log?index=ecommerce&key_field=primary_ean"
 echo -e "\n"
 
 echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"
