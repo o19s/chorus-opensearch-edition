@@ -37,6 +37,9 @@
 		"type": "text",
 		"analyzer": "english_stemmed"
 	  },
+	  "primary_ean": {
+		"type": "keyword"
+	  },
 	  "ean": {
 		"type": "keyword"
 	  },

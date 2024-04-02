@@ -30,19 +30,7 @@ export class UbiPosition{
 		this.trail = trail;
 	}
 }
-export class UbiPosition{
-	public ordinal:integer|null=null;
-	public x:integer|null=null;
-	public y:integer|null=null;
-	public trail:string|null=null;
 
-	constructor({ordinal=null, x=null, y=null, trail=null}={}) {
-		this.ordinal = ordinal;
-		this.x = x;
-		this.y = y;
-		this.trail = trail;
-	}
-}
 
 export class UbiEventAttributes {
 	/**
@@ -93,12 +81,6 @@ export class UbiEvent {
 	setMessage(message:string, message_type:string='INFO'){
 		this.message = message
 		this.message_type = message_type
-	}
-
-	static replacer(key, value){
-		if(value == null)
-			return undefined;
-		return value;
 	}
 
 	/**

@@ -4,7 +4,7 @@ At Chorus Electonics we've been collecting data for a while, storing in a S3 buc
 
 Note: although this data should index to the indices straight from the zipped file format, it's best to make sure the UBI store(s) for the indices exist with the following:
 
-`curl -X PUT http://localhost:9200/_plugins/ubi/`{<mark>ubi-store-name}</mark>`?index=`{<mark>search-index</mark>}`&id_field=`{<mark>unique-key-field</mark>}
+`curl -X PUT http://localhost:9200/_plugins/ubi/`{<mark>ubi-store-name}</mark>`?index=`{<mark>search-index</mark>}`&key_field=`{<mark>unique-key-field</mark>}
 
 Where:
 - *ubi-store-name* is the name of the UBI store.  So, for the ubi store name, `ubi-awesome`, the subsequent indices should be named `.ubi-awesome_events` and `.ubi-awesome_queries`.  **This allows UBI to integrate the data you're loading with the UBI store.** 
@@ -12,7 +12,7 @@ Where:
 - *unique-key-field* is a unique field in the search-index that can link back to the exact row. **This is what allows a query at some point in time link to a *hit* that the user acted on (i.e. purchase, like, etc.)**  It does not necessarily need to be an id, it could be an isbn, brand name, etc. that humans tend to associate this item with. This is needed because the default `id` or `_id` field in OpenSearch can change and are not guaranteed to point to the same exact book, product, object that was returned to the user.
 
 So here is a full example:
-`curl -X PUT "http://localhost:9200/_plugins/ubi/ubi_log?index=ecommerce&id_field=id"`
+`curl -X PUT "http://localhost:9200/_plugins/ubi/chorus_log?index=ecommerce&key_field=primary_ean"`
 
 ## Data file format
 [File format](data/log_events.zip) is a zipped text file with two tab-delimited columns, the index to write to and the json event to store in that index:
@@ -57,15 +57,15 @@ You should see output similar to the following:
 python .\scripts\index_sample_data.py
 green open .plugins-ml-config        IWCZ9aidRDqAemg-_eKKIQ 1 0     1 0  3.9kb  3.9kb
 green open .opensearch-observability lNidG-R2Tfy8qelKxx_kLA 1 0     0 0   208b   208b
-green open .ubi_log_events           xjU-Xt-_ScW4aeR9-iCJdg 1 0 23162 0 11.8mb 11.8mb
+green open .chorus_log_events           xjU-Xt-_ScW4aeR9-iCJdg 1 0 23162 0 11.8mb 11.8mb
 green open .ql-datasources           CzvI7qpfRpaM9-LDnZFuAg 1 0     0 0   208b   208b
 green open ecommerce                 yDAehOoDRC-eH7l3KMuOgw 1 0 18359 0 22.7mb 22.7mb
-green open .ubi_log_queries          nw0sw8GWT-agEq6PgIu7Dg 1 0  2457 0  1.3mb  1.3mb
+green open .chorus_log_queries          nw0sw8GWT-agEq6PgIu7Dg 1 0  2457 0  1.3mb  1.3mb
 green open .kibana_1                 Wv1zKeKrQ3Wv-lCWqapQqw 1 0    30 6   63kb   63kb
 
 Indexing rows in ./data/log_events.zip/log_events.json
-* Uploaded 23092 rows to .ubi_log_events
-* Uploaded 2335 rows to .ubi_log_queries
+* Uploaded 23092 rows to .chorus_log_events
+* Uploaded 2335 rows to .chorus_log_queries
 Done! Indexed 25427 total documents.
 ```
 
