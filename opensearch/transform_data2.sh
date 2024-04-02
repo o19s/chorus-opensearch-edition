@@ -1,7 +1,9 @@
 #!/bin/bash
 
+
 # modified from transform_data.sh to extract the 1st ean and make that the primary_ean
 # other minor changes were attempts at speeding this up
+
 
 # This script transforms the downloaded and extracted 19k products from the icecat dataset.
 # Transformation idea taken from https://www.starkandwayne.com/blog/bash-for-loop-over-json-array-using-jq/
@@ -9,7 +11,7 @@
 # Afterwards, the string is decoded and prefixed with {"index" : {}} to reflect the structure
 # needed by OpenSearch.
 
-for row in $(cat icecat-products-w_price-19k-20201127.json | jq -r '.[] | @base64'); do
+for row in $(cat icecat-products-w_price-19k-20201127.json | jq -rc '.[] | @base64'); do
     my_line=$(echo ${row} | base64 --decode)
 
 # ******************************************************
@@ -28,4 +30,5 @@ for row in $(cat icecat-products-w_price-19k-20201127.json | jq -r '.[] | @base6
    
    #add line with a new primary_ean field
    echo ${my_line} | jq -rc ".primary_ean |= . + \"${ean}\""
+
 done
