@@ -4,10 +4,10 @@ import { integer } from "@opensearch-project/opensearch/api/types";
  * Ubi Event data structures
  */
 
-
 export class UbiEventData {
 	public readonly object_type:string;
 	public object_id:string;
+	public key_value:string;
 	public description:string;
 	public object_detail:{};
 	constructor(type:string, id:string=null, description:string=null, details=null) {
@@ -15,6 +15,9 @@ export class UbiEventData {
 		this.object_id = id;
 		this.description = description;
 		this.object_detail = details;
+
+		//override if using key_field's and values
+		this.key_value = id;
 	}
 }
 export class UbiPosition{
@@ -67,7 +70,6 @@ export class UbiEvent {
 	public message:string;
 	public timestamp:number=Date.now();
 	public event_attributes:UbiEventAttributes = new UbiEventAttributes();
-	public position:UbiPosition|null=null;
 
 	constructor(action_name:string, user_id:string, query_id:string, message:string=null) {
 		this.action_name = action_name;

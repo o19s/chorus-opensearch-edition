@@ -57,15 +57,15 @@ You should see output similar to the following:
 python .\scripts\index_sample_data.py
 green open .plugins-ml-config        IWCZ9aidRDqAemg-_eKKIQ 1 0     1 0  3.9kb  3.9kb
 green open .opensearch-observability lNidG-R2Tfy8qelKxx_kLA 1 0     0 0   208b   208b
-green open .chorus_log_events           xjU-Xt-_ScW4aeR9-iCJdg 1 0 23162 0 11.8mb 11.8mb
+green open ubi_chorus_log_events           xjU-Xt-_ScW4aeR9-iCJdg 1 0 23162 0 11.8mb 11.8mb
 green open .ql-datasources           CzvI7qpfRpaM9-LDnZFuAg 1 0     0 0   208b   208b
 green open ecommerce                 yDAehOoDRC-eH7l3KMuOgw 1 0 18359 0 22.7mb 22.7mb
-green open .chorus_log_queries          nw0sw8GWT-agEq6PgIu7Dg 1 0  2457 0  1.3mb  1.3mb
+green open ubi_chorus_log_queries          nw0sw8GWT-agEq6PgIu7Dg 1 0  2457 0  1.3mb  1.3mb
 green open .kibana_1                 Wv1zKeKrQ3Wv-lCWqapQqw 1 0    30 6   63kb   63kb
 
 Indexing rows in ./data/log_events.zip/log_events.json
-* Uploaded 23092 rows to .chorus_log_events
-* Uploaded 2335 rows to .chorus_log_queries
+* Uploaded 23092 rows to ubi_chorus_log_events
+* Uploaded 2335 rows to ubi_chorus_log_queries
 Done! Indexed 25427 total documents.
 ```
 
