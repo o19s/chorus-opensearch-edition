@@ -24,7 +24,7 @@ const event_server = "http://127.0.0.1:9200";
 const search_credentials = "*:*";
 const search_index = 'ecommerce'
 const key_field = 'primary_ean'
-const ubi_store = 'chorus_log'
+const ubi_store = 'chorus'
 const verbose_ubi_client = true;
 
 const user_id = 'USER-eeed-43de-959d-90e6040e84f9'; // demo user id
@@ -418,13 +418,12 @@ class App extends Component {
                     function(_event) {
                         console.log('mouse over ' + item.title);
                         let e = new UbiEvent('product_hover', user_id, QueryId());
-                        e.message = item.title + ' (' + item.id + ')';
+                        e.message = item.title + ' (' + item.primary_ean + ')';
                         e.session_id = session_id;
                         e.page_id = window.location.pathname;
       
-                        e.event_attributes.object = new UbiEventData('product', item.id, item.title, item);
+                        e.event_attributes.object = new UbiEventData('product', item.id, item.title);
                         e.event_attributes.object.key_value = item.primary_ean;
-                        e.event_attributes.object.object_type = item.name;
                         ubi_client.log_event(e);
                     }
                   }

@@ -97,9 +97,9 @@ echo -e "${MAJOR}Creating ecommerce index, defining its mapping & settings\n${RE
 curl -s -X PUT "localhost:9200/ecommerce/" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
 echo -e "\n"
 
-# Initialize the UBI store, chorus_log for the ecommerce index, pointing to the index field name, `primary_ean`
+# Initialize the UBI store, chorus for the ecommerce index, pointing to the index field name, `primary_ean`
 echo -e "${MAJOR}Creating UBI settings, defining its mapping & settings\n${RESET}"
-curl -X PUT "localhost:9200/_plugins/ubi/chorus_log?index=ecommerce&key_field=primary_ean"
+curl -X PUT "localhost:9200/_plugins/ubi/chorus?index=ecommerce&key_field=primary_ean"
 echo -e "\n"
 
 echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"

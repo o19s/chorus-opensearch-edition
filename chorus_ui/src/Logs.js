@@ -3,7 +3,7 @@ import { ReactiveBase, ReactiveList, StateProvider, ResultList} from "@appbaseio
 
 //TODO: make these configurable properties
 const ubi_credentials="*:*"
-const default_ubi_store = 'chorus_log'
+const default_ubi_store = 'chorus'
 
 const event_server =  ((sessionStorage.hasOwnProperty('event_server')) ?
           sessionStorage.getItem('event_server')  
