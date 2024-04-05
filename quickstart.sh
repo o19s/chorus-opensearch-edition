@@ -95,13 +95,11 @@ echo -e "${MAJOR}Waiting for OpenSearch to start up and be online.${RESET}"
 
 echo -e "${MAJOR}Creating ecommerce index, defining its mapping & settings\n${RESET}"
 curl -s -X PUT "localhost:9200/ecommerce/" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
-# This command was moved into the schema above
-# curl -s -X PUT "localhost:9200/ecommerce/_settings"  -H 'Content-Type: application/json' -d '{"index.mapping.total_fields.limit": 20000}'
 echo -e "\n"
 
-# Initialize the UBI store for the ecommerce index, pointing to the index field name, `id`
+# Initialize the UBI store, chorus for the ecommerce index, pointing to the index field name, `primary_ean`
 echo -e "${MAJOR}Creating UBI settings, defining its mapping & settings\n${RESET}"
-curl -X PUT "localhost:9200/_plugins/ubi/ubi_log?index=ecommerce&id_field=id"
+curl -X PUT "localhost:9200/_plugins/ubi/chorus?index=ecommerce&key_field=primary_ean"
 echo -e "\n"
 
 echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"
@@ -117,7 +115,7 @@ fi
 
 if [ ! -f ./transformed_data.json ]; then
   echo -e "${MINOR}Transforming the sample product data into JSON format, please give it a few minutes!\n${RESET}"
-  ./opensearch/transform_data.sh > transformed_data.json
+  ./opensearch/transform_data2.sh > transformed_data.json
 fi
 echo -e "${MAJOR}Indexing the sample product data, please wait...\n${RESET}"
 curl -s -X POST "localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items" -H 'Content-Type: application/json' --data-binary @transformed_data.json

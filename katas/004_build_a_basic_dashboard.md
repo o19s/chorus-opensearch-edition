@@ -14,7 +14,7 @@ Index patterns are how OpenSearch dashboards access your indices.  In this case,
 After you click on "Create index pattern" you'll see a list of indices in your OpenSearch instance.  The UBI stores are hidden by default; so, be sure to click on "Include system and hidden indices".  
 ![Index Patterns](images/index_pattern2.png "Index Patterns")
 
-With wildcards you can group indices into the same data source for your dashboard.  Assuming the name of your UBI is `ubi_log`, we'll lump both the query and event stores together as `.ubi_log*`.
+With wildcards you can group indices into the same data source for your dashboard.  Assuming the name of your UBI is `chorus`, we'll lump both the query and event stores together as `ubi_chorus*`.
 
 It will prompt you to filter on any `date` field in your schema, so that you can look at things like trending queries over the last 15 minutes, etc.  However, for your first dashboard, do not filter on any date field. 
 <img src="images/index_pattern3.png" alt="Index Patterns" width="400"/>

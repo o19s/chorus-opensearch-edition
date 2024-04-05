@@ -37,7 +37,7 @@ with zipfile.ZipFile(zip_name) as archive:
 					# parse the store name out of the index name
 					store = ''.join(index_name.split('_')[:-1]).lstrip('.')
 					print(f'ERROR: Index {index_name} does not exist for store {store}.')
-					print(f'You need to initialize the store first with: PUT .../plugins/ubi/{store}?index=...&id_field=...')
+					print(f'You need to initialize the store first with: PUT .../plugins/ubi/{store}?index=...&key_field=...')
 					exit();
 				
 				idx_cntr[index_name] +=1

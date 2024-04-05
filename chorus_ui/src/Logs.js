@@ -3,15 +3,15 @@ import { ReactiveBase, ReactiveList, StateProvider, ResultList} from "@appbaseio
 
 //TODO: make these configurable properties
 const ubi_credentials="*:*"
-const default_ubi_store = 'ubi_log'
+const default_ubi_store = 'chorus'
 
 const event_server =  ((sessionStorage.hasOwnProperty('event_server')) ?
           sessionStorage.getItem('event_server')  
           : "http://localhost:9200");
 
 const ubi_store_events =  ((sessionStorage.hasOwnProperty('log_store')) ?
-          '.' + sessionStorage.getItem('log_store') + '_events'
-          : '.' + default_ubi_store + '_events');
+          'ubi_' + sessionStorage.getItem('log_store') + '_events'
+          : 'ubi_' + default_ubi_store + '_events');
 
 
 //TODO: auto refresh.

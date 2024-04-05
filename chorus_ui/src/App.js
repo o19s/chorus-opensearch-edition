@@ -23,8 +23,8 @@ var UbiPosition = require('./ts/UbiEvent.ts').UbiPosition;
 const event_server = "http://127.0.0.1:9200";
 const search_credentials = "*:*";
 const search_index = 'ecommerce'
-const id_field = 'id'
-const ubi_store = 'ubi_log'
+const key_field = 'primary_ean'
+const ubi_store = 'chorus'
 const verbose_ubi_client = true;
 
 const user_id = 'USER-eeed-43de-959d-90e6040e84f9'; // demo user id
@@ -44,7 +44,7 @@ sessionStorage.setItem('event_server', event_server);
 sessionStorage.setItem('user_id', user_id);
 sessionStorage.setItem('session_id', session_id);
 sessionStorage.setItem('search_index', search_index);
-sessionStorage.setItem('id_field', id_field);
+sessionStorage.setItem('key_field', key_field);
 
 
 //######################################
@@ -187,7 +187,7 @@ const queries = {
     query: {
       multi_match: {
         query: value,
-        fields: [ "id", "name", "title", "product_type" , "short_description", "ean", "search_attributes"]
+        fields: [ "id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]
       }
     }
   }}
@@ -382,7 +382,7 @@ class App extends Component {
             componentId="searchbox"
             placeholder="Search for products, brands or EAN"
             autosuggest={false}
-            dataField={["id", "name", "title", "product_type" , "short_description", "ean", "search_attributes"]}
+            dataField={["id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]}
             customQuery={ 
               function(value) {
                   return queries[ 'default' ](value);
@@ -418,13 +418,12 @@ class App extends Component {
                     function(_event) {
                         console.log('mouse over ' + item.title);
                         let e = new UbiEvent('product_hover', user_id, QueryId());
-                        e.message = item.title + ' (' + item.id + ')';
+                        e.message = item.title + ' (' + item.primary_ean + ')';
                         e.session_id = session_id;
                         e.page_id = window.location.pathname;
       
-                        e.event_attributes.object = new UbiEventData('product', genObjectId(), item.title, item);
-                        e.event_attributes.object.object_id = item.id;
-                        e.event_attributes.object.object_type = item.name;
+                        e.event_attributes.object = new UbiEventData('product', item.id, item.title);
+                        e.event_attributes.object.key_value = item.primary_ean;
                         ubi_client.log_event(e);
                     }
                   }
@@ -438,10 +437,9 @@ class App extends Component {
                         e.session_id = session_id;
                         e.page_id = window.location.pathname;
       
-                        e.event_attributes.object = new UbiEventData('product', genObjectId(), item.title, item);
-                        e.event_attributes.object.object_id = item.id;
-                        e.event_attributes.object.transaction_id = genTransactionId()
-                        e.event_attributes.object.object_type = item.name;
+                        e.event_attributes.object = new UbiEventData('product', item.id, item.title, item);
+                        e.event_attributes.object.transaction_id = genTransactionId();
+                        e.event_attributes.object.key_value = item.primary_ean;
                         ubi_client.log_event(e);
                         console.log('User just bought ' + item.title);
                       } else {
@@ -451,9 +449,8 @@ class App extends Component {
                         e.session_id = session_id
                         e.page_id = window.location.pathname;
       
-                        e.event_attributes.object = new UbiEventData('product', genObjectId(), item.title, item);
-                        e.event_attributes.object.object_id = item.id;
-                        e.event_attributes.object.object_type = item.name;
+                        e.event_attributes.object = new UbiEventData('product', item.id, item.title, item);
+                        e.event_attributes.object.key_value = item.primary_ean;
                         ubi_client.log_event(e);
                         console.log('User declined to buy ' + item.title);
                       }
