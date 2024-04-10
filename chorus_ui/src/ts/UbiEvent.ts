@@ -8,9 +8,9 @@ export class UbiEventData {
 	public readonly object_type:string;
 	public object_id:string;
 	public key_value:string;
-	public description:string;
-	public object_detail:{};
-	constructor(type:string, id:string=null, description:string=null, details=null) {
+	public description:string|null;
+	public object_detail:object|null;
+	constructor(type:string, id:string=null, description:string=null, details:object|null=null) {
 		this.object_type = type;
 		this.object_id = id;
 		this.description = description;
