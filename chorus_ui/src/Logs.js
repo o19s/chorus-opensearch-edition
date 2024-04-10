@@ -131,7 +131,7 @@ class LogTable extends Component {
               }
               style={{ "paddingBottom": "10px", "paddingTop": "10px", "height":"50px" }}
               react={{
-                or: ["market-place", "logs", "logresults", "searchbox", "brandfilter", "typefilter"]
+                or: ["market-place", "logs", "logresults", "searchbox", "aupplier_name", "product_type"]
               }}
               render={({ data }) => (
               <ReactiveList.ResultListWrapper >

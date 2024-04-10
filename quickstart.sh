@@ -94,18 +94,18 @@ echo -e "${MAJOR}Waiting for OpenSearch to start up and be online.${RESET}"
 
 
 echo -e "${MAJOR}Creating ecommerce index, defining its mapping & settings\n${RESET}"
-curl -s -X PUT "localhost:9200/ecommerce/" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
+curl -s -X PUT "http://localhost:9200/ecommerce/" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
 echo -e "\n"
 
 # Initialize the UBI store, chorus for the ecommerce index, pointing to the index field name, `primary_ean`
 echo -e "${MAJOR}Creating UBI settings, defining its mapping & settings\n${RESET}"
-curl -X PUT "localhost:9200/_plugins/ubi/chorus?index=ecommerce&key_field=primary_ean"
+curl -X PUT "http://localhost:9200/_plugins/ubi/chorus?index=ecommerce&key_field=primary_ean"
 echo -e "\n"
 
 echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"
 if [ ! -f ./icecat-products-w_price-19k-20201127.tar.gz ]; then
   echo -e "${MINOR}Downloading the sample product data\n${RESET}"
-  wget https://querqy.org/datasets/icecat/icecat-products-w_price-19k-20201127.tar.gz
+  wget http://querqy.org/datasets/icecat/icecat-products-w_price-19k-20201127.tar.gz
 fi
 
 if [ ! -f ./icecat-products-w_price-19k-20201127.json ]; then
@@ -118,7 +118,7 @@ if [ ! -f ./transformed_data.json ]; then
   ./opensearch/transform_data2.sh > transformed_data.json
 fi
 echo -e "${MAJOR}Indexing the sample product data, please wait...\n${RESET}"
-curl -s -X POST "localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items" -H 'Content-Type: application/json' --data-binary @transformed_data.json
+curl -s -X POST "http://localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items" -H 'Content-Type: application/json' --data-binary @transformed_data.json
 
 
 if $offline_lab; then
