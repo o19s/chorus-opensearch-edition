@@ -114,8 +114,14 @@ if [ ! -f ./icecat-products-w_price-19k-20201127.json ]; then
 fi
 
 if [ ! -f ./transformed_data.json ]; then
-  echo -e "${MINOR}Transforming the sample product data into JSON format, please give it a few minutes!\n${RESET}"
-  ./opensearch/transform_data2.sh > transformed_data.json
+  # Hack till we get transform_data2.sh to run.
+  if [ ! -f ./transformed_data-2024_04_10.json ]; then
+    echo -e "${MINOR}Downloading the transformed_data-2024_04_10.json\n${RESET}"
+    wget http://o19s-public-datasets.s3.amazonaws.com/chorus-elasticsearch-edition/transformed_data-2024_04_10.json
+    cp transformed_data-2024_04_10.json transformed_data.json
+  fi
+  #echo -e "${MINOR}Transforming the sample product data into JSON format, please give it a few minutes!\n${RESET}"
+  #./opensearch/transform_data2.sh > transformed_data.json
 fi
 echo -e "${MAJOR}Indexing the sample product data, please wait...\n${RESET}"
 curl -s -X POST "http://localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items" -H 'Content-Type: application/json' --data-binary @transformed_data.json
