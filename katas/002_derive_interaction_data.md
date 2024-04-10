@@ -1,4 +1,4 @@
-# Personalize I
+# Kata 002: Lets derive interaction data from UBI
 
 Let's say you're searching for a laptop.  Pop open the Chorus webshop. 
 You type "laptop" and unfortuantly you are getting lots of accessories for laptops, like screen protectors.  You want an HP laptop so you click on the HP brand filter, and _Chorus_ suggests a single HP laptop, along with an HP branded accessory.  You know there are more HP laptops available at Chorus however!
