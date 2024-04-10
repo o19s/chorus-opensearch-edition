@@ -17,7 +17,7 @@ export class UbiClient {
     private readonly rest_client:AxiosInstance; //client for direct http work
     private readonly rest_config:AxiosRequestConfig;
     private search_index:string;
-    private id_field:string;
+    private key_field:string;
     private verbose:number=0;
 
 
@@ -29,7 +29,7 @@ export class UbiClient {
 
         //TODO: make these parameters when the interface is more finalized
         this.search_index = sessionStorage.getItem('search_index');
-        this.id_field = sessionStorage.getItem('id_field');
+        this.key_field = sessionStorage.getItem('key_field');
 
         //TODO: add authentication
         this.rest_config = {
@@ -71,7 +71,7 @@ export class UbiClient {
      * @returns true, if the store is created
      */
     init(){
-        if( this.search_index == null || this.id_field == null){
+        if( this.search_index == null || this.key_field == null){
             try{
                 const response = this._put(this.url + this.ubi_store + '/index=' + this.search_index).then(
                     (response) => {
