@@ -241,7 +241,7 @@ class App extends Component {
       transformResponse={async (response, componentId) => {
         if( componentId == 'product_type'){
           //console.log('** Type change =>' + response);
-        } else if(componentId == 'aupplier_name'){
+        } else if(componentId == 'supplier_name'){
           //console.log('** Brand change =>' + response);
         } else if(componentId == 'results'){
           console.log('** Search results =>' + response);
@@ -289,7 +289,7 @@ class App extends Component {
             session_id={session_id}
             />
           <MultiList
-            componentId="aupplier_name"
+            componentId="supplier_name"
             dataField="supplier"
             title="Filter by Brands"
             size={20}
@@ -350,7 +350,7 @@ class App extends Component {
               }
             }
             react={{
-              and: ["searchbox", "aupplier_name"]
+              and: ["searchbox", "supplier_name"]
             }}
             style={{ "paddingBottom": "10px", "paddingTop": "10px" }}
           />
@@ -411,7 +411,7 @@ class App extends Component {
             size={20}
             pagination={true}
             react={{
-              and: ["searchbox", "aupplier_name", "product_type"]
+              and: ["searchbox", "supplier_name", "product_type"]
             }}
             onClick={
             function(results) {
