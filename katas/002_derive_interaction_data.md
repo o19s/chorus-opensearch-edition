@@ -108,6 +108,9 @@ USER-eeed-43de-959d-90e6040e84f9|0884420390350|2024-04-10 19:11:38.098|add_to_ca
 You can see that this user has engaged three times with HP laptops and just 1 time with an HP desktop.
 
 > [!TIP]  
+> No data? Did you double click on a laptop and choose okay in order to trigger the `add_to_cart` event?
+
+> [!TIP]  
 > Notice that we are using the individual products "EAN" as the value returned by `e.event_attributes.object.key_value`.   If we wanted the value of the internal to OpenSearch `_id` field, then we would use `e.event_attributes.object.object_id` instead.
 
 
