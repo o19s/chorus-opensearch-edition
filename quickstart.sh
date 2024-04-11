@@ -26,6 +26,10 @@ if ! [ -x "$(command -v wget)" ]; then
   echo "${ERROR}Error: wget is not installed.${RESET}" >&2
   exit 1
 fi
+if ! [ -x "$(command -v python3)" ]; then
+  echo "${ERROR}Error: python3 is not installed.${RESET}" >&2
+  exit 1
+fi
 
 observability=false
 shutdown=false
