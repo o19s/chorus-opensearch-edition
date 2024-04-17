@@ -33,7 +33,6 @@ const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
           : 'SESSION-' + guiid()); //<- new fake session, otherwise it should reuse the sessionStorage version
 
 
-
 const ubi_client = new  UbiClient(event_server, ubi_store, user_id, session_id);
 
 //decide if we write each event to the console
@@ -45,10 +44,23 @@ sessionStorage.setItem('user_id', user_id);
 sessionStorage.setItem('session_id', session_id);
 sessionStorage.setItem('search_index', search_index);
 sessionStorage.setItem('key_field', key_field);
+sessionStorage.setItem('shopping_cart', 0);
 
 
 //######################################
 // util functions, TODO: reorganize files
+  
+export function add_to_cart()
+{
+  let shopping_cart = sessionStorage.getItem("shopping_cart");
+  shopping_cart++;
+  sessionStorage.setItem("shopping_cart", shopping_cart);
+  var cart = document.getElementById("cart");
+  cart.textContent = shopping_cart;
+  return true;
+}
+
+
 function guiid() {
   let id = '';
   try{
@@ -268,6 +280,16 @@ class App extends Component {
         <img style={{ height: "100%", class: "center"  }} src={chorusLogo} />
       </div>
       
+      <div>
+      <button id="cart" onClick ={
+            function(results) {
+              alert("Maybe someday I'll show you what's in your cart!");
+            }}>
+              0
+        </button>
+        <i style={{fontSize:"28px"}} class="fa fa-shopping-cart"></i>
+        </div>
+        <br />
       <small><code>Your User ID: {user_id} | Your Session ID: {session_id}</code></small>
       
       <div style={{ display: "flex", flexDirection: "row" }}>
@@ -490,8 +512,47 @@ class App extends Component {
                       {item.price/100 +
                         " $ | " +
                         item.supplier}
+                  <div>
+                  <fieldset style={{
+                      width:"110px",
+                      display:"inline-block",
+                      position:"relative",
+                      padding:"0px",
+                      fontStyle:"italic"
+                      }} >
+                    <legend>Result quality?</legend>
+                    <div
+                        style={{
+                          fontSize:"28px",
+                          fontWeight:"bolder",
+                          fontStyle:"oblique"
+                        }}
+                    >
+                      <label for="pos-review"
+                          style={{
+
+                            color: "#008000",
+                          }}> &#128402;
+                      <input type="radio" id="pos-review" name="pos-reviewrone" value="pos" checked />
+                      </label>
+                      <input type="radio" id="neg-review" name="neg-reviewrone" value="neg" checked />
+                      <label for="neg-review"
+                          style={{
+
+                            color: "#C00000",
+                          }}>&#128403; 
+                      </label>
+                    </div>
+                    </fieldset>
+                  <button style={{ fontSize:"14px", position:"relative" }} onClick ={
+            function(results) {
+              add_to_cart();
+            }}>
+              Add to
+                    <i style={{fontSize:"24px"}} class="fa fa-shopping-cart"></i>
+                  </button>
+                    </div>
                     </ResultCard.Description>
-                    
                   </ResultCard>
                   </div>
                 ))}
@@ -509,6 +570,7 @@ class App extends Component {
             }
           />
         </div>
+        
       </div>
     </ReactiveBase>
   );
