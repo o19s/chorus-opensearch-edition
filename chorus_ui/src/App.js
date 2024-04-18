@@ -50,13 +50,25 @@ sessionStorage.setItem('shopping_cart', 0);
 //######################################
 // util functions, TODO: reorganize files
   
-export function add_to_cart()
+export function add_to_cart(item=null)
 {
-  let shopping_cart = sessionStorage.getItem("shopping_cart");
-  shopping_cart++;
-  sessionStorage.setItem("shopping_cart", shopping_cart);
-  var cart = document.getElementById("cart");
-  cart.textContent = shopping_cart;
+  if(item != null){
+    let shopping_cart = sessionStorage.getItem("shopping_cart");
+    shopping_cart++;
+    sessionStorage.setItem("shopping_cart", shopping_cart);
+    var cart = document.getElementById("cart");
+    cart.textContent = shopping_cart;
+
+    let e = new UbiEvent('add_to_cart', user_id, QueryId());
+    e.message_type = 'CONVERSION';
+    e.message = item.title + ' (' + item.id + ')';
+    e.session_id = session_id;
+    e.page_id = window.location.pathname;
+
+    e.event_attributes.object = new UbiEventData('product', item.primary_ean, item.title, item);
+    ubi_client.log_event(e);
+    console.log('User just bought ' + item.title);
+  }
   return true;
 }
 
@@ -287,7 +299,7 @@ class App extends Component {
             }}>
               0
         </button>
-        <i style={{fontSize:"28px"}} class="fa fa-shopping-cart"></i>
+        <i style={{fontSize:"28px"}} className="fa fa-shopping-cart"></i>
         </div>
         <br />
       <small><code>Your User ID: {user_id} | Your Session ID: {session_id}</code></small>
@@ -467,7 +479,8 @@ class App extends Component {
                   }
                   onDoubleClick={    
                     function(_event) {
-                      
+                      add_to_cart(item);
+                     /* 
                       if (window.confirm('Do you want to buy ' + item.title)) {
                         let e = new UbiEvent('add_to_cart', user_id, QueryId());
                         e.message_type = 'CONVERSION';
@@ -492,6 +505,7 @@ class App extends Component {
                         ubi_client.log_event(e);
                         console.log('User declined to buy ' + item.title);
                       }
+                      */
                     }
                   }
                   >
@@ -528,28 +542,50 @@ class App extends Component {
                           fontStyle:"oblique"
                         }}
                     >
-                      <label for="pos-review"
-                          style={{
-
-                            color: "#008000",
-                          }}> &#128402;
-                      <input type="radio" id="pos-review" name="pos-reviewrone" value="pos" checked />
+                      <label htmlFor="pos-review"
+                          style={{ color: "#008000", }}> &#128402;
+                      <input type="radio" id="pos-review" name="pos-reviewrone" value="pos"  
+                          onClick={function(event){
+                            var neg = document.getElementById("neg-review");
+                            neg.checked = false;
+                        
+                            let e = new UbiEvent('positive', user_id, QueryId());
+                            e.message_type = 'RELEVANCY';
+                            e.message = item.title + ' (' + item.id + ')';
+                            e.session_id = session_id;
+                            e.page_id = window.location.pathname;
+                        
+                            e.event_attributes.object = new UbiEventData('product', item.primary_ean, item.title, {'pos-review':item.primary_ean});
+                            ubi_client.log_event(e);
+                            console.log('pos review of ' + item.title)
+                          }}/>
                       </label>
-                      <input type="radio" id="neg-review" name="neg-reviewrone" value="neg" checked />
-                      <label for="neg-review"
-                          style={{
-
-                            color: "#C00000",
-                          }}>&#128403; 
+                      <input type="radio" id="neg-review" name="neg-reviewrone" value="neg"  
+                      onClick={function(event){
+                        var pos = document.getElementById("pos-review");
+                        pos.checked = false;
+                    
+                        let e = new UbiEvent('negative', user_id, QueryId());
+                        e.message_type = 'RELEVANCY';
+                        e.message = item.title + ' (' + item.id + ')';
+                        e.session_id = session_id;
+                        e.page_id = window.location.pathname;
+                    
+                        e.event_attributes.object = new UbiEventData('product', item.primary_ean, item.title, {'pos-review':item.primary_ean});
+                        ubi_client.log_event(e);
+                        console.log('pos review of ' + item.title)
+                      }}/>
+                      <label htmlFor="neg-review"
+                          style={{ color: "#C00000", }}>&#128403; 
                       </label>
                     </div>
                     </fieldset>
                   <button style={{ fontSize:"14px", position:"relative" }} onClick ={
-            function(results) {
-              add_to_cart();
+            function(el) {
+              add_to_cart(item);
             }}>
               Add to
-                    <i style={{fontSize:"24px"}} class="fa fa-shopping-cart"></i>
+                    <i style={{fontSize:"24px"}} className="fa fa-shopping-cart"></i>
                   </button>
                     </div>
                     </ResultCard.Description>
