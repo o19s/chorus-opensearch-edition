@@ -1,19 +1,17 @@
-import React, {Component, useState} from "react";
+import React, {Component} from "react";
 import {
   ReactiveBase,
   DataSearch,
   MultiList,
   ReactiveList,
-  ResultCard,
-  StateProvider,
-  ResultList,
+  ResultCard
 } from "@appbaseio/reactivesearch";
 import AlgoPicker from './custom/AlgoPicker';
 import { UbiClient } from "./ts/UbiClient.ts";
 import chorusLogo from './assets/chorus-logo.png';
 
 var UbiEvent = require('./ts/UbiEvent.ts').UbiEvent;
-var UbiAttributes = require('./ts/UbiEvent.ts').UbiEventAttributes;
+var UbiEventAttributes = require('./ts/UbiEvent.ts').UbiEventAttributes;
 var UbiEventData = require('./ts/UbiEvent.ts').UbiEventData;
 var UbiPosition = require('./ts/UbiEvent.ts').UbiPosition;
 
@@ -466,7 +464,9 @@ class App extends Component {
                   <div id='product_item' key={item.id} 
                   onMouseOver={
                     function(_event) {
-                        console.log('mouse over ' + item.title);
+                        // Decide if the mouse over on the product helps tell the story.
+                        // preference would be to log when a product comes into the "viewport".
+                        //console.log('mouse over ' + item.title);
                         let e = new UbiEvent('product_hover', user_id, QueryId());
                         e.message = item.title + ' (' + item.primary_ean + ')';
                         e.session_id = session_id;
@@ -474,40 +474,9 @@ class App extends Component {
       
                         e.event_attributes.object = new UbiEventData('product', item.id, item.title);
                         e.event_attributes.object.key_value = item.primary_ean;
-                        ubi_client.log_event(e);
+                        //ubi_client.log_event(e);
                     }
-                  }
-                  onDoubleClick={    
-                    function(_event) {
-                      add_to_cart(item);
-                     /* 
-                      if (window.confirm('Do you want to buy ' + item.title)) {
-                        let e = new UbiEvent('add_to_cart', user_id, QueryId());
-                        e.message_type = 'CONVERSION';
-                        e.message = item.title + ' (' + item.id + ')';
-                        e.session_id = session_id;
-                        e.page_id = window.location.pathname;
-      
-                        e.event_attributes.object = new UbiEventData('product', item.id, item.title, item);
-                        e.event_attributes.object.transaction_id = genTransactionId();
-                        e.event_attributes.object.key_value = item.primary_ean;
-                        ubi_client.log_event(e);
-                        console.log('User just bought ' + item.title);
-                      } else {
-                        let e = new UbiEvent('declined_product', user_id, QueryId());
-                        e.message_type = 'REJECT'
-                        e.message = item.title + ' (' + item.id + ')'
-                        e.session_id = session_id
-                        e.page_id = window.location.pathname;
-      
-                        e.event_attributes.object = new UbiEventData('product', item.id, item.title, item);
-                        e.event_attributes.object.key_value = item.primary_ean;
-                        ubi_client.log_event(e);
-                        console.log('User declined to buy ' + item.title);
-                      }
-                      */
-                    }
-                  }
+                  }                  
                   >
                   <ResultCard key={item._id} >
                     <ResultCard.Image
@@ -543,11 +512,11 @@ class App extends Component {
                         }}
                     >
                       <label htmlFor="pos-review"
-                          style={{ color: "#008000", }}> &#128402;
+                          style={{ color: "#008000", }}> 👍
                       <input type="radio" id="pos-review" name="pos-reviewrone" value="pos"  
                           onClick={function(event){
                             var neg = document.getElementById("neg-review");
-                            neg.checked = false;
+                           // neg.checked = false;
                         
                             let e = new UbiEvent('positive', user_id, QueryId());
                             e.message_type = 'RELEVANCY';
@@ -563,7 +532,7 @@ class App extends Component {
                       <input type="radio" id="neg-review" name="neg-reviewrone" value="neg"  
                       onClick={function(event){
                         var pos = document.getElementById("pos-review");
-                        pos.checked = false;
+                        //pos.checked = false;
                     
                         let e = new UbiEvent('negative', user_id, QueryId());
                         e.message_type = 'RELEVANCY';
@@ -576,7 +545,7 @@ class App extends Component {
                         console.log('pos review of ' + item.title)
                       }}/>
                       <label htmlFor="neg-review"
-                          style={{ color: "#C00000", }}>&#128403; 
+                          style={{ color: "#C00000", }}>👎 
                       </label>
                     </div>
                     </fieldset>
