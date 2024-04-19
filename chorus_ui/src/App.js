@@ -288,20 +288,20 @@ class App extends Component {
       
       <div style={{ height: "200px", width: "100%"}}>
         <img style={{ height: "100%", class: "center"  }} src={chorusLogo} />
+        <div style={{float:"right", marginTop:"170px"}}>
+          <button id="cart" onClick ={
+                function(results) {
+                  alert("Maybe someday I'll show you what's in your cart!");
+                }}>
+                  0
+            </button>
+            <i style={{fontSize:"28px"}} className="fa fa-shopping-cart"></i>
+            <br />
+          <small><code>Your User ID: {user_id} | Your Session ID: {session_id}</code></small>
+        </div>
       </div>
       
-      <div>
-      <button id="cart" onClick ={
-            function(results) {
-              alert("Maybe someday I'll show you what's in your cart!");
-            }}>
-              0
-        </button>
-        <i style={{fontSize:"28px"}} className="fa fa-shopping-cart"></i>
-        </div>
-        <br />
-      <small><code>Your User ID: {user_id} | Your Session ID: {session_id}</code></small>
-      
+      <br/>
       <div style={{ display: "flex", flexDirection: "row" }}>
         <div
           style={{
@@ -497,7 +497,7 @@ class App extends Component {
                         item.supplier}
                   <div>
                   <fieldset style={{
-                      width:"110px",
+                      width:"120px",
                       display:"inline-block",
                       position:"relative",
                       padding:"0px",
@@ -506,17 +506,18 @@ class App extends Component {
                     <legend>Result quality?</legend>
                     <div
                         style={{
-                          fontSize:"28px",
+                          fontSize:"24px",
                           fontWeight:"bolder",
+                          //backgroundColor:"#33475b",
                           fontStyle:"oblique"
                         }}
                     >
-                      <label htmlFor="pos-review"
-                          style={{ color: "#008000", }}> 👍
-                      <input type="radio" id="pos-review" name="pos-reviewrone" value="pos"  
+                      <label htmlFor="pos-relevant"
+                          style={{ backgroundColor: "#ABEBC6", }}> 👍
+                      <input type="radio" id={`pos-${item.id}`} name={`pos-${item.id}`} value="pos"  
                           onClick={function(event){
-                            var neg = document.getElementById("neg-review");
-                           // neg.checked = false;
+                            var neg = document.getElementById(`neg-${item.id}`);
+                            neg.checked = false;
                         
                             let e = new UbiEvent('positive', user_id, QueryId());
                             e.message_type = 'RELEVANCY';
@@ -524,15 +525,17 @@ class App extends Component {
                             e.session_id = session_id;
                             e.page_id = window.location.pathname;
                         
-                            e.event_attributes.object = new UbiEventData('product', item.primary_ean, item.title, {'pos-review':item.primary_ean});
+                            e.event_attributes.object = new UbiEventData('product', item.primary_ean, item.title, {'pos-relevant':item.primary_ean});
                             ubi_client.log_event(e);
                             console.log('pos review of ' + item.title)
                           }}/>
                       </label>
-                      <input type="radio" id="neg-review" name="neg-reviewrone" value="neg"  
+                      <label htmlFor="neg-relevant"
+                          style={{ backgroundColor: "#EC7063", }}>👎 
+                      <input type="radio" id={`neg-${item.id}`} name={`neg-${item.id}`} value="neg"  
                       onClick={function(event){
-                        var pos = document.getElementById("pos-review");
-                        //pos.checked = false;
+                        var pos = document.getElementById(`pos-${item.id}`);
+                        pos.checked = false;
                     
                         let e = new UbiEvent('negative', user_id, QueryId());
                         e.message_type = 'RELEVANCY';
@@ -540,12 +543,10 @@ class App extends Component {
                         e.session_id = session_id;
                         e.page_id = window.location.pathname;
                     
-                        e.event_attributes.object = new UbiEventData('product', item.primary_ean, item.title, {'pos-review':item.primary_ean});
+                        e.event_attributes.object = new UbiEventData('product', item.primary_ean, item.title, {'pos-relevant':item.primary_ean});
                         ubi_client.log_event(e);
                         console.log('pos review of ' + item.title)
                       }}/>
-                      <label htmlFor="neg-review"
-                          style={{ color: "#C00000", }}>👎 
                       </label>
                     </div>
                     </fieldset>
