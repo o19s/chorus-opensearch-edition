@@ -28,9 +28,9 @@ First, we have to uncompress the data:
 
 > tar xzf icecat-products-w_price-19k-20201127.tar.gz
 
-Next, we need to format the data before we can index it into Elasticsearch. For that run the script `transform_data.sh`:
+Next, we need to format the data before we can index it into OpenSearch. For that run the script `transform_data.py`.  We provide a python3 docker container to run the command in:
 
-> ./opensearch/transform_data.sh > transformed_data.json
+> docker run -v ./:/app -w /app python:3 python3 ./opensearch/transform_data.py icecat-products-w_price-19k-20201127.json transformed_data.json
 
 This can take a while. The script takes the freshly extracted JSON data and transforms it in a way, so it can be used by the [OpenSearch's Bulk API](https://opensearch.org/docs/latest/api-reference/document-apis/bulk/).
 
