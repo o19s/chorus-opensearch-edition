@@ -48,7 +48,7 @@ After setting up Chorus you can check out [Kata 1: Alice Needs a New Laptop](kat
 Learn more by following this sequence of Katas:
 
 1. 000 Kata: [Setting up Chorus](katas/000_setting_up_chorus.md)
-1. First Kata: [Alice Wants a New Laptop](katas/001_alice_wants_a_new_laptop.md)
+1. First Kata: [Alice Needs a New Laptop](katas/001_alice_needs_a_new_laptop.md)
 1. Second Kata: [Deriving Interaction Data](katas/002_derive_interaction_data.md)
 1. Third Kata: [Importing Pre-Existing Event Data](katas/003_import_preexisting_event_data.md)
 1. Fourth Kata: [Build a Basic Dashboard](katas/004_build_a_basic_dashboard.md)
