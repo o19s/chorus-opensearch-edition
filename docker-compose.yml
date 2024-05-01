@@ -1,15 +1,5 @@
 version: '3.7'
 services:
-  mysql:
-    container_name: mysql
-    image: amd64/mysql:8
-    ports:
-      - 3306:3306
-    environment:
-      - MYSQL_ROOT_PASSWORD=password
-    volumes:
-      - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-
   opensearch:
     container_name: opensearch
     build: ./opensearch/.
@@ -38,60 +28,21 @@ services:
       timeout: 10s
       retries: 50
 
-  opensearch-dashboards:
-    build: ./opensearch-dashboards/.
-    container_name: opensearch-dashboards
+  data-prepper:
+    container_name: data-prepper
+    build: ./data-prepper/.
+    restart: unless-stopped
+    #image: opensearchproject/data-prepper:2.7.0
+    #volumes:
+    #  - ../trace_analytics_no_ssl_2x.yml:/usr/share/data-prepper/pipelines/pipelines.yaml
+    #  - ../data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
+    #  - ../demo/root-ca.pem:/usr/share/data-prepper/root-ca.pem
     ports:
-      - 5601:5601
-    expose:
-      - 5601
-    environment:
-      OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
-      DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
+      - "8080:8080"
+    #networks:
+    #  - chorus-net
     depends_on:
       - opensearch
+    #  - chorus_ui
 
-  chorus-ui:
-    container_name: chorus_ui
-    build: ./chorus_ui/.
-    depends_on:
-      - opensearch
-    volumes:
-      - './chorus_ui:/usr/src/app'
-      - '/usr/src/app/node_modules'
-    ports:
-      - 4000:3000
 
-  quepid:
-    container_name: quepid
-    image: o19s/quepid:7.15.1
-    ports:
-      - 3000:3000
-    environment:
-      - PORT=3000
-      - RACK_ENV=production
-      - RAILS_ENV=production
-      - DATABASE_URL=mysql2://root:password@mysql:3306/quepid
-      - REDIS_URL=redis://redis:6379/1
-      - FORCE_SSL=false
-      - MAX_THREADS=2
-      - WEB_CONCURRENCY=2
-      - RAILS_LOG_TO_STDOUT=true
-      - RAILS_SERVE_STATIC_FILES=true
-      - SECRET_KEY_BASE=chorus_key
-      - TC_URL=
-      - PRIVACY_URL=
-      - COOKIES_URL=
-      - EMAIL_MARKETING_MODE=false
-      - EMAIL_PROVIDER=
-      - QUEPID_DEFAULT_SCORER=DCG@10
-      - SIGNUP_ENABLED=true
-    links:
-      - mysql
-      - redis
-
-  redis:
-    container_name: quepid_redis
-    image: redis:7.0.11-alpine
-    ports:
-      - 6379:6379

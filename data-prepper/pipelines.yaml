@@ -1,0 +1,28 @@
+ubi-event-pipeline:
+  workers: 2
+  delay: "5000" #millis for the workers to wait
+  source:
+    random:
+    #http:
+    #  max_connection_count: 500
+    #  request_timeout: 10000
+    #  port: 1919
+  buffer:
+    bounded_blocking:
+      buffer_size: 10240 # max number of records the buffer will accept
+      batch_size: 160 # max number of records the buffer will drain for each read
+  processor:
+  #- date:
+    #from_time_received: true
+    #destination: "@timestamp"
+    #- trace_peer_forwarder:
+    - string_converter:
+       upper_case: true
+  sink:
+   - stdout:
+   #- opensearch:
+   #     hosts: ["http://localhost:9200"]
+   #     insecure: true
+        #username: admin
+        #password: Mysupersecretpassword_123
+        #index_type: trace-analytics-raw
