@@ -1,5 +1,18 @@
 version: '3.7'
 services:
+
+  dataprepper:
+    depends_on:
+      - opensearch
+    container_name: data-prepper
+    image: opensearchproject/data-prepper:latest
+    ports:
+      - 4900:4900
+      - 2021:2021
+    volumes:
+      - ./dataprepper/pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
+      - ./dataprepper/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml 
+
   mysql:
     container_name: mysql
     image: amd64/mysql:8

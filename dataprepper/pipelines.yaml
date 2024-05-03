@@ -1,0 +1,9 @@
+chorus-ubi-pipeline:
+  source:
+    http:
+      port: 2021
+      ssl: false
+  sink:
+    - opensearch:
+        hosts: [ "http://opensearch:9200" ]
+        index: ubi_events
