@@ -286,18 +286,22 @@ class App extends Component {
 
             >
       
-      <div style={{ height: "200px", width: "100%"}}>
+      <div style={{ height: "140px", width: "100%"}}>
         <img style={{ height: "100%", class: "center"  }} src={chorusLogo} />
-        <div style={{float:"right", marginTop:"170px"}}>
+        <div style={{float:"right"}}>
+          <small>
+            <code>Your User ID: {user_id}</code>
+            <br/>
+            <code>Your Session ID: {session_id}</code>
+          </small>
+          <br/>
           <button id="cart" onClick ={
-                function(results) {
-                  alert("Maybe someday I'll show you what's in your cart!");
-                }}>
-                  0
-            </button>
-            <i style={{fontSize:"28px"}} className="fa fa-shopping-cart"></i>
-            <br />
-          <small><code>Your User ID: {user_id} | Your Session ID: {session_id}</code></small>
+              function(results) {
+                alert("Maybe someday I'll show you what's in your cart!");
+              }}>
+                0
+          </button>
+          <i style={{fontSize:"28px"}} className="fa fa-shopping-cart"></i>
         </div>
       </div>
       
