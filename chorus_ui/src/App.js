@@ -1,19 +1,17 @@
-import React, {Component, useState} from "react";
+import React, {Component} from "react";
 import {
   ReactiveBase,
   DataSearch,
   MultiList,
   ReactiveList,
-  ResultCard,
-  StateProvider,
-  ResultList,
+  ResultCard
 } from "@appbaseio/reactivesearch";
 import AlgoPicker from './custom/AlgoPicker';
 import { UbiClient } from "./ts/UbiClient.ts";
 import chorusLogo from './assets/chorus-logo.png';
 
 var UbiEvent = require('./ts/UbiEvent.ts').UbiEvent;
-var UbiAttributes = require('./ts/UbiEvent.ts').UbiEventAttributes;
+var UbiEventAttributes = require('./ts/UbiEvent.ts').UbiEventAttributes;
 var UbiEventData = require('./ts/UbiEvent.ts').UbiEventData;
 var UbiPosition = require('./ts/UbiEvent.ts').UbiPosition;
 
@@ -33,7 +31,6 @@ const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
           : 'SESSION-' + guiid()); //<- new fake session, otherwise it should reuse the sessionStorage version
 
 
-
 const ubi_client = new  UbiClient(event_server, ubi_store, user_id, session_id);
 
 //decide if we write each event to the console
@@ -45,10 +42,35 @@ sessionStorage.setItem('user_id', user_id);
 sessionStorage.setItem('session_id', session_id);
 sessionStorage.setItem('search_index', search_index);
 sessionStorage.setItem('key_field', key_field);
+sessionStorage.setItem('shopping_cart', 0);
 
 
 //######################################
 // util functions, TODO: reorganize files
+  
+export function add_to_cart(item=null)
+{
+  if(item != null){
+    let shopping_cart = sessionStorage.getItem("shopping_cart");
+    shopping_cart++;
+    sessionStorage.setItem("shopping_cart", shopping_cart);
+    var cart = document.getElementById("cart");
+    cart.textContent = shopping_cart;
+
+    let e = new UbiEvent('add_to_cart', user_id, QueryId());
+    e.message_type = 'CONVERSION';
+    e.message = item.title + ' (' + item.id + ')';
+    e.session_id = session_id;
+    e.page_id = window.location.pathname;
+
+    e.event_attributes.object = new UbiEventData('product', item.primary_ean, item.title, item);
+    ubi_client.log_event(e);
+    console.log('User just bought ' + item.title);
+  }
+  return true;
+}
+
+
 function guiid() {
   let id = '';
   try{
@@ -264,12 +286,26 @@ class App extends Component {
 
             >
       
-      <div style={{ height: "200px", width: "100%"}}>
+      <div style={{ height: "140px", width: "100%"}}>
         <img style={{ height: "100%", class: "center"  }} src={chorusLogo} />
+        <div style={{float:"right"}}>
+          <small>
+            <code>Your User ID: {user_id}</code>
+            <br/>
+            <code>Your Session ID: {session_id}</code>
+          </small>
+          <br/>
+          <button id="cart" onClick ={
+              function(results) {
+                alert("Maybe someday I'll show you what's in your cart!");
+              }}>
+                0
+          </button>
+          <i style={{fontSize:"28px"}} className="fa fa-shopping-cart"></i>
+        </div>
       </div>
       
-      <small><code>Your User ID: {user_id} | Your Session ID: {session_id}</code></small>
-      
+      <br/>
       <div style={{ display: "flex", flexDirection: "row" }}>
         <div
           style={{
@@ -432,7 +468,9 @@ class App extends Component {
                   <div id='product_item' key={item.id} 
                   onMouseOver={
                     function(_event) {
-                        console.log('mouse over ' + item.title);
+                        // Decide if the mouse over on the product helps tell the story.
+                        // preference would be to log when a product comes into the "viewport".
+                        //console.log('mouse over ' + item.title);
                         let e = new UbiEvent('product_hover', user_id, QueryId());
                         e.message = item.title + ' (' + item.primary_ean + ')';
                         e.session_id = session_id;
@@ -440,38 +478,9 @@ class App extends Component {
       
                         e.event_attributes.object = new UbiEventData('product', item.id, item.title);
                         e.event_attributes.object.key_value = item.primary_ean;
-                        ubi_client.log_event(e);
+                        //ubi_client.log_event(e);
                     }
-                  }
-                  onDoubleClick={    
-                    function(_event) {
-                      
-                      if (window.confirm('Do you want to buy ' + item.title)) {
-                        let e = new UbiEvent('add_to_cart', user_id, QueryId());
-                        e.message_type = 'CONVERSION';
-                        e.message = item.title + ' (' + item.id + ')';
-                        e.session_id = session_id;
-                        e.page_id = window.location.pathname;
-      
-                        e.event_attributes.object = new UbiEventData('product', item.id, item.title, item);
-                        e.event_attributes.object.transaction_id = genTransactionId();
-                        e.event_attributes.object.key_value = item.primary_ean;
-                        ubi_client.log_event(e);
-                        console.log('User just bought ' + item.title);
-                      } else {
-                        let e = new UbiEvent('declined_product', user_id, QueryId());
-                        e.message_type = 'REJECT'
-                        e.message = item.title + ' (' + item.id + ')'
-                        e.session_id = session_id
-                        e.page_id = window.location.pathname;
-      
-                        e.event_attributes.object = new UbiEventData('product', item.id, item.title, item);
-                        e.event_attributes.object.key_value = item.primary_ean;
-                        ubi_client.log_event(e);
-                        console.log('User declined to buy ' + item.title);
-                      }
-                    }
-                  }
+                  }                  
                   >
                   <ResultCard key={item._id} >
                     <ResultCard.Image
@@ -490,8 +499,70 @@ class App extends Component {
                       {item.price/100 +
                         " $ | " +
                         item.supplier}
-                    </ResultCard.Description>
+                  <div>
+                  <fieldset style={{
+                      width:"120px",
+                      display:"inline-block",
+                      position:"relative",
+                      padding:"0px",
+                      fontStyle:"italic"
+                      }} >
+                    <legend>Result quality?</legend>
+                    <div
+                        style={{
+                          fontSize:"24px",
+                          fontWeight:"bolder",
+                          //backgroundColor:"#33475b",
+                          fontStyle:"oblique"
+                        }}
+                    >
+                      <label htmlFor="pos-relevant"
+                          style={{ backgroundColor: "#ABEBC6", }}> 👍
+                      <input type="radio" id={`pos-${item.id}`} name={`pos-${item.id}`} value="pos"  
+                          onClick={function(event){
+                            var neg = document.getElementById(`neg-${item.id}`);
+                            neg.checked = false;
+                        
+                            let e = new UbiEvent('positive', user_id, QueryId());
+                            e.message_type = 'RELEVANCY';
+                            e.message = item.title + ' (' + item.id + ')';
+                            e.session_id = session_id;
+                            e.page_id = window.location.pathname;
+                        
+                            e.event_attributes.object = new UbiEventData('product', item.primary_ean, item.title, {'pos-relevant':item.primary_ean});
+                            ubi_client.log_event(e);
+                            console.log('pos review of ' + item.title)
+                          }}/>
+                      </label>
+                      <label htmlFor="neg-relevant"
+                          style={{ backgroundColor: "#EC7063", }}>👎 
+                      <input type="radio" id={`neg-${item.id}`} name={`neg-${item.id}`} value="neg"  
+                      onClick={function(event){
+                        var pos = document.getElementById(`pos-${item.id}`);
+                        pos.checked = false;
                     
+                        let e = new UbiEvent('negative', user_id, QueryId());
+                        e.message_type = 'RELEVANCY';
+                        e.message = item.title + ' (' + item.id + ')';
+                        e.session_id = session_id;
+                        e.page_id = window.location.pathname;
+                    
+                        e.event_attributes.object = new UbiEventData('product', item.primary_ean, item.title, {'pos-relevant':item.primary_ean});
+                        ubi_client.log_event(e);
+                        console.log('pos review of ' + item.title)
+                      }}/>
+                      </label>
+                    </div>
+                    </fieldset>
+                  <button style={{ fontSize:"14px", position:"relative" }} onClick ={
+            function(el) {
+              add_to_cart(item);
+            }}>
+              Add to
+                    <i style={{fontSize:"24px"}} className="fa fa-shopping-cart"></i>
+                  </button>
+                    </div>
+                    </ResultCard.Description>
                   </ResultCard>
                   </div>
                 ))}
@@ -509,6 +580,7 @@ class App extends Component {
             }
           />
         </div>
+        
       </div>
     </ReactiveBase>
   );
