@@ -6,4 +6,5 @@ chorus-ubi-pipeline:
   sink:
     - opensearch:
         hosts: [ "http://opensearch:9200" ]
-        index: ubi_events
+        index_type: custom
+        index: ubi_chorus_events
