@@ -293,15 +293,15 @@ class App extends Component {
             <code>Your User ID: {user_id}</code>
             <br/>
             <code>Your Session ID: {session_id}</code>
-          </small>
-          <br/>
-          <button id="cart" onClick ={
-              function(results) {
-                alert("Maybe someday I'll show you what's in your cart!");
-              }}>
-                0
-          </button>
-          <i style={{fontSize:"28px"}} className="fa fa-shopping-cart"></i>
+            <br/>
+            <code>Your 🛒 Items: <button id="cart" onClick ={
+                function(results) {
+                  alert("Maybe someday I'll show you what's in your cart!");
+                }}>
+                  0
+            </button>
+            </code>
+          </small>         
         </div>
       </div>
       
@@ -558,8 +558,7 @@ class App extends Component {
             function(el) {
               add_to_cart(item);
             }}>
-              Add to
-                    <i style={{fontSize:"24px"}} className="fa fa-shopping-cart"></i>
+              Add to 🛒
                   </button>
                     </div>
                     </ResultCard.Description>
