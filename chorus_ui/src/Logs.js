@@ -5,8 +5,8 @@ import { ReactiveBase, ReactiveList, StateProvider, ResultList} from "@appbaseio
 const ubi_credentials="*:*"
 const default_ubi_store = 'chorus'
 
-const event_server =  ((sessionStorage.hasOwnProperty('event_server')) ?
-          sessionStorage.getItem('event_server')  
+const event_server =  ((sessionStorage.hasOwnProperty('search_server')) ?
+          sessionStorage.getItem('search_server')  
           : "http://localhost:9200");
 
 const ubi_store_events =  ((sessionStorage.hasOwnProperty('log_store')) ?

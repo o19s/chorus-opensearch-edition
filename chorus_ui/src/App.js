@@ -18,7 +18,8 @@ var UbiPosition = require('./ts/UbiEvent.ts').UbiPosition;
 
 //######################################
 // global variables
-const event_server = "http://localhost:9200";
+const event_server = "http://localhost:2021"; //data prepper
+const search_server = "http://localhost:9200"; //open search
 const search_credentials = "*:*";
 const search_index = 'ecommerce'
 const key_field = 'primary_ean'
@@ -31,13 +32,14 @@ const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
           : 'SESSION-' + guiid()); //<- new fake session, otherwise it should reuse the sessionStorage version
 
 
-const ubi_client = new  UbiClient(event_server, ubi_store, user_id, session_id);
+const ubi_client = new  UbiClient(event_server, user_id, session_id);
 
 //decide if we write each event to the console
 ubi_client.verbose = verbose_ubi_client;
 
 sessionStorage.setItem('ubi_store', ubi_store);
 sessionStorage.setItem('event_server', event_server);
+sessionStorage.setItem('search_server', search_server);
 sessionStorage.setItem('user_id', user_id);
 sessionStorage.setItem('session_id', session_id);
 sessionStorage.setItem('search_index', search_index);
@@ -198,7 +200,7 @@ function logClickPosition(event) {
   ubi_client.log_event(e);
    
   }
-  document.addEventListener("click", logClickPosition);
+  //document.addEventListener("click", logClickPosition);
 //EVENTS ###############################################################
 
 
@@ -242,7 +244,7 @@ class App extends Component {
   return (
         <ReactiveBase
       componentId="market-place"
-      url={event_server}
+      url={search_server}
       app={search_index}
       credentials={search_credentials}
       //enableAppbase={true}  <- TODO: to allow auto analytics
