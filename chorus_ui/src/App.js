@@ -294,7 +294,7 @@ class App extends Component {
             <br/>
             <code>Your Session ID: {session_id}</code>
             <br/>
-            <code>Your 🛒 Items: <button id="cart" onClick ={
+            <code>Your <span style={{fontSize:24 }}>🛒</span>Items: <button id="cart" onClick ={
                 function(results) {
                   alert("Maybe someday I'll show you what's in your cart!");
                 }}>
@@ -558,7 +558,7 @@ class App extends Component {
             function(el) {
               add_to_cart(item);
             }}>
-              Add to 🛒
+              Add to<span style={{fontSize:24 }}> 🛒</span>
                   </button>
                     </div>
                     </ResultCard.Description>
