@@ -13,29 +13,29 @@ export class UbiClient {
     static readonly API = '/log/ingest';
 
     private readonly url:string;
-    //private readonly ubi_store:string;
+    //private readonly ubi_application:string;
     private readonly rest_client:AxiosInstance; //client for direct http work
     private readonly rest_config:AxiosRequestConfig;
     private search_index:string;
-    private key_field:string;
+    private object_id_field:string;
     private verbose:number=0;
 
 
     //TODO: capture response and request headers
-    constructor(baseUrl:string, user_id:string=null, session_id:string=null) {
+    constructor(baseUrl:string) {
 
         this.url = baseUrl + UbiClient.API;
 
         //TODO: make these parameters when the interface is more finalized
         this.search_index = sessionStorage.getItem('search_index');
-        this.key_field = sessionStorage.getItem('key_field');
+        this.object_id_field = sessionStorage.getItem('object_id_field');
 
         //TODO: add authentication
         this.rest_config = {
      			headers :{
       				'Content-type': 'application/x-www-form-urlencoded',
-              'X-ubi-user-id': user_id,
-              'X-ubi-session-id':session_id,
+              'X-ubi-user-id': sessionStorage.getItem('client_id'),
+              'X-ubi-session-id': sessionStorage.getItem('session_id'),
               //'Access-Control-Allow-Origin':'*'
      			},
     		};
@@ -79,7 +79,7 @@ export class UbiClient {
      *
     async delete() {
         try {
-            const response = await this.rest_client.delete(this.url + this.ubi_store, this.rest_config )
+            const response = await this.rest_client.delete(this.url + this.ubi_application, this.rest_config )
             return response.data;
         } catch (error) {
             console.error(error);

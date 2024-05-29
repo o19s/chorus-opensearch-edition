@@ -4,7 +4,7 @@ At Chorus Electonics we've been collecting data for a while, storing in a S3 buc
 
 Note: although this data should index to the indices straight from the zipped file format, it's best to make sure the UBI store(s) for the indices exist with the following:
 
-`curl -X PUT http://localhost:9200/_plugins/ubi/`{<mark>ubi-store-name}</mark>`?index=`{<mark>search-index</mark>}`&key_field=`{<mark>unique-key-field</mark>}
+`curl -X PUT http://localhost:9200/_plugins/ubi/`{<mark>ubi-store-name}</mark>`?index=`{<mark>search-index</mark>}`&object_id_field=`{<mark>unique-key-field</mark>}
 
 Where:
 - *ubi-store-name* is the name of the UBI store.  So, for the ubi store name, `ubi-awesome`, the subsequent indices should be named `.ubi-awesome_events` and `.ubi-awesome_queries`.  **This allows UBI to integrate the data you're loading with the UBI store.** 
@@ -12,14 +12,14 @@ Where:
 - *unique-key-field* is a unique field in the search-index that can link back to the exact row. **This is what allows a query at some point in time link to a *hit* that the user acted on (i.e. purchase, like, etc.)**  It does not necessarily need to be an id, it could be an isbn, brand name, etc. that humans tend to associate this item with. This is needed because the default `id` or `_id` field in OpenSearch can change and are not guaranteed to point to the same exact book, product, object that was returned to the user.
 
 So here is a full example:
-`curl -X PUT "http://localhost:9200/_plugins/ubi/chorus?index=ecommerce&key_field=primary_ean"`
+`curl -X PUT "http://localhost:9200/_plugins/ubi/chorus?index=ecommerce&object_id_field=primary_ean"`
 
 ## Data file format
 [File format](data/log_events.zip) is a zipped text file with two tab-delimited columns, the index to write to and the json event to store in that index:
 
 ```
-.ubi-store-name_events \t {"action_name": "login", "user_id": "124_0349b478-4a53-456c-aaf7-c08c82004b66", "session_id"...
-.ubi-store-name_queries \t {"user_id": "204_a11451b6-c947-4c51-85ec-9bfcaba7967f", "query": ...
+.ubi-store-name_events \t {"action_name": "login", "client_id": "124_0349b478-4a53-456c-aaf7-c08c82004b66", "session_id"...
+.ubi-store-name_queries \t {"client_id": "204_a11451b6-c947-4c51-85ec-9bfcaba7967f", "query": ...
 ```
 
 The event format should conform to the UBI schema mappings: 
