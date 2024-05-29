@@ -93,10 +93,14 @@ echo -e "${MAJOR}Creating ecommerce index, defining its mapping & settings\n${RE
 curl -s -X PUT "http://localhost:9200/ecommerce/" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
 echo -e "\n"
 
+# TODO: maybe create the event and query indices like we do with the ecommerce store?
 # Initialize the UBI store, chorus for the ecommerce index, pointing to the index field name, `primary_ean`
-echo -e "${MAJOR}Creating UBI settings, defining its mapping & settings\n${RESET}"
-curl -X PUT "http://localhost:9200/_plugins/ubi/chorus?index=ecommerce&object_id_field=primary_ean"
-echo -e "\n"
+wget https://raw.githubusercontent.com/o19s/opensearch-ubi/2.14.0/src/main/resources/events-mapping.json
+curl -s -X PUT "http://localhost:9200/ubi_events" -H 'Content-Type: application/json'
+curl -s -X PUT "http://localhost:9200/ubi_events/_mapping" -H 'Content-Type: application/json' --data-binary @./events-mapping.json
+# echo -e "${MAJOR}Creating UBI settings, defining its mapping & settings\n${RESET}"
+# curl -X PUT "http://localhost:9200/_plugins/ubi/chorus?index=ecommerce&key_field=primary_ean"
+# echo -e "\n"
 
 echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"
 if [ ! -f ./icecat-products-w_price-19k-20201127.tar.gz ]; then
