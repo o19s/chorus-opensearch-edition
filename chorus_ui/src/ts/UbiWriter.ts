@@ -52,7 +52,7 @@ export class UbiWriter implements Writer {
 	constructor(olUrl, channel, queryResolver, sessionResolver, debug) {
 
 
-		this.ubi_client = new UbiClient(olUrl, channel);
+		//this.ubi_client = new UbiClient(olUrl, channel);
 
 		const localstorageWriter = {
 			write: (data) => {
@@ -87,7 +87,7 @@ export class UbiWriter implements Writer {
 
 	write_event(e:UbiEvent){
 		//console.log('about to log');
-		this.ubi_client.log_event(e);
+		//this.ubi_client.log_event(e);
 		console.log('Just logged: ' + e.toJson());
 	}
 }

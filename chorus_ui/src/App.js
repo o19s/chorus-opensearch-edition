@@ -101,6 +101,7 @@ function QueryId(){
   return sessionStorage.getItem('query_id');
 }
 
+/*
 function CurrentHeaders(){
   let query_id = sessionStorage.getItem('query_id');
   if(query_id == null || query_id == 'null' || query_id==''){
@@ -121,7 +122,7 @@ function CurrentHeaders(){
     'X-ubi-session-id':session_id,
   };
 }
-
+*/
 function genObjectId(){
   return 'OBJECT-'+genGuid();
 }
@@ -164,7 +165,7 @@ function genObjectId(){
       }
       }, false); 
       try{
-        send.call(this, data);
+        send.call(this, data );
       }
       catch(error){
         console.warm('POST error: ' + error);
@@ -244,9 +245,7 @@ class App extends Component {
       //enableAppbase={false} <- orig
       
       //**************************************************************
-
-      
-      headers={CurrentHeaders()}
+      //headers={CurrentHeaders()}
       //**************************************************************
       
 
@@ -275,6 +274,10 @@ class App extends Component {
       }}
       transformRequest={async (request) => {
         //intercept request headers here
+        //*************************** 
+        //TODO: add ext/ubi stuff here
+        //componentId == 'results'
+        //*************************** 
         
         return request;
       }}
