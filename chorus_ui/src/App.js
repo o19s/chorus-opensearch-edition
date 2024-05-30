@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function () {
 //###############
 
 function logClickPosition(event) {
-  let e = new UbiEvent('global_click', client_id, QueryId());
+  let e = new UbiEvent('global_click', client_id, getQueryId());
   e.message = `(${event.offsetX}, ${event.offsetY})`
   e.event_attributes.object = new UbiEventData('location', genObjectId(), e.message, event);
   e.event_attributes.object.object_type = 'click_location';
@@ -167,12 +167,10 @@ class App extends Component {
     });
   };
 
-
   componentDidMount(){
     console.log('mounted ' + this);
   }
 
-  
 
   render(){
   return (
@@ -204,8 +202,7 @@ class App extends Component {
       transformRequest={async (request) => {
         //intercept request headers here
         return request;
-      }}
-      >
+      }} >
       
       <div style={{ height: "140px", width: "100%"}}>
         <img style={{ height: "100%", class: "center"  }} src={chorusLogo} />
@@ -225,7 +222,6 @@ class App extends Component {
           </small>         
         </div>
       </div>
-      
       <br/>
       <div style={{ display: "flex", flexDirection: "row" }}>
         <div
