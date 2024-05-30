@@ -34,9 +34,6 @@ export class UbiClient {
         this.rest_config = {
      			headers :{
       				'Content-type': 'application/x-www-form-urlencoded',
-              'X-ubi-user-id': sessionStorage.getItem('client_id'),
-              'X-ubi-session-id': sessionStorage.getItem('session_id'),
-              //'Access-Control-Allow-Origin':'*'
      			},
     		};
 

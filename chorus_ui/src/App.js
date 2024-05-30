@@ -32,7 +32,7 @@ const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
           : 'SESSION-' + genGuid()); //<- new fake session, otherwise it should reuse the sessionStorage version
 
 
-const ubi_client = new  UbiClient(event_server, client_id, session_id);
+const ubi_client = new  UbiClient(event_server);
 
 //decide if we write each event to the console
 ubi_client.verbose = verbose_ubi_client;
@@ -103,79 +103,9 @@ function getQueryId(){
   return sessionStorage.getItem('query_id');
 }
 
-/*
-function CurrentHeaders(){
-  let query_id = sessionStorage.getItem('query_id');
-  if(query_id == null || query_id == 'null' || query_id==''){
-    console.log('query_id is currently null')
-    return {   
-      'X-ubi-store': ubi_application,
-    // enable if the client were to maintain query_id's:
-    //'X-ubi-query-id': genQueryId(),
-      'X-ubi-user-id': client_id,
-      'X-ubi-session-id':session_id,
-    };
-  }
-
-  return {   
-    'X-ubi-store': ubi_application,
-    'X-ubi-query-id': query_id,
-    'X-ubi-user-id': client_id,
-    'X-ubi-session-id':session_id,
-  };
-}
-*/
 function genObjectId(){
   return 'OBJECT-'+genGuid();
 }
-
-
-
-
-/**
- * overriding send so that we can intercept the query id response
- * from any post
- */
-(function(send) { 
-  XMLHttpRequest.prototype.send = function(data) { 
-      this.addEventListener('readystatechange', function() { 
-        if (this.readyState == 4 ) {
-          /**
-           * only pull query_id out for searches on the main store
-           * otherwise, this also runs for ubi client calls
-           */
-            if(this.responseURL.includes(search_index)){
-              let headers = this.getAllResponseHeaders();
-              if(headers.includes('query_id:')) {
-              try {
-                let query_id = this.getResponseHeader('query_id');
-                if(query_id == null || query_id == 'null' || query_id=='') {
-
-                  query_id = genQueryId()
-                  console.warn('Received null query id.  Generated - ' + query_id);
-                }
-                sessionStorage.setItem('query_id', query_id);
-            }
-            catch(error){
-              console.log(error);
-            }
-          } 
-          else {
-            console.warn('No query id in the search response headers => ' + headers);
-          }
-        } 
-      }
-      }, false); 
-      try{
-        send.call(this, data );
-      }
-      catch(error){
-        console.warm('POST error: ' + error);
-        console.log(data);
-      }
-  }; 
-})(XMLHttpRequest.prototype.send);
-
 
 
 
@@ -240,7 +170,6 @@ class App extends Component {
 
   componentDidMount(){
     console.log('mounted ' + this);
-
   }
 
   
@@ -252,16 +181,6 @@ class App extends Component {
       url={search_server}
       app={search_index}
       credentials={search_credentials}
-      //enableAppbase={true}  <- TODO: to allow auto analytics
-      //enableAppbase={false} <- orig
-      
-      //**************************************************************
-      //headers={CurrentHeaders()}
-      //**************************************************************
-      
-
-      
-
       recordAnalytics={true}
       searchStateHeader={true}
       
@@ -280,7 +199,6 @@ class App extends Component {
           console.warn(response, componentId);
         }
 
-        
         return response;
       }}
       transformRequest={async (request) => {
@@ -396,6 +314,7 @@ class App extends Component {
             function(value) {
               console.log("onValueChanged search value: ", value)
 
+              //generate a new query id to track events
               const query_id = genQueryId();
               let e = new UbiEvent('on_search', client_id, query_id, value);
               e.message_type = 'QUERY'
@@ -416,8 +335,6 @@ class App extends Component {
             // The update is accepted by default
             //if (value) {
                 // To reject the update, throw an error
-          //    console.log("beforeValueChanged current value: ", value)
-            
         }}
           onQueryChange={
             function(prevQuery, nextQuery) {
