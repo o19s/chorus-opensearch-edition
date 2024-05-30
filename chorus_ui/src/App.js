@@ -59,7 +59,7 @@ export function add_to_cart(item=null)
     var cart = document.getElementById("cart");
     cart.textContent = shopping_cart;
 
-    let e = new UbiEvent('add_to_cart', client_id, QueryId());
+    let e = new UbiEvent('add_to_cart', client_id, getQueryId());
     e.message_type = 'CONVERSION';
     e.message = item.title + ' (' + item.id + ')';
 
@@ -93,11 +93,13 @@ String.prototype.f = function () {
   });
 };
 
-function genQueryId(){
-  return 'QUERY-' + genGuid();
+export function genQueryId(){
+  const query_id = 'Q-'+ genGuid();
+  sessionStorage.setItem('query_id', query_id);
+  return query_id;
 }
 
-function QueryId(){
+function getQueryId(){
   return sessionStorage.getItem('query_id');
 }
 
@@ -197,14 +199,23 @@ function logClickPosition(event) {
   //document.addEventListener("click", logClickPosition);
 //EVENTS ###############################################################
 
-
-
-
 const queries = {
-  'default': function( value ) { return {
+  'default': function( user_query) { 
+    return {
+    ext:{
+      ubi:{
+        query_id: getQueryId(),
+        user_query:user_query,
+        client_id:client_id,
+        object_id_field:object_id_field,
+        query_attributes:{
+          application:ubi_application
+        }
+      } 
+    },
     query: {
       multi_match: {
-        query: value,
+        query: user_query,
         fields: [ "id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]
       }
     }
@@ -274,11 +285,6 @@ class App extends Component {
       }}
       transformRequest={async (request) => {
         //intercept request headers here
-        //*************************** 
-        //TODO: add ext/ubi stuff here
-        //componentId == 'results'
-        //*************************** 
-        
         return request;
       }}
       >
@@ -318,7 +324,7 @@ class App extends Component {
             componentId="algopicker" 
             ubi_client={ubi_client}
             client_id={client_id}
-            query_id={QueryId()}
+            query_id={getQueryId()}
             session_id={session_id}
             />
           <MultiList
@@ -333,7 +339,7 @@ class App extends Component {
                 //convert array into json object
                 let sfilter = String(arr)
                 let filter = {'filter':sfilter};
-                let e = new UbiEvent('brand_filter', client_id, QueryId());
+                let e = new UbiEvent('brand_filter', client_id, getQueryId());
                 e.message = 'filtering on brands: ' + sfilter;
                 e.message_type = 'FILTER';
                 e.event_attributes.object = new UbiEventData('filter_data', genObjectId(), "supplier_name", filter);
@@ -364,7 +370,7 @@ class App extends Component {
               //convert array into json object
               let sfilter = String(arr)
               let filter = {'filter':sfilter};
-              let e = new UbiEvent('type_filter', client_id, QueryId());
+              let e = new UbiEvent('type_filter', client_id, getQueryId());
               e.message = 'filtering on product types: ' + sfilter;
               //e.message_type = 'FILTER';
               e.event_attributes.object = new UbiEventData('filter_data', genObjectId(),"filter_product_type", filter);
@@ -390,7 +396,8 @@ class App extends Component {
             function(value) {
               console.log("onValueChanged search value: ", value)
 
-              let e = new UbiEvent('on_search', client_id, QueryId(), value);
+              const query_id = genQueryId();
+              let e = new UbiEvent('on_search', client_id, query_id, value);
               e.message_type = 'QUERY'
               ubi_client.log_event(e);
             }
@@ -462,7 +469,7 @@ class App extends Component {
                         // Decide if the mouse over on the product helps tell the story.
                         // preference would be to log when a product comes into the "viewport".
                         //console.log('mouse over ' + item.title);
-                        let e = new UbiEvent('product_hover', client_id, QueryId());
+                        let e = new UbiEvent('product_hover', client_id, getQueryId());
                         e.message = item.title + ' (' + item.primary_ean + ')';
       
                         e.event_attributes.object = new UbiEventData('product', item.id, item.title);
@@ -512,7 +519,7 @@ class App extends Component {
                             var neg = document.getElementById(`neg-${item.id}`);
                             neg.checked = false;
                         
-                            let e = new UbiEvent('positive', client_id, QueryId());
+                            let e = new UbiEvent('positive', client_id, getQueryId());
                             e.message_type = 'RELEVANCY';
                             e.message = item.title + ' (' + item.id + ')';
                         
@@ -528,7 +535,7 @@ class App extends Component {
                         var pos = document.getElementById(`pos-${item.id}`);
                         pos.checked = false;
                     
-                        let e = new UbiEvent('negative', client_id, QueryId());
+                        let e = new UbiEvent('negative', client_id, getQueryId());
                         e.message_type = 'RELEVANCY';
                         e.message = item.title + ' (' + item.id + ')';
                     
