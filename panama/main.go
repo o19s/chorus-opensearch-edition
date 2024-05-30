@@ -48,9 +48,9 @@ func rewriteBody(resp *http.Response) (err error) {
 		return err
 	}
 
-	myString := string(b[:])
-	queryId := gjson.Get(myString, "ext.ubi.query_id")
-	productMargin := gjson.Get(myString, "ext.ubi.attributes.product_margin")
+	content := string(b[:])
+	queryId := gjson.Get(content, "ext.ubi.query_id")
+	productMargin := gjson.Get(content, "ext.ubi.attributes.product_margin")
 
 	fmt.Println(queryId)
 	fmt.Println(productMargin)
