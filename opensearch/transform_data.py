@@ -14,9 +14,9 @@ data = json.load(fIn)
 with open(fOut, 'w', encoding='utf8') as fOut:
 	for row in data:
 		price = row.get('price', 1)
-		margin = 0 if price < 2 else random.randint(0, price - 1)
+		cost = 0 if price < 2 else random.randint(0, price - 1)
 
 		row['primary_ean'] = row['ean'][0]
-		row['margin'] = margin
+		row['cost'] = cost
 		fOut.write('{ "index" : {"_id" : "' + row['id'] + '"}}\n')
 		fOut.write(json.dumps(row) + '\n')
