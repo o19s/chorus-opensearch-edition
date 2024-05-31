@@ -17,6 +17,6 @@ with open(fOut, 'w', encoding='utf8') as fOut:
 		cost = 0 if price < 2 else random.randint(0, price - 1)
 
 		row['primary_ean'] = row['ean'][0]
-		row['price'] = price
+		row['cost'] = cost
 		fOut.write('{ "index" : {"_id" : "' + row['id'] + '"}}\n')
 		fOut.write(json.dumps(row) + '\n')
