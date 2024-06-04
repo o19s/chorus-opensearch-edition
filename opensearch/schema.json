@@ -46,6 +46,9 @@
 	  "price": {
 		"type": "double"
 	  },
+	  "cost": {
+		"type": "double"
+	  },
 	  "short_description": {
 		"type": "text",
 		"analyzer": "english_stemmed"
