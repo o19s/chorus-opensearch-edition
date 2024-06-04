@@ -17,7 +17,7 @@ She grabs her client_id from the Chorus website, and then creates a SQL query:
 ```
 %sql
 SELECT query_id, message_type, action_name, event_attributes, message, timestamp 
-FROM ubi_chorus_events 
+FROM ubi_events 
 WHERE client_id='USER-eeed-43de-959d-90e6040e84f9' 
 ORDER BY timestamp DESC
 ```

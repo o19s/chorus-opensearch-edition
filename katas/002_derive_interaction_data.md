@@ -17,7 +17,7 @@ Let's see what UBI logged:
 ```sql
 select 
 	client_id, query_id, action_name, message_type, message, event_attributes.object.object_type, timestamp 
-from ubi_chorus_events e
+from ubi_events e
 where e.client_id = 'USER-eeed-43de-959d-90e6040e84f9'
 order by timestamp
 ```
@@ -90,7 +90,7 @@ select
 	timestamp as TIMESTAMP,
 	e.action_name as EVENT_TYPE,
 	e.message
-from ubi_chorus_events e
+from ubi_events e
 where e.client_id = 'USER-eeed-43de-959d-90e6040e84f9'
 and (e.action_name = 'add_to_cart')
 order by timestamp
@@ -121,7 +121,7 @@ A good query for that data would be:
 ```sql
 select 
 	client_id, query_id, action_name, message_type, message, event_attributes.object.object_type, timestamp 
-from ubi_chorus_events e
+from ubi_events e
 where e.client_id = '103_edb3eaba-2b68-4682-a84f-b07a077545bb' and session_id = 'f9bca536-7e7e-4063-85f9-85367c6c7bb9_1137'
 order by timestamp
 ```

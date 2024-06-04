@@ -57,13 +57,13 @@ green open .opensearch-observability _Zc-LWVLSCyki7AC2PlFaA 1 0     0 0   208b  
 green open .plugins-ml-config        cZ_3czqtRXGLbRsghpjuWA 1 0     1 0  3.9kb  3.9kb
 green open .ql-datasources           Ekb9nCOwS9yqIXR_FWAgtg 1 0     0 0   208b   208b
 green open ecommerce                 V50PSuTrSdetIeE9-f0vjw 1 0 19406 0   24mb   24mb
-green open ubi_chorus_queries        16wRpOxWT7iF7RIKUg1StQ 1 0     0 0   208b   208b
+green open ubi_queries        16wRpOxWT7iF7RIKUg1StQ 1 0     0 0   208b   208b
 green open .kibana_1                 7rhJyRdvTV6COAW6j58IcA 1 0     1 0  5.2kb  5.2kb
-green open ubi_chorus_events         2wKFJacpRbaf-d_rYkDF1A 1 0     0 0   208b   208b
+green open ubi_events         2wKFJacpRbaf-d_rYkDF1A 1 0     0 0   208b   208b
 
 Indexing rows in ./data/log_events.zip/log_events.json
-* Uploaded 37577 rows to ubi_chorus_events
-* Uploaded 2797 rows to ubi_chorus_queries
+* Uploaded 37577 rows to ubi_events
+* Uploaded 2797 rows to ubi_queries
 Done! Indexed 40374 total documents.
 ```
 
