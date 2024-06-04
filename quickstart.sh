@@ -84,17 +84,15 @@ fi
 
 docker compose up -d --build ${services}
 
-#TODO: is this needed with the depends_on config in the docker compose?
 echo -e "${MAJOR}Waiting for OpenSearch to start up and be online.${RESET}"
 ./opensearch/wait-for-os.sh # Wait for OpenSearch to be online
-
 
 echo -e "${MAJOR}Creating ecommerce index, defining its mapping & settings\n${RESET}"
 curl -s -X PUT "http://localhost:9200/ecommerce/" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
 echo -e "\n"
 
-# TODO: maybe create the event and query indices like we do with the ecommerce store?
-# Initialize the UBI store, chorus for the ecommerce index, pointing to the index field name, `primary_ean`
+# Configure the ubi_events index in OpenSearch by looking up the versioned mapping file.
+rm events-mapping.json
 wget https://raw.githubusercontent.com/o19s/opensearch-ubi/2.14.0/src/main/resources/events-mapping.json
 curl -s -X PUT "http://localhost:9200/ubi_events" -H 'Content-Type: application/json'
 curl -s -X PUT "http://localhost:9200/ubi_events/_mapping" -H 'Content-Type: application/json' --data-binary @./events-mapping.json
