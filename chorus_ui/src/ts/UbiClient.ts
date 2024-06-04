@@ -61,8 +61,8 @@ export class UbiClient {
                 e.message_type = message_type;
             }
         }
-        let json = e.toJson();
-        json = JSON.stringify(json);
+        // Data prepper appears to always want an array of JSON.
+        let json = JSON.stringify([e]);
         if(this.verbose > 0){
             console.log('POSTing event: ' + json);
         }
