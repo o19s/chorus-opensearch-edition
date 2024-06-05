@@ -93,7 +93,7 @@ curl -s -X PUT "http://localhost:9200/ecommerce/" -H 'Content-Type: application/
 echo -e "\n"
 
 # Configure the ubi_events index in OpenSearch by looking up the versioned mapping file.
-rm events-mapping.json
+rm -f ./events-mapping.json
 wget https://raw.githubusercontent.com/o19s/opensearch-ubi/2.14.0/src/main/resources/events-mapping.json
 curl -s -X PUT "http://localhost:9200/ubi_events" -H 'Content-Type: application/json'
 curl -s -X PUT "http://localhost:9200/ubi_events/_mapping" -H 'Content-Type: application/json' --data-binary @./events-mapping.json
