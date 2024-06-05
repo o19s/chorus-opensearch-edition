@@ -16,13 +16,13 @@ Pop open the dashboard view.  We're going to use the Query Workbench view to loo
 Let's see what UBI logged:
 ```sql
 select 
-	user_id, query_id, action_name, message_type, message, event_attributes.object.object_type, timestamp 
-from ubi_chorus_events e
-where e.user_id = 'USER-eeed-43de-959d-90e6040e84f9'
+	client_id, query_id, action_name, message_type, message, event_attributes.object.object_type, timestamp 
+from ubi_events e
+where e.client_id = 'USER-eeed-43de-959d-90e6040e84f9'
 order by timestamp
 ```
 
-user_id|query_id|action_name|message_type|message
+client_id|query_id|action_name|message_type|message
 ---|---|---|---|---
 USER-eeed-43de-959d-90e6040e84f9|63bc508e-f0d3-4de4-9e8d-ae4450be6177|global_click|INFO|(381, 19)|click_location|1712770519665
 USER-eeed-43de-959d-90e6040e84f9|63bc508e-f0d3-4de4-9e8d-ae4450be6177|on_search|QUERY|l|NULL|1712770523466
@@ -77,7 +77,7 @@ From these results it's quite easy to infer the first few queries by themselves 
 ## AWS Personalize Integration
 So let's think about if we wanted to use this data with the AWS Personalize service?  There is an explicit schema defined for ecommerce interaction data that we can consult at https://docs.aws.amazon.com/personalize/latest/dg/ECOMMERCE-interactions-dataset.html.
 
-The item interaction dataset requires us to extract USER_ID, ITEM_ID, TIMESTAMP, and EVENT_TYPE.
+The item interaction dataset requires us to extract client_id, ITEM_ID, TIMESTAMP, and EVENT_TYPE.
 
 The demo chorus site really only has one event that indicates POSTIVE engagement, which is our `add_to_cart` event.   If we had `product_click_through` or other events we could then use them as well as part of our interaction data.
 
@@ -85,20 +85,20 @@ We can easily retrieve the interaction data from our UBI via this SQL query (alo
 
 ```sql
 select 
-	user_id AS USER_ID, 
+	client_id AS client_id, 
 	e.event_attributes.object.key_value as ITEM_ID,
 	timestamp as TIMESTAMP,
 	e.action_name as EVENT_TYPE,
 	e.message
-from ubi_chorus_events e
-where e.user_id = 'USER-eeed-43de-959d-90e6040e84f9'
+from ubi_events e
+where e.client_id = 'USER-eeed-43de-959d-90e6040e84f9'
 and (e.action_name = 'add_to_cart')
 order by timestamp
 ```
 
 The resulting data looks like:
 
-USER_ID|ITEM_ID|TIMESTAMP|EVENT_TYPE|message
+client_id|ITEM_ID|TIMESTAMP|EVENT_TYPE|message
 ---|---|---|---|---
 USER-eeed-43de-959d-90e6040e84f9|0884962707517|2024-04-10 19:10:48.348|add_to_cart|HP Compaq 6530b Notebook Black 35.8 cm (14.1") 1280 x 800 pixels Intel® Core™2 Duo 2 GB DDR2-SDRAM 320 GB HDD Intel® GMA 4500MHD 802.11a Windows 7 Professional (3802249)
 USER-eeed-43de-959d-90e6040e84f9|0884420439387|2024-04-10 19:11:32.077|add_to_cart|HP EliteBook 2530p Notebook PC 30.7 cm (12.1") 1280 x 800 pixels Intel® Core™2 Duo 2 GB DDR2-SDRAM 120 GB HDD Intel® GMA X4500HD Windows Vista Business (1710195)
@@ -120,8 +120,8 @@ If you'd like to look at messier, more real-world-like data, follow the instruct
 A good query for that data would be:
 ```sql
 select 
-	user_id, query_id, action_name, message_type, message, event_attributes.object.object_type, timestamp 
-from ubi_chorus_events e
-where e.user_id = '103_edb3eaba-2b68-4682-a84f-b07a077545bb' and session_id = 'f9bca536-7e7e-4063-85f9-85367c6c7bb9_1137'
+	client_id, query_id, action_name, message_type, message, event_attributes.object.object_type, timestamp 
+from ubi_events e
+where e.client_id = '103_edb3eaba-2b68-4682-a84f-b07a077545bb' and session_id = 'f9bca536-7e7e-4063-85f9-85367c6c7bb9_1137'
 order by timestamp
 ```

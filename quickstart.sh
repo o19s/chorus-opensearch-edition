@@ -59,7 +59,7 @@ do
 	shift
 done
 
-services="opensearch opensearch-dashboards dataprepper chorus-ui"
+services="opensearch opensearch-dashboards dataprepper dataprepper-proxy chorus-ui"
 
 if $offline_lab; then
   services="${services} quepid"
@@ -67,9 +67,9 @@ fi
 
 if ! $local_deploy; then
   echo -e "${MAJOR}Updating configuration files for online deploy${RESET}"
-  sed -i.bu 's/localhost:9200/chorus-opensearch-edition.dev.o19s.com:9200/g'  ./chorus_ui/src/Logs.js
-  sed -i.bu 's/localhost:9200/chorus-opensearch-edition.dev.o19s.com:9200/g'  ./chorus_ui/src/App.js
-  sed -i.bu 's/localhost:9200/chorus-opensearch-edition.dev.o19s.com:9200/g'  ./opensearch/wait-for-os.sh
+  sed -i.bu 's/localhost/chorus-opensearch-edition.dev.o19s.com/g'  ./chorus_ui/src/Logs.js
+  sed -i.bu 's/localhost/chorus-opensearch-edition.dev.o19s.com/g'  ./chorus_ui/src/App.js
+  sed -i.bu 's/localhost/chorus-opensearch-edition.dev.o19s.com/g'  ./opensearch/wait-for-os.sh
 fi
 
 if $stop; then
@@ -84,19 +84,29 @@ fi
 
 docker compose up -d --build ${services}
 
-#TODO: is this needed with the depends_on config in the docker compose?
 echo -e "${MAJOR}Waiting for OpenSearch to start up and be online.${RESET}"
 ./opensearch/wait-for-os.sh # Wait for OpenSearch to be online
-
 
 echo -e "${MAJOR}Creating ecommerce index, defining its mapping & settings\n${RESET}"
 curl -s -X PUT "http://localhost:9200/ecommerce/" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
 echo -e "\n"
 
-# Initialize the UBI store, chorus for the ecommerce index, pointing to the index field name, `primary_ean`
-echo -e "${MAJOR}Creating UBI settings, defining its mapping & settings\n${RESET}"
-curl -X PUT "http://localhost:9200/_plugins/ubi/chorus?index=ecommerce&key_field=primary_ean"
-echo -e "\n"
+echo -e "${MAJOR}Creating UBI indexes\n${RESET}"
+# Configure the ubi_events index in OpenSearch by looking up the versioned mapping file.
+rm -f ./events-mapping.json
+wget https://raw.githubusercontent.com/o19s/opensearch-ubi/2.14.0/src/main/resources/events-mapping.json
+curl -s -X PUT "http://localhost:9200/ubi_events" -H 'Content-Type: application/json'
+curl -s -X PUT "http://localhost:9200/ubi_events/_mapping" -H 'Content-Type: application/json' --data-binary @./events-mapping.json
+
+# Configure the ubi_queries index in OpenSearch by sending an empty search with {"ubi":{}} clause
+curl -s -X GET "http://localhost:9200/ecommerce/_search" -H "Content-Type: application/json" -d'
+ {
+  "ext": {
+   "ubi": {}
+   },
+   "query": {"match_all": {}}
+ }
+'
 
 echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"
 if [ ! -f ./icecat-products-w_price-19k-20201127.tar.gz ]; then

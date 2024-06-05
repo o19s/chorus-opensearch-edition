@@ -12,13 +12,13 @@ Alice is curious, the behavior that she was exhibiting, how are we capturing tha
 
 She opens up a OpenSearch Notebook at http://localhost:5601/app/observability-notebooks to do some data analysis and clicks _Create notebook_.  She names it "My Activity" and then clicks _Add Code Block_ to actually query some data.
 
-She grabs her user_id from the Chorus website, and then creates a SQL query:
+She grabs her client_id from the Chorus website, and then creates a SQL query:
 
 ```
 %sql
 SELECT query_id, message_type, action_name, event_attributes, message, timestamp 
-FROM ubi_chorus_events 
-WHERE user_id='USER-eeed-43de-959d-90e6040e84f9' 
+FROM ubi_events 
+WHERE client_id='USER-eeed-43de-959d-90e6040e84f9' 
 ORDER BY timestamp DESC
 ```
 

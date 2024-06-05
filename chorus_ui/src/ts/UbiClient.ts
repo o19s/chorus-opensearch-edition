@@ -10,87 +10,44 @@ import { UbiEvent } from "./UbiEvent";
  * Class to handle OpenSearch authentication (eventually) log connectivity
  */
 export class UbiClient {
-    static readonly API = '/_plugins/ubi/';
+    static readonly API = '/log/ingest';
 
     private readonly url:string;
-    private readonly ubi_store:string;
+    //private readonly ubi_application:string;
     private readonly rest_client:AxiosInstance; //client for direct http work
     private readonly rest_config:AxiosRequestConfig;
     private search_index:string;
-    private key_field:string;
+    private object_id_field:string;
     private verbose:number=0;
 
 
     //TODO: capture response and request headers
-    constructor(baseUrl:string, ubi_store:string, user_id:string=null, session_id:string=null) {
+    constructor(baseUrl:string) {
 
         this.url = baseUrl + UbiClient.API;
-        this.ubi_store = ubi_store;
 
         //TODO: make these parameters when the interface is more finalized
         this.search_index = sessionStorage.getItem('search_index');
-        this.key_field = sessionStorage.getItem('key_field');
+        this.object_id_field = sessionStorage.getItem('object_id_field');
 
         //TODO: add authentication
         this.rest_config = {
      			headers :{
-      				'Content-type': 'application/json',
-              'X-ubi-store': ubi_store,
-              'X-ubi-user-id': user_id,
-              'X-ubi-session-id':session_id,
+      				'Content-type': 'application/x-www-form-urlencoded',
      			},
     		};
 
         //TODO: replace with more precise client configuration
         this.rest_client = axios.create({
             baseURL: baseUrl,
-            headers: { 'Content-type': 'application/json' },
+            headers: { 'Content-type': 'application/x-www-form-urlencoded' },
+            //headers: { 'Content-type': 'application/json' },
             withCredentials:true
         });
 
-
-        //if the ubi store doesn't exist, create it
-        this.get_stores().then(data => {
-            if(data.stores.indexOf(this.ubi_store) == -1){
-                this.init();
-            }
-        })
     }
 
-    /**
-     * 
-     * @returns All available Ubi stores
-     */
-     async get_stores(){
-        const stores = await this._get(this.url).then(data => data);
-        return stores;
-    }
 
-    /**
-     * Initialize the Ubi store
-     * @returns true, if the store is created
-     */
-    init(){
-        if( this.search_index == null || this.key_field == null){
-            try{
-                const response = this._put(this.url + this.ubi_store + '/index=' + this.search_index).then(
-                    (response) => {
-                        console.log('Inititializing ' + this.ubi_store + ': ' + JSON.stringify(response));
-                        return true;
-                    }
-                ).catch(
-                    (error) => {
-                        console.error('Error initializing ' + this.ubi_store + ': ' + error);
-                    } 
-                )
-            } catch(error){
-                console.error('Error initializing ' + this.ubi_store + ': ' + error);
-            } 
-        } else {
-            console.error('Cannot initialize Ubi store.');
-        }
-        return false;
-    }
 
     async log_event(e:UbiEvent, message:string|null=null, message_type:string|null=null){
         if(message){
@@ -104,7 +61,8 @@ export class UbiClient {
                 e.message_type = message_type;
             }
         }
-        const json = e.toJson();
+        // Data prepper appears to always want an array of JSON.
+        let json = JSON.stringify([e]);
         if(this.verbose > 0){
             console.log('POSTing event: ' + json);
         }
@@ -118,7 +76,7 @@ export class UbiClient {
      *
     async delete() {
         try {
-            const response = await this.rest_client.delete(this.url + this.ubi_store, this.rest_config )
+            const response = await this.rest_client.delete(this.url + this.ubi_application, this.rest_config )
             return response.data;
         } catch (error) {
             console.error(error);
@@ -145,7 +103,7 @@ export class UbiClient {
 
     async _post(data) {
         try {
-            const response = await this.rest_client.post(this.url + this.ubi_store, data, this.rest_config);
+            const response = await this.rest_client.post(this.url, data, this.rest_config);
             return response.data;
         } catch (error) {
             console.error(error);
@@ -154,7 +112,7 @@ export class UbiClient {
 
     async _put(data=null) {
         try {
-            const response = await this.rest_client.put(this.url + this.ubi_store , data, this.rest_config);
+            const response = await this.rest_client.put(this.url, data, this.rest_config);
             return response.data;
         } catch (error) {
             console.error(error);
