@@ -92,14 +92,22 @@ echo -e "${MAJOR}Creating ecommerce index, defining its mapping & settings\n${RE
 curl -s -X PUT "http://localhost:9200/ecommerce/" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
 echo -e "\n"
 
+echo -e "${MAJOR}Creating UBI indexes\n${RESET}"
 # Configure the ubi_events index in OpenSearch by looking up the versioned mapping file.
 rm -f ./events-mapping.json
 wget https://raw.githubusercontent.com/o19s/opensearch-ubi/2.14.0/src/main/resources/events-mapping.json
 curl -s -X PUT "http://localhost:9200/ubi_events" -H 'Content-Type: application/json'
 curl -s -X PUT "http://localhost:9200/ubi_events/_mapping" -H 'Content-Type: application/json' --data-binary @./events-mapping.json
-# echo -e "${MAJOR}Creating UBI settings, defining its mapping & settings\n${RESET}"
-# curl -X PUT "http://localhost:9200/_plugins/ubi/chorus?index=ecommerce&key_field=primary_ean"
-# echo -e "\n"
+
+# Configure the ubi_queries index in OpenSearch by sending an empty search with {"ubi":{}} clause
+curl -s -X GET "http://localhost:9200/ecommerce/_search" -H "Content-Type: application/json" -d'
+ {
+  "ext": {
+   "ubi": {}
+   },
+   "query": {"match_all": {}}
+ }
+'
 
 echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"
 if [ ! -f ./icecat-products-w_price-19k-20201127.tar.gz ]; then
