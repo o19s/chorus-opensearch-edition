@@ -2,26 +2,19 @@
 
 At Chorus Electonics we've been collecting data for a while, storing in a S3 bucket.  We want to locally populate our set up with data that is pre-existing.
 
-Note: although this data should index to the indices straight from the zipped file format, it's best to make sure the UBI store(s) for the indices exist with the following:
+Note: although this data should index to the indices straight from the zipped file format, it's best to make sure the UBI store for the indices exist.  Verify the existence of `ubi_queries` and `ubi_events`
 
-`curl -X PUT http://localhost:9200/_plugins/ubi/`{<mark>ubi-store-name}</mark>`?index=`{<mark>search-index</mark>}`&key_field=`{<mark>unique-key-field</mark>}
+#### TODO: client_idlink to other documentation to init the store
 
-Where:
-- *ubi-store-name* is the name of the UBI store.  So, for the ubi store name, `ubi-awesome`, the subsequent indices should be named `.ubi-awesome_events` and `.ubi-awesome_queries`.  **This allows UBI to integrate the data you're loading with the UBI store.** 
-- *search-index* is the index the user will search against (i.e. products, books, blogs, etc.). **This is what activates a listener on that index to log all user queries on the search-index into the `.ubi-awesome_queries` index**
-- *unique-key-field* is a unique field in the search-index that can link back to the exact row. **This is what allows a query at some point in time link to a *hit* that the user acted on (i.e. purchase, like, etc.)**  It does not necessarily need to be an id, it could be an isbn, brand name, etc. that humans tend to associate this item with. This is needed because the default `id` or `_id` field in OpenSearch can change and are not guaranteed to point to the same exact book, product, object that was returned to the user.
-
-So here is a full example:
-`curl -X PUT "http://localhost:9200/_plugins/ubi/chorus?index=ecommerce&key_field=primary_ean"`
 
 ## Data file format
 [File format](data/log_events.zip) is a zipped text file with two tab-delimited columns, the index to write to and the json event to store in that index:
 
 ```
-.ubi-store-name_events \t {"action_name": "login", "user_id": "124_0349b478-4a53-456c-aaf7-c08c82004b66", "session_id"...
-.ubi-store-name_queries \t {"user_id": "204_a11451b6-c947-4c51-85ec-9bfcaba7967f", "query": ...
+ubi_events \t {"action_name": "login", "client_id": "124_0349b478-4a53-456c-aaf7-c08c82004b66", "session_id"...
+ubi_queries \t {"client_id": "204_a11451b6-c947-4c51-85ec-9bfcaba7967f", "query": ...
 ```
-
+#### TODO: update links 
 The event format should conform to the UBI schema mappings: 
 - https://github.com/o19s/opensearch-ubi/tree/main/src/main/resources
 - https://github.com/o19s/opensearch-ubi/blob/main/documentation/documentation.md
@@ -48,23 +41,24 @@ client = OpenSearch(
 	ssl_show_warn = False
 )
 ```
-Then run `python scripts/index_sample_data.py`.
+Then run `python3 scripts/index_sample_data.py`.
+or  `python scripts/index_sample_data.py`.
 
 You should see output similar to the following:
 ```
 python .\scripts\index_sample_data.py
-green open .opensearch-observability _Zc-LWVLSCyki7AC2PlFaA 1 0     0 0   208b   208b
-green open .plugins-ml-config        cZ_3czqtRXGLbRsghpjuWA 1 0     1 0  3.9kb  3.9kb
-green open .ql-datasources           Ekb9nCOwS9yqIXR_FWAgtg 1 0     0 0   208b   208b
-green open ecommerce                 V50PSuTrSdetIeE9-f0vjw 1 0 19406 0   24mb   24mb
-green open ubi_chorus_queries        16wRpOxWT7iF7RIKUg1StQ 1 0     0 0   208b   208b
-green open .kibana_1                 7rhJyRdvTV6COAW6j58IcA 1 0     1 0  5.2kb  5.2kb
-green open ubi_chorus_events         2wKFJacpRbaf-d_rYkDF1A 1 0     0 0   208b   208b
+green  open .opensearch-observability hjFUJZwnSS29XI3Bt7g7bg 1 0     0 0   208b   208b
+green  open .plugins-ml-config        RTlG08MrRWiX_V39h51cmA 1 0     1 0  3.9kb  3.9kb
+green  open ubi_queries               MFBfP5DoTt-Horv13IYztA 1 0     1 0  9.1kb  9.1kb
+green  open ecommerce                 NF5sxZJISn2TsIKW9jAkdQ 1 0 19406 0 24.7mb 24.7mb
+green  open ubi_events                Q12DH3iURS-BlIzAXYfTUQ 1 0     0 0   208b   208b
+green  open .kibana_1                 2qm5E-mYSLeXqz1vQkBafA 1 0     0 0   208b   208b
+yellow open ubi_chorus_events         1gya1EjsRVCtDCQ1O1_gHQ 1 1     0 0   208b   208b
 
-Indexing rows in ./data/log_events.zip/log_events.json
-* Uploaded 37577 rows to ubi_chorus_events
-* Uploaded 2797 rows to ubi_chorus_queries
-Done! Indexed 40374 total documents.
+Indexing rows in ./data/log_events.zip/log_events_new.json
+* Uploaded 4130 rows to ubi_queries
+* Uploaded 35404 rows to ubi_events
+Done! Indexed 39534 total documents.
 ```
 
 Congrats!
