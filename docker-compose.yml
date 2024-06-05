@@ -13,6 +13,7 @@ services:
       - ./dataprepper/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml 
 
   dataprepper-proxy:
+    container_name: dataprepper-proxy
     image: caddy:latest
     ports:
       - "2022:2022"
