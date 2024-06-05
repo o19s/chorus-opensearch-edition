@@ -70,6 +70,7 @@ if ! $local_deploy; then
   sed -i.bu 's/localhost:9200/chorus-opensearch-edition.dev.o19s.com:9200/g'  ./chorus_ui/src/Logs.js
   sed -i.bu 's/localhost:9200/chorus-opensearch-edition.dev.o19s.com:9200/g'  ./chorus_ui/src/App.js
   sed -i.bu 's/localhost:9200/chorus-opensearch-edition.dev.o19s.com:9200/g'  ./opensearch/wait-for-os.sh
+  sed -i.bu 's/localhost:2200/chorus-opensearch-edition.dev.o19s.com:2022/g'  ./dataprepper-proxy/Caddyfile
 fi
 
 if $stop; then
