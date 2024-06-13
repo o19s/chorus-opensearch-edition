@@ -9,12 +9,13 @@ Depending on your configuration: http://localhost:5601/app/home#/
 ## 2) Create an index pattern
 http://localhost:5601/app/management/opensearch-dashboards/indexPatterns
 ![Index Patterns](images/index_pattern1.png "Index Patterns")
-Index patterns are how OpenSearch dashboards access your indices.  In this case, we want to access the *hidden* indices that UBI creates, so that we can visualize your users' online, search behaviors.
+Index patterns are how OpenSearch dashboards access your indices.  
 
-After you click on "Create index pattern" you'll see a list of indices in your OpenSearch instance.  The UBI stores are hidden by default; so, be sure to click on "Include system and hidden indices".  
+After you click on "Create index pattern" you'll see a list of indices in your OpenSearch instance.  The UBI stores may be hidden by default; so, be sure to click on "Include system and hidden indices".  
 ![Index Patterns](images/index_pattern2.png "Index Patterns")
 
-With wildcards you can group indices into the same data source for your dashboard.  Assuming the name of your UBI is `chorus`, we'll lump both the query and event stores together as `ubi_chorus*`.
+With wildcards you can group indices into the same data source for your dashboard.   
+We'll lump both the query and event stores together as `ubi_*`.
 
 It will prompt you to filter on any `date` field in your schema, so that you can look at things like trending queries over the last 15 minutes, etc.  However, for your first dashboard, do not filter on any date field. 
 <img src="images/index_pattern3.png" alt="Index Patterns" width="400"/>
@@ -39,7 +40,7 @@ Most of the visualization require some sort of aggregate function on an bucket/f
 Save that visualization and it will be added to your new dashboard.  Now that you have a visualization on your dashboard, you can save your dashboard.
 
 ## 4) Add a "Tag Cloud" vizualization to your dashboard
-Let's add a word cloud for trending searches.  Choose the Tag Cloud visualization of the terms in the `message` field where the javascript client logs the raw text that the user searches on.  (Note: the true query, as processed by OpenSearch with filters, boosting, etc. will be in the `.{store}_queries` index, but what we are looking at is the `message` field of the `.{store}_events` index, where the javascript client captures what the user actually typed. )
+Let's add a word cloud for trending searches.  Choose the Tag Cloud visualization of the terms in the `message` field where the javascript client logs the raw text that the user searches on.  (Note: the true query, as processed by OpenSearch with filters, boosting, etc. will be in the `ubi_queries` index, but what we are looking at is the `message` field of the `ubi_events` index, where the javascript client captures what the user actually typed. )
 ![Word Cloud](images/tag_cloud1.png "Word Cloud")
 
 **But there's a problem!**  The `message` field is on *every* event --not just query/search events-- and can be used in anyway the client developer decides to use it; so, it can contain error messages, debug messages, click information, etc.  
@@ -62,7 +63,7 @@ The data field we want to examine is `event_attributes.position.ordinal`, meanin
 For example, let's see how the click position changes when there is a purchase, by adding this filter `action_name:product_purchase`.
 ![Product Purchase](images/product_purchase.png "Product Purchase")
 
-Or let's see what event messages include "\*UBI\*" somewhere between the wildcards.
-![UBI](images/ubi.png "UBI")
+Or let's see what event messages include "\*laptop\*" somewhere between the wildcards.
+![Laptop](images/laptop.png "Laptop")
 
 You now have a basic dashboard that lets you look at the data.  In the next Katas we'll focus on some typical ecommerce driven scenarios.
