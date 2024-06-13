@@ -28,10 +28,10 @@ class AlgoPicker extends Component {
 
     if('ubi_client' in this.props){
       const ubi_client = this.props['ubi_client']
-      const user_id = this.props['user_id'];
+      const client_id = this.props['client_id'];
       const query_id = this.props['query_id'];
       const session_id = this.props['session_id'];
-      let e = new Ubi.UbiEvent('product_sort', user_id, query_id);
+      let e = new Ubi.UbiEvent('product_sort', client_id, query_id);
       e.message = selection;
       e.message_type = 'SORT'
       e.event_attributes['session_id'] = session_id;

@@ -6,7 +6,6 @@ Note: although this data should index to the indices straight from the zipped fi
 
 #### TODO: client_idlink to other documentation to init the store
 
-
 ## Data file format
 [File format](data/log_events.zip) is a zipped text file with two tab-delimited columns, the index to write to and the json event to store in that index:
 

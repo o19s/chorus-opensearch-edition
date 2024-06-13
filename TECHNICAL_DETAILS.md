@@ -8,3 +8,8 @@ This table contains the username and password combinations for each of the compo
 |---------------|-----------------------------|--------------|----------------------|----------------|
 | Quepid        | admin@choruselectronics.com | password     | `quickstart.sh`      | Admin User     |
 | MySQL         | root                        | password     | `docker-compose.yml` | Admin User     |
+
+# Webapp and CORS
+
+The webapp logs to Dataprepper via a proxy which adds CORS headers.
+If you change to logging directly to opensearch then you don't need the proxy, it is already set up for that.

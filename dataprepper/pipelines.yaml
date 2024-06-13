@@ -7,4 +7,5 @@ chorus-ubi-pipeline:
     - opensearch:
         hosts: [ "http://opensearch:9200" ]
         index_type: custom
-        index: ubi_chorus_events
+        index: ubi_events
+    - stdout:

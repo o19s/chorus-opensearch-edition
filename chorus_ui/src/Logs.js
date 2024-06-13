@@ -3,15 +3,17 @@ import { ReactiveBase, ReactiveList, StateProvider, ResultList} from "@appbaseio
 
 //TODO: make these configurable properties
 const ubi_credentials="*:*"
-const default_ubi_store = 'chorus'
 
-const event_server =  ((sessionStorage.hasOwnProperty('event_server')) ?
-          sessionStorage.getItem('event_server')  
+//TODO: filter the log table by this `application`
+const default_ubi_application = 'chorus'
+
+const event_server =  ((sessionStorage.hasOwnProperty('search_server')) ?
+          sessionStorage.getItem('search_server')  
           : "http://localhost:9200");
 
-const ubi_store_events =  ((sessionStorage.hasOwnProperty('log_store')) ?
+const ubi_application_events =  ((sessionStorage.hasOwnProperty('log_store')) ?
           'ubi_' + sessionStorage.getItem('log_store') + '_events'
-          : 'ubi_' + default_ubi_store + '_events');
+          : 'ubi_events');
 
 
 //TODO: auto refresh.
@@ -56,7 +58,7 @@ class LogTable extends Component {
 	  <ReactiveBase
         componentId="eventlogs"
 		url={event_server}
-		app={ ubi_store_events }
+		app={ ubi_application_events }
 		credentials={ubi_credentials}
 		enableAppbase={false}
 		initialQueriesSyncTime={100}
@@ -137,7 +139,7 @@ class LogTable extends Component {
               <ReactiveList.ResultListWrapper >
   						<div style={{display: "table-row", height: "15px", textAlign:'center', margin:'5px', fontWeight: '800'}}>
   							<div style={{ display: "table-cell", width: "270px", }}>
-  								&nbsp;user_id
+  								&nbsp;client_id
   							</div>
   							<div style={{ display: "table-cell", width: "100px", }}>
   								&nbsp;timestamp
@@ -165,7 +167,7 @@ class LogTable extends Component {
   											display: "table-cell", flexDirection: "column",
   											width: "275px", margin: "5px", marginTop: "2px"
   										  }}
-  										>&nbsp;{item.user_id}</div>
+  										>&nbsp;{item.client_id}</div>
   										<div style={{
   											display: "table-cell", flexDirection: "column",
   											textAlign: "left",

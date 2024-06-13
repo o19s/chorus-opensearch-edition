@@ -5,26 +5,22 @@ import { integer } from "@opensearch-project/opensearch/api/types";
  */
 
 export class UbiEventData {
-	public readonly object_type:string;
+	public readonly object_id_field:string;
 	public object_id:string;
-	public key_value:string;
 	public description:string|null;
 	public object_detail:object|null;
-	constructor(type:string, id:string=null, description:string=null, details:object|null=null) {
-		this.object_type = type;
+	constructor(id_field:string, id:string=null, description:string=null, details:object|null=null) {
+		this.object_id_field = id_field;
 		this.object_id = id;
 		this.description = description;
 		this.object_detail = details;
-
-		//override if using key_field's and values
-		this.key_value = id;
 	}
 }
 export class UbiPosition{
 	public ordinal:integer|null=null;
 	public x:integer|null=null;
 	public y:integer|null=null;
-	public trail:string|null=null;
+	public trail:[string]|string|null=null;
 
 	constructor({ordinal=null, x=null, y=null, trail=null}={}) {
 		this.ordinal = ordinal;
@@ -37,23 +33,64 @@ export class UbiPosition{
 
 export class UbiEventAttributes {
 	/**
-	 * Attributes, other than `object` or `position` should be in the form of
+	 * Tries to prepopulate common event attributes
+	 * The developer can add an `object` that the user interacted with and
+	 *   the site `position` information relevant to the event
+	 * 
+	 * Attributes, other than `object` or `position` can be added in the form:
 	 * attributes['item1'] = 1
 	 * attributes['item2'] = '2'
-	 * 
-	 * The object member is reserved for further, relevant object payloads or classes
+	 *
+	 * @param {*} attributes: object with general event attributes 
+	 * @param {*} object: the data object the user interacted with
+	 * @param {*} position: the site position information
 	 */
 	public object:UbiEventData|null=null; 		//any data object
 	public position:UbiPosition|null = null;	//click or other location
-	constructor(object:UbiEventData|null=null, position:UbiPosition|null=null) {
-		if(object)
-			this.object = object;
 
-		if(position)
-			this.position = position;
+	//ad hoc variables
+	public browser:string|null=null;
+	public session_id:string|null=null;
+	public page_id:string|null=null;
+	public dwell_time:integer|null=null;
+
+	constructor({attributes={}, object=null, position=null}={}) {
+	  if(attributes != null){
+		Object.assign(this, attributes);
+	  }
+	  if(object != null && Object.keys(object).length > 0){
+		this.object = object;
+	  }
+	  if(position != null && Object.keys(position).length > 0){
+		this.position = position;
+	  }
+	  this.setDefaultAttributes();
 	}
-}
-
+  
+	setDefaultAttributes(){
+	  try{
+		  //if(!this.hasOwnProperty('dwell_time') && typeof TimeMe !== 'undefined'){
+		//	this.dwell_time = TimeMe.getTimeOnPageInSeconds(window.location.pathname);
+		  //}
+  
+		  if(!this.hasOwnProperty('browser')){
+			this.browser = window.navigator.userAgent;
+		  }
+  
+		  if(!this.hasOwnProperty('session_id')){
+			this.session_id = sessionStorage.getItem('session_id');
+		  }
+  
+		  if(!this.hasOwnProperty('page_id')){
+			this.page_id = window.location.pathname;
+		  }
+		  // ToDo: set IP
+	  }
+	  catch(error){
+		console.log(error);
+	  }
+	}
+  }
 
 
 export class UbiEvent {
@@ -62,7 +99,7 @@ export class UbiEvent {
 	 * All other event attributes should be set in this.event_attributes
 	 */
 	public readonly action_name:string;
-	public readonly user_id:string;
+	public readonly client_id:string;
 	public query_id:string;
 	public session_id:string;
 	public page_id:string= window.location.pathname
@@ -71,9 +108,9 @@ export class UbiEvent {
 	public timestamp:number=Date.now();
 	public event_attributes:UbiEventAttributes = new UbiEventAttributes();
 
-	constructor(action_name:string, user_id:string, query_id:string, message:string=null) {
+	constructor(action_name:string, client_id:string, query_id:string, message:string=null) {
 		this.action_name = action_name;
-		this.user_id = user_id;
+		this.client_id = client_id;
 		this.query_id = query_id;
 
 		if( message )

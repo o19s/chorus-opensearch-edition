@@ -1,8 +1,11 @@
+# Logs an event to Data Prepper.  Change port to 2022 to simulate what the browser does
+# through the dataprepper-proxy service that enables CORS support.
+
 curl -k -XPOST -H "Content-Type: application/json" http://localhost:2021/log/ingest -d '
 [
   {
   "action_name": "on_search",
-  "user_id": "USER-eeed-43de-959d-90e6040e84f9",
+  "client_id": "USER-eeed-43de-959d-90e6040e84f9",
   "query_id": "a84818c4-c5da-4031-8612-ce869b98d061",
   "session_id": "SESSION-eb4a46bb-8838-4b01-9699-8cdefbf52c88",
   "page_id": "/",
