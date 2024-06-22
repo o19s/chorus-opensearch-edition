@@ -21,10 +21,12 @@ type Proxy struct {
 	proxy  *httputil.ReverseProxy
 }
 
+var cache = make(map[string]string)
+
 func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	bytedata, _ := ioutil.ReadAll(r.Body)
-	reqBodyString := string(bytedata)
+	b, _ := ioutil.ReadAll(r.Body)
+	reqBodyString := string(b)
 
 	newBodyContent := reqBodyString
 
@@ -49,17 +51,18 @@ func rewriteBody(resp *http.Response) (err error) {
 	}
 
 	content := string(b[:])
-	queryId := gjson.Get(content, "ext.ubi.query_id")
-	productMargin := gjson.Get(content, "ext.ubi.attributes.product_margin")
+	//queryId := gjson.Get(content, "ext.ubi.query_id")
 
-	fmt.Println(queryId)
-	fmt.Println(productMargin)
+	// For each hit in the results, get the product ID and the margin.
+	result := gjson.Get(content, "hits.hits")
+	result.ForEach(func(key, value gjson.Result) bool {
+		id := gjson.Get(value.String(), "_id")
+		cost := gjson.Get(value.String(), "_source.cost")
+		cache[id.String()] = cost.String()
+		return true
+	})
 
 	jsonParsed, _ := gabs.ParseJSON(b)
-
-	_ = jsonParsed.DeleteP("ext.ubi.attributes.product_margin")
-
-	// TODO: Send productMargin somewhere else.
 
 	body := io.NopCloser(bytes.NewReader(jsonParsed.Bytes()))
 	resp.Body = body
@@ -96,7 +99,7 @@ func main() {
 	p := &Proxy{target: target, proxy: proxy}
 	proxy.ModifyResponse = rewriteBody
 
-	port := getEnv("PANAMA_PORT", "8080")
+	port := getEnv("PANAMA_PORT", "18080")
 
 	fmt.Println("Started panama on port " + port)
 	err = http.ListenAndServe(":"+port, p)
