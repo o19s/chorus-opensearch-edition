@@ -388,7 +388,7 @@ class App extends Component {
       
                         e.event_attributes.object = new UbiEventData('product', item.id, item.title);
                         e.event_attributes.object.key_value = item.primary_ean;
-                        //ubi_client.log_event(e);
+                        ubi_client.log_event(e);
                     }
                   }                  
                   >
