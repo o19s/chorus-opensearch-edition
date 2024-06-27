@@ -94,7 +94,7 @@ echo -e "\n"
 echo -e "${MAJOR}Creating UBI indexes\n${RESET}"
 # Configure the ubi_events index in OpenSearch by looking up the versioned mapping file.
 rm -f ./events-mapping.json
-wget https://raw.githubusercontent.com/o19s/opensearch-ubi/2.14.0/src/main/resources/events-mapping.json
+wget https://raw.githubusercontent.com/opensearch-project/user-behavior-insights/2.15/src/main/resources/events-mapping.json
 curl -s -X PUT "http://localhost:9200/ubi_events" -H 'Content-Type: application/json'
 curl -s -X PUT "http://localhost:9200/ubi_events/_mapping" -H 'Content-Type: application/json' --data-binary @./events-mapping.json
 
