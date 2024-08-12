@@ -1,5 +1,13 @@
 services:
 
+  dejavu:
+    container_name: dejavu
+    image: appbaseio/dejavu
+    ports:
+      - "1358:1358"
+    depends_on:
+      - opensearch   
+      
   dataprepper:
     depends_on:
       - opensearch
