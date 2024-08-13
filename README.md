@@ -32,7 +32,7 @@ Want to stay up-to-date with the community? Visit https://querqy.org/ to learn m
 * OpenSearch Data Prepper runs at http://localhost:2021/ |  http://chorus-opensearch-edition.dev.o19s.com:2021/
   * Proxy enabling CORS for Data Prepper runs at http://localhost:2022/ |  http://chorus-opensearch-edition.dev.o19s.com:2022/
 * Quepid runs at http://localhost:3000  |  http://chorus-opensearch-edition.dev.o19s.com:3000
-* DejaVu runs at http://localhost:1358
+* DejaVu runs at http://localhost:1358/?appname=ubi_events&url=http://localhost:9200&mode=edit
 
 Working with macOS? Pop open all the tuning related web pages with one terminal command:
 > open http://localhost:4000 http://localhost:5601/app/home http://localhost:3000
