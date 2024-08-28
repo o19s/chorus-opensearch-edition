@@ -54,8 +54,6 @@ def ubi_events():
 
     # Make OTel trace from UBI event.
 
-    # Resource can be required for some backends, e.g. Jaeger
-    # If resource wouldn't be set - traces wouldn't appears in Jaeger
     resource = Resource(attributes={
         "service.name": "ubi"
     })
