@@ -1,20 +1,13 @@
-import json
 import os
 
-import requests
-from opentelemetry import trace, metrics
-from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from flask import Flask, request, Response
+from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.sdk.metrics._internal.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-from flask import Flask, request, Response
-
-#DATAPREPPER_ENDPOINT = os.environ.get("DATAPREPPER_ENDPOINT", "http://localhost:2021/log/ingest")
-DATAPREPPER_ENDPOINT = os.environ.get("DATAPREPPER_ENDPOINT", "http://localhost:4318/v1/traces")
+OTEL_COLLECTOR_ENDPOINT = os.environ.get("OTEL_COLLECTOR_ENDPOINT", "http://localhost:4318/v1/traces")
 
 app = Flask(__name__)
 
@@ -59,7 +52,7 @@ def ubi_events():
     })
 
     traceProvider = TracerProvider(resource=resource)
-    processor = BatchSpanProcessor(OTLPSpanExporter(endpoint="http://localhost:4318/v1/traces"))
+    processor = BatchSpanProcessor(OTLPSpanExporter(endpoint=OTEL_COLLECTOR_ENDPOINT))
     traceProvider.add_span_processor(processor)
     trace.set_tracer_provider(traceProvider)
 
