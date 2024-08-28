@@ -12,16 +12,12 @@ services:
       - ./dataprepper/pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
       - ./dataprepper/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml 
 
-  dataprepper-proxy:
-    container_name: dataprepper-proxy
-    image: caddy:latest
+  middleware:
+    container_name: middleware
+    build: ./middleware
     ports:
-      - "2022:2022"
-    volumes:
-          - ./dataprepper-proxy/Caddyfile:/etc/caddy/Caddyfile
-    depends_on:
-      - dataprepper      
-      
+      - "8000:8000"
+
   mysql:
     container_name: mysql
     image: amd64/mysql:8

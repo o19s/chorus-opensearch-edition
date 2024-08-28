@@ -1,7 +1,6 @@
-# Logs an event to Data Prepper.  Change port to 2022 to simulate what the browser does
-# through the dataprepper-proxy service that enables CORS support.
+#!/bin/bash -e
 
-curl -k -XPOST -H "Content-Type: application/json" http://localhost:4318/v1/traces -d '
+curl -X POST http://localhost:9090/ubi_events  -H "Content-Type: application/json" -d'
 [
   {
   "action_name": "on_search",
