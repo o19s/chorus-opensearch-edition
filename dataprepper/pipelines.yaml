@@ -5,11 +5,11 @@ chorus-ubi-pipeline:
       ssl: false
   buffer:
     bounded_blocking:
-      buffer_size: 50
+      buffer_size: 150
       batch_size: 1      
   sink:
     - opensearch:
         hosts: [ "http://opensearch:9200" ]
         index_type: custom
-        index: ubi_events
+        index: otel_ubi_events
     - stdout:
