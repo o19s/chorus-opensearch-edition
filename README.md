@@ -30,7 +30,6 @@ Want to stay up-to-date with the community? Visit https://querqy.org/ to learn m
 * OpenSearch runs at http://localhost:9200 |  http://chorus-opensearch-edition.dev.o19s.com:9200
 * OpenSearch Dashboards runs at http://localhost:5601/app/home |  http://chorus-opensearch-edition.dev.o19s.com:5601/app/home
 * OpenSearch Data Prepper runs at http://localhost:2021/ |  http://chorus-opensearch-edition.dev.o19s.com:2021/
-  * Proxy enabling CORS for Data Prepper runs at http://localhost:2022/ |  http://chorus-opensearch-edition.dev.o19s.com:2022/
 * Quepid runs at http://localhost:3000  |  http://chorus-opensearch-edition.dev.o19s.com:3000
 
 Working with macOS? Pop open all the tuning related web pages with one terminal command:
