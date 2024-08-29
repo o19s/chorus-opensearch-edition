@@ -11,7 +11,7 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-OTEL_COLLECTOR_ENDPOINT = os.environ.get("OTEL_COLLECTOR_ENDPOINT", "http://localhost:4318/v1/traces")
+OTEL_COLLECTOR_ENDPOINT = "http://localhost:21890/opentelemetry.proto.collector.trace.v1.TraceService/Export" #os.environ.get("OTEL_COLLECTOR_ENDPOINT", "http://localhost:4318/v1/traces")
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
