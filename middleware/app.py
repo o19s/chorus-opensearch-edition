@@ -79,8 +79,11 @@ def ubi_events():
         for event in ubi_event:
 
             with tracer.start_as_current_span("ubi_event") as span:
-                span.set_attribute("ubi.client_id", event["client_id"])
-                span.set_attribute("ubi.action_name", event["action_name"])
+
+                for key, value in event.items():
+                    span.set_attribute("ubi." + key, value)
+
+                # TODO: Handle event_attributes
 
         return "{'status': 'submitted'}"
 
