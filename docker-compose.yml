@@ -1,15 +1,5 @@
 services:
 
-  # otel_desktop_viewer:
-  #   container_name: otel_desktop_viewer
-  #   build: ./otel-desktop-viewer
-  #   network_mode: host
-  #   ports:
-  #     - "8000:8000" # web ui
-  #     - "4318:4318" # otel http
-  #     - "4317:4317" # otel grpc
-  #     - "8888:8888" # prometheus
-
   dataprepper:
     depends_on:
       - opensearch
