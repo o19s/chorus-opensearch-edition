@@ -11,5 +11,6 @@ This table contains the username and password combinations for each of the compo
 
 # Webapp and CORS
 
-The webapp logs to Dataprepper via a proxy which adds CORS headers.
+We tried to have webapp log directly to Dataprepper via CORS proxy, no joy.  We will experiment with an actual API.
+
 If you change to logging directly to opensearch then you don't need the proxy, it is already set up for that.
