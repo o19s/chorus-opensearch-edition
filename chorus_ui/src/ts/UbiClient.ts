@@ -24,7 +24,8 @@ export class UbiClient {
     //TODO: capture response and request headers
     constructor(baseUrl:string) {
 
-        this.url = baseUrl + UbiClient.API;
+        //this.url = baseUrl + UbiClient.API;
+        this.url = "http://127.0.0.1:9090/ubi_events"
 
         //TODO: make these parameters when the interface is more finalized
         this.search_index = sessionStorage.getItem('search_index');
@@ -33,15 +34,16 @@ export class UbiClient {
         //TODO: add authentication
         this.rest_config = {
      			headers :{
-      				'Content-type': 'application/x-www-form-urlencoded',
+      				//'Content-type': 'application/x-www-form-urlencoded',
+                    'Content-type': 'application/json',
      			},
     		};
 
         //TODO: replace with more precise client configuration
         this.rest_client = axios.create({
             baseURL: baseUrl,
-            headers: { 'Content-type': 'application/x-www-form-urlencoded' },
-            //headers: { 'Content-type': 'application/json' },
+            //headers: { 'Content-type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-type': 'application/json' },
             withCredentials:true
         });
 
