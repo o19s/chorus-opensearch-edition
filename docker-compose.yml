@@ -17,8 +17,7 @@ services:
     container_name: middleware
     build: ./middleware
     environment:
-      #OTEL_COLLECTOR_ENDPOINT: "http://localhost:4318/v1/traces"
-      OTEL_COLLECTOR_ENDPOINT: "http://dataprepper:21890/v1/traces"
+      OTEL_COLLECTOR_ENDPOINT: "http://localhost:21890/opentelemetry.proto.collector.trace.v1.TraceService/Export"
     ports:
       - "9090:9090"
 
