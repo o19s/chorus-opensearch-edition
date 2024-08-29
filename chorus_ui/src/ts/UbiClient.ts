@@ -36,6 +36,7 @@ export class UbiClient {
      			headers :{
       				//'Content-type': 'application/x-www-form-urlencoded',
                     'Content-type': 'application/json',
+                    'Accept': 'application/json'
      			},
     		};
 
@@ -43,8 +44,8 @@ export class UbiClient {
         this.rest_client = axios.create({
             baseURL: baseUrl,
             //headers: { 'Content-type': 'application/x-www-form-urlencoded' },
-            headers: { 'Content-type': 'application/json' },
-            withCredentials:true
+            headers: { 'Content-type': 'application/json', 'Accept': 'application/json'  },
+            withCredentials:false
         });
 
     }
