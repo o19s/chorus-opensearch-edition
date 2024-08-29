@@ -1,14 +1,14 @@
 services:
 
-  otel_desktop_viewer:
-    container_name: otel_desktop_viewer
-    build: ./otel-desktop-viewer
-    network_mode: host
-    ports:
-      - "8000:8000" # web ui
-      - "4318:4318" # otel http
-      - "4317:4317" # otel grpc
-      - "8888:8888" # prometheus
+  # otel_desktop_viewer:
+  #   container_name: otel_desktop_viewer
+  #   build: ./otel-desktop-viewer
+  #   network_mode: host
+  #   ports:
+  #     - "8000:8000" # web ui
+  #     - "4318:4318" # otel http
+  #     - "4317:4317" # otel grpc
+  #     - "8888:8888" # prometheus
 
   dataprepper:
     depends_on:
@@ -16,8 +16,9 @@ services:
     container_name: dataprepper
     image: opensearchproject/data-prepper:2.8.0
     ports:
-      - 4900:4900
-      - 2021:2021
+      - "4900:4900"
+      - "2021:2021"
+      - "21890:21890"
     volumes:
       - ./dataprepper/pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
       - ./dataprepper/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml 
@@ -26,7 +27,8 @@ services:
     container_name: middleware
     build: ./middleware
     environment:
-      OTEL_COLLECTOR_ENDPOINT: "http://localhost:4318/v1/traces"
+      #OTEL_COLLECTOR_ENDPOINT: "http://localhost:4318/v1/traces"
+      OTEL_COLLECTOR_ENDPOINT: "http://dataprepper:21890/v1/traces"
     ports:
       - "9090:9090"
 

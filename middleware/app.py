@@ -1,19 +1,20 @@
-import os
-
 import flask
 from flask import Flask, request
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 from opentelemetry import trace
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+
+# For otel-desktop-viewer, use from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-OTEL_COLLECTOR_ENDPOINT = os.environ.get("OTEL_COLLECTOR_ENDPOINT", "http://localhost:4318/v1/traces")
+OTEL_COLLECTOR_ENDPOINT = "http://localhost:21890/opentelemetry.proto.collector.trace.v1.TraceService/Export" #os.environ.get("OTEL_COLLECTOR_ENDPOINT", "http://localhost:4318/v1/traces")
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
+print("Using OTel endpoint: " + OTEL_COLLECTOR_ENDPOINT)
 
 @app.route("/ubi_events", methods=["POST", "OPTIONS"])
 def ubi_events():
@@ -81,7 +82,8 @@ def ubi_events():
             with tracer.start_as_current_span("ubi_event") as span:
 
                 for key, value in event.items():
-                    span.set_attribute("ubi." + key, value)
+                    if value is not None:
+                        span.set_attribute("ubi." + key, value)
 
                 # TODO: Handle event_attributes
 
