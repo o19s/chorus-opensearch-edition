@@ -16,8 +16,6 @@ services:
   middleware:
     container_name: middleware
     build: ./middleware
-    environment:
-      OTEL_COLLECTOR_ENDPOINT: "http://localhost:21890/opentelemetry.proto.collector.trace.v1.TraceService/Export"
     ports:
       - "9090:9090"
 

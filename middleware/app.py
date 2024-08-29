@@ -11,7 +11,7 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-OTEL_COLLECTOR_ENDPOINT = "http://localhost:21890/opentelemetry.proto.collector.trace.v1.TraceService/Export" #os.environ.get("OTEL_COLLECTOR_ENDPOINT", "http://localhost:4318/v1/traces")
+OTEL_COLLECTOR_ENDPOINT = "http://dataprepper:21890/opentelemetry.proto.collector.trace.v1.TraceService/Export"
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -84,7 +84,7 @@ def ubi_events():
             with tracer.start_as_current_span("ubi_event") as span:
 
                 for key, value in event.items():
-                    if value is not None:
+                    if value is not None and key is not "event_attributes":
                         span.set_attribute("ubi." + key, value)
 
                 # TODO: Handle event_attributes
