@@ -1,25 +1,61 @@
+import os
 import uuid
 
 import flask
-import os
-import json
-from flask import Flask, request
+import requests
+from flask import Flask, request, Response
 from flask_cors import CORS
 from opensearchpy import OpenSearch
 from opentelemetry import trace
-
 # For otel-desktop-viewer, use from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-OTEL_COLLECTOR_ENDPOINT = "http://dataprepper:21890/opentelemetry.proto.collector.trace.v1.TraceService/Export"
+OTEL_COLLECTOR_ENDPOINT = os.getenv("OTEL_COLLECTOR_ENDPOINT", "http://dataprepper:21890/opentelemetry.proto.collector.trace.v1.TraceService/Export")
+OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "http://opensearch:9200")
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
+cache = {}
+
 print("Using OTel endpoint: " + OTEL_COLLECTOR_ENDPOINT)
+
+
+@app.route("/ubi_search", methods=["GET"])
+def search():
+
+    res = requests.request(  # ref. https://stackoverflow.com/a/36601467/248616
+        method          = request.method,
+        url             = request.url.replace(request.host_url, f"{OPENSEARCH_ENDPOINT}/"),
+        headers         = {k:v for k,v in request.headers if k.lower() != "host"}, # exclude "host" header
+        data            = request.get_data(),
+        cookies         = request.cookies,
+        allow_redirects = False,
+    )
+
+    excluded_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]  #NOTE we here exclude all "hop-by-hop headers" defined by RFC 2616 section 13.5.1 ref. https://www.rfc-editor.org/rfc/rfc2616#section-13.5.1
+
+    headers = {}
+    for k,v in res.raw.headers.items():
+        if k not in excluded_headers:
+            headers[k] = v
+
+    response = flask.Response(res.content, res.status_code, headers=headers)
+
+    # 	// For each hit in the results, get the product ID and the margin.
+    # 	result := gjson.Get(content, "hits.hits")
+    # 	result.ForEach(func(key, value gjson.Result) bool {
+    # 		id := gjson.Get(value.String(), "_id")
+    # 		cost := gjson.Get(value.String(), "_source.cost")
+    # 		cache[id.String()] = cost.String()
+    # 		return true
+    # 	})
+
+    return response
+
 
 @app.route("/ubi_events", methods=["POST", "OPTIONS"])
 def ubi_events():
@@ -35,8 +71,8 @@ def ubi_events():
         # Send the event to Data Prepper.
         events = request.get_json()
 
-        print("Received UBI events:")
-        print(events)
+        #print("Received UBI events:")
+        #print(events)
 
         # Example received UBI event.
         # [
@@ -102,7 +138,7 @@ def ubi_events():
 
                 # TODO: Handle event_attributes
 
-        return "{'status': 'submitted'}"
+        return '{"status": "submitted"}'
 
 
 if __name__ == "__main__":
