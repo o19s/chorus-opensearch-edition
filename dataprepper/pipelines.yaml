@@ -1,4 +1,4 @@
-chorus-ubi-pipeline:
+chorus-ubi-otel-pipeline:
   source:
     otel_trace_source:
       port: 21890
@@ -6,10 +6,21 @@ chorus-ubi-pipeline:
   buffer:
     bounded_blocking:
       buffer_size: 150
-      batch_size: 1      
+      batch_size: 1
   sink:
     - opensearch:
         hosts: [ "http://opensearch:9200" ]
         index_type: custom
         index: otel_ubi_events
+#    - stdout:
+chorus-ubi-pipeline:
+  source:
+    http:
+      port: 2021
+      ssl: false
+  sink:
+    - opensearch:
+        hosts: [ "http://opensearch:9200" ]
+        index_type: custom
+        index: ubi_queries
     - stdout:
