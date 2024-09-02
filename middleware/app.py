@@ -27,7 +27,8 @@ print("Using OTel endpoint: " + OTEL_COLLECTOR_ENDPOINT)
 @app.route("/ubi_search", methods=["GET"])
 def search():
 
-    res = requests.request(  # ref. https://stackoverflow.com/a/36601467/248616
+    # Based on https://stackoverflow.com/a/36601467
+    res = requests.request(
         method          = request.method,
         url             = request.url.replace(request.host_url, f"{OPENSEARCH_ENDPOINT}/"),
         headers         = {k:v for k,v in request.headers if k.lower() != "host"}, # exclude "host" header
