@@ -1,8 +1,11 @@
+import uuid
+
 import flask
 import os
 import json
 from flask import Flask, request
 from flask_cors import CORS
+from opensearchpy import OpenSearch
 from opentelemetry import trace
 
 # For otel-desktop-viewer, use from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -30,12 +33,12 @@ def ubi_events():
     else:
 
         # Send the event to Data Prepper.
-        ubi_event = request.get_json()
+        events = request.get_json()
 
-        print("Received UBI event:")
-        print(ubi_event)
+        print("Received UBI events:")
+        print(events)
 
-        # Example UBI event for OpenSearch.
+        # Example received UBI event.
         # [
         #     {
         #         "action_name": "product_hover",
@@ -61,6 +64,9 @@ def ubi_events():
         #     }
         # ]
 
+        # Index the UBI event to OpenSearch.
+        client = OpenSearch(hosts=[{"host": "opensearch", "port": 9200}])
+
         # Make OTel traces from UBI events in the request body.
 
         resource = Resource(attributes={
@@ -79,7 +85,14 @@ def ubi_events():
         span_processor = BatchSpanProcessor(otlp_exporter)
         trace.get_tracer_provider().add_span_processor(span_processor)
 
-        for event in ubi_event:
+        for event in events:
+
+            client.index(
+                index="ubi_events",
+                body=event,
+                id=str(uuid.uuid4()),
+                refresh=True
+            )
 
             with tracer.start_as_current_span("ubi_event") as span:
 

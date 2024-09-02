@@ -1,6 +1,7 @@
 Flask==3.0.3
 flask-cors~=4.0.1
 requests==2.32.3
+opensearch-py
 opentelemetry-api
 opentelemetry-sdk
 opentelemetry-exporter-otlp-proto-http
