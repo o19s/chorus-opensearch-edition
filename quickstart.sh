@@ -87,8 +87,12 @@ docker compose up -d --build ${services}
 echo -e "${MAJOR}Waiting for OpenSearch to start up and be online.${RESET}"
 ./opensearch/wait-for-os.sh # Wait for OpenSearch to be online
 
-echo -e "${MAJOR}Creating ecommerce index, defining its mapping & settings\n${RESET}"
-curl -s -X PUT "http://localhost:9200/ecommerce/" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
+echo -e "${MAJOR}Creating ecommerce-keyword index, defining its mapping & settings\n${RESET}"
+curl -s -X PUT "http://localhost:9200/ecommerce-keyword/" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
+echo -e "\n"
+
+echo -e "${MAJOR}Creating ecommerce alias for ecommerce-keyword index\n${RESET}"
+curl -s -X POST "http://localhost:9200/ecommerce-keyword/_aliases/ecommerce" -H "Content-Type: application/json" 
 echo -e "\n"
 
 echo -e "${MAJOR}Creating UBI indexes\n${RESET}"
@@ -99,7 +103,7 @@ curl -s -X PUT "http://localhost:9200/ubi_events" -H 'Content-Type: application/
 curl -s -X PUT "http://localhost:9200/ubi_events/_mapping" -H 'Content-Type: application/json' --data-binary @./events-mapping.json
 
 # Configure the ubi_queries index in OpenSearch by sending an empty search with {"ubi":{}} clause
-curl -s -X GET "http://localhost:9200/ecommerce/_search" -H "Content-Type: application/json" -d'
+curl -s -X GET "http://localhost:9200/ecommerce-keyword/_search" -H "Content-Type: application/json" -d'
  {
   "ext": {
    "ubi": {}

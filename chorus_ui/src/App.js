@@ -18,8 +18,9 @@ var UbiPosition = require('./ts/UbiEvent.ts').UbiPosition;
 
 //######################################
 // global variables
-const event_server = "http://localhost:2022"; //Caddy proxing for data prepper with CORS
+//const event_server = "http://localhost:2022"; //Caddy proxing for data prepper with CORS
 //const event_server = "http://localhost:2021"; //data prepper
+const event_server = "http://localhost:9200"; //open search
 const search_server = "http://localhost:9200"; //open search
 const search_credentials = "*:*";
 const search_index = 'ecommerce'
