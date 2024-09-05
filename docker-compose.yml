@@ -6,12 +6,19 @@ services:
     container_name: dataprepper
     image: opensearchproject/data-prepper:2.8.0
     ports:
-      - 4900:4900
-      - 2021:2021
+      - "4900:4900"
+      - "2021:2021"
+      - "21890:21890"
     volumes:
       - ./dataprepper/pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
-      - ./dataprepper/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml     
-      
+      - ./dataprepper/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml 
+
+  middleware:
+    container_name: middleware
+    build: ./middleware
+    ports:
+      - "9090:9090"
+  
   mysql:
     container_name: mysql
     image: amd64/mysql:8
@@ -38,6 +45,7 @@ services:
       # indexes faster if we don't log each row (i.e. logger.level: warn)
       logger.level: info
       OPENSEARCH_INITIAL_ADMIN_PASSWORD: Mysupersecretpassword_123
+      ubi.dataprepper.url: "http://dataprepper:2021/log/ingest"
       OPENSEARCH_JAVA_OPTSL: -Xms1g -Xmx2g
     ulimits:
       memlock:

@@ -10,7 +10,6 @@ import { UbiEvent } from "./UbiEvent";
  * Class to handle OpenSearch authentication (eventually) log connectivity
  */
 export class UbiClient {
-    static readonly API = '/log/ingest';
 
     private readonly url:string;
     //private readonly ubi_application:string;
@@ -24,7 +23,7 @@ export class UbiClient {
     //TODO: capture response and request headers
     constructor(baseUrl:string) {
 
-        this.url = baseUrl + UbiClient.API;
+        this.url = baseUrl + "/ubi_events";
 
         //TODO: make these parameters when the interface is more finalized
         this.search_index = sessionStorage.getItem('search_index');
@@ -33,21 +32,19 @@ export class UbiClient {
         //TODO: add authentication
         this.rest_config = {
      			headers :{
-      				'Content-type': 'application/x-www-form-urlencoded',
+                    'Content-type': 'application/json',
+                    'Accept': 'application/json'
      			},
     		};
 
         //TODO: replace with more precise client configuration
         this.rest_client = axios.create({
             baseURL: baseUrl,
-            headers: { 'Content-type': 'application/x-www-form-urlencoded' },
-            //headers: { 'Content-type': 'application/json' },
-            withCredentials:true
+            headers: { 'Content-type': 'application/json', 'Accept': 'application/json'  },
+            withCredentials:false
         });
 
     }
-
-
 
     async log_event(e:UbiEvent, message:string|null=null, message_type:string|null=null){
         if(message){
