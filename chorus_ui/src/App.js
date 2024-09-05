@@ -308,42 +308,46 @@ class App extends Component {
         </div>
         <div style={{ display: "flex", flexDirection: "column", width: "75%" }}>
           <DataSearch 
-          onValueChange={
-            function(value) {
-              console.log("onValueChanged search value: ", value)
-
-              //generate a new query id to track events
-              const query_id = genQueryId();
-              let e = new UbiEvent('on_search', client_id, query_id, value);
-              e.message_type = 'QUERY'
-              ubi_client.log_event(e);
+            onValueChange={
+              function(value) {
+                console.log("onValueChanged search value: ", value)
+  
+                //generate a new query id to track events
+                const query_id = genQueryId();
+                let e = new UbiEvent('on_search', client_id, query_id, value);
+                e.message_type = 'QUERY'
+                ubi_client.log_event(e);
+              }
             }
-          }
-          onChange={
-            function(value, cause, source) {
-              console.log("onChange current value: ", value)
+            onChange={
+              function(value, cause, source) {
+                console.log("onChange current value: ", value)
+              }
+            } 
+            onValueSelected={
+              function(value, cause, source) {
+                console.log("onValueSelected current value: ", value)
+              }
             }
-          } 
-          onValueSelected={
-            function(value, cause, source) {
-              console.log("onValueSelected current value: ", value)
+            beforeValueChange = { 
+              function(value){
+              // The update is accepted by default
+              //if (value) {
+                  // To reject the update, throw an error
+              }
             }
-          }
-          beforeValueChange = { function(value){
-            // The update is accepted by default
-            //if (value) {
-                // To reject the update, throw an error
-        }}
-          onQueryChange={
-            function(prevQuery, nextQuery) {
-              // use the query with other js code
-              console.log('prevQuery', prevQuery);
-              console.log('nextQuery', nextQuery);
+            onQueryChange={
+              function(prevQuery, nextQuery) {
+                // use the query with other js code
+                console.log('prevQuery', prevQuery);
+                console.log('nextQuery', nextQuery);
+              }
             }
-          }
-            style={{
-              marginTop: "35px"
-            }}
+            style={
+              {
+                marginTop: "35px"
+              }
+            }
             componentId="searchbox"
             placeholder="Search for products, brands or EAN"
             autosuggest={false}
