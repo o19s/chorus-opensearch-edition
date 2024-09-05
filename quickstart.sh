@@ -59,7 +59,7 @@ do
 	shift
 done
 
-services="opensearch opensearch-dashboards dataprepper chorus-ui"
+services="opensearch opensearch-dashboards dataprepper middleware chorus-ui"
 
 if $offline_lab; then
   services="${services} quepid"
@@ -92,25 +92,8 @@ curl -s -X PUT "http://localhost:9200/ecommerce-keyword/" -H 'Content-Type: appl
 echo -e "\n"
 
 echo -e "${MAJOR}Creating ecommerce alias for ecommerce-keyword index\n${RESET}"
-curl -s -X POST "http://localhost:9200/ecommerce-keyword/_aliases/ecommerce" -H "Content-Type: application/json" 
+curl -s -X POST "http://localhost:9200/ecommerce-keyword/_aliases/ecommerce" -H "Content-Type: application/json"
 echo -e "\n"
-
-echo -e "${MAJOR}Creating UBI indexes\n${RESET}"
-# Configure the ubi_events index in OpenSearch by looking up the versioned mapping file.
-rm -f ./events-mapping.json
-wget https://raw.githubusercontent.com/opensearch-project/user-behavior-insights/2.15/src/main/resources/events-mapping.json
-curl -s -X PUT "http://localhost:9200/ubi_events" -H 'Content-Type: application/json'
-curl -s -X PUT "http://localhost:9200/ubi_events/_mapping" -H 'Content-Type: application/json' --data-binary @./events-mapping.json
-
-# Configure the ubi_queries index in OpenSearch by sending an empty search with {"ubi":{}} clause
-curl -s -X GET "http://localhost:9200/ecommerce-keyword/_search" -H "Content-Type: application/json" -d'
- {
-  "ext": {
-   "ubi": {}
-   },
-   "query": {"match_all": {}}
- }
-'
 
 echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"
 if [ ! -f ./icecat-products-w_price-19k-20201127.tar.gz ]; then

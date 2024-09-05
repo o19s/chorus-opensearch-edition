@@ -9,3 +9,5 @@ icecat-products-w_price-19k-20201127.json
 *.json
 katas/.venv
 katas/.ipynb_checkpoints
+venv/
+__pycache__/

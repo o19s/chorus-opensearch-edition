@@ -18,7 +18,7 @@ var UbiPosition = require('./ts/UbiEvent.ts').UbiPosition;
 
 //######################################
 // global variables
-//const event_server = "http://localhost:2022"; //Caddy proxing for data prepper with CORS
+const event_server = "http://127.0.0.1:9090"; // Middleware
 //const event_server = "http://localhost:2021"; //data prepper
 const event_server = "http://localhost:9200"; //open search
 const search_server = "http://localhost:9200"; //open search
@@ -30,7 +30,7 @@ const verbose_ubi_client = true;
 
 const client_id = 'USER-eeed-43de-959d-90e6040e84f9'; // demo user id
 const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
-          sessionStorage.getItem('session_id') 
+          sessionStorage.getItem('session_id')
           : 'SESSION-' + genGuid()); //<- new fake session, otherwise it should reuse the sessionStorage version
 
 
@@ -51,7 +51,7 @@ sessionStorage.setItem('shopping_cart', 0);
 
 //######################################
 // util functions, TODO: reorganize files
-  
+
 export function add_to_cart(item=null)
 {
   if(item != null){
@@ -126,13 +126,13 @@ function logClickPosition(event) {
   e.event_attributes.object.object_type = 'click_location';
   e.event_attributes.position = new UbiPosition({x:event.clientX, y:event.clientY});
   ubi_client.log_event(e);
-   
+
   }
   //document.addEventListener("click", logClickPosition);
 //EVENTS ###############################################################
 
 const queries = {
-  'default': function( user_query) { 
+  'default': function( user_query) {
     return {
     ext:{
       ubi:{
@@ -143,7 +143,7 @@ const queries = {
         query_attributes:{
           application:ubi_application
         }
-      } 
+      }
     },
     query: {
       multi_match: {
@@ -183,7 +183,7 @@ class App extends Component {
       credentials={search_credentials}
       recordAnalytics={true}
       searchStateHeader={true}
-      
+
       transformResponse={async (response, componentId) => {
         if( componentId == 'product_type'){
           //console.log('** Type change =>' + response);
@@ -205,7 +205,7 @@ class App extends Component {
         //intercept request headers here
         return request;
       }} >
-      
+
       <div style={{ height: "140px", width: "100%"}}>
         <img style={{ height: "100%", class: "center"  }} src={chorusLogo} />
         <div style={{float:"right"}}>
@@ -221,7 +221,7 @@ class App extends Component {
                   0
             </button>
             </code>
-          </small>         
+          </small>
         </div>
       </div>
       <br/>
@@ -237,7 +237,7 @@ class App extends Component {
         >
           <AlgoPicker
             title="Product Sort"
-            componentId="algopicker" 
+            componentId="algopicker"
             ubi_client={ubi_client}
             client_id={client_id}
             query_id={getQueryId()}
@@ -262,7 +262,7 @@ class App extends Component {
                 ubi_client.log_event(e);
               }
             }
-            onQueryChange={  
+            onQueryChange={
               function(prevQuery, nextQuery) {
                 if(nextQuery != prevQuery){
 
@@ -293,10 +293,10 @@ class App extends Component {
               ubi_client.log_event(e);
               }
             }
-            onQueryChange={  
+            onQueryChange={
               function(prevQuery, nextQuery) {
                 if(nextQuery != prevQuery){
-                
+
                 }
               }
             }
@@ -307,11 +307,11 @@ class App extends Component {
           />
         </div>
         <div style={{ display: "flex", flexDirection: "column", width: "75%" }}>
-          <DataSearch 
+          <DataSearch
             onValueChange={
               function(value) {
                 console.log("onValueChanged search value: ", value)
-  
+
                 //generate a new query id to track events
                 const query_id = genQueryId();
                 let e = new UbiEvent('on_search', client_id, query_id, value);
@@ -323,13 +323,13 @@ class App extends Component {
               function(value, cause, source) {
                 console.log("onChange current value: ", value)
               }
-            } 
+            }
             onValueSelected={
               function(value, cause, source) {
                 console.log("onValueSelected current value: ", value)
               }
             }
-            beforeValueChange = { 
+            beforeValueChange = {
               function(value){
               // The update is accepted by default
               //if (value) {
@@ -352,7 +352,7 @@ class App extends Component {
             placeholder="Search for products, brands or EAN"
             autosuggest={false}
             dataField={["id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]}
-            customQuery={ 
+            customQuery={
               function(value) {
                   return queries[ 'default' ](value);
               }
@@ -382,7 +382,7 @@ class App extends Component {
             render={({ data }) => (
               <ReactiveList.ResultCardsWrapper>
                 {data.map((item) => (
-                  <div id='product_item' key={item.id} 
+                  <div id='product_item' key={item.id}
                   onMouseOver={
                     function(_event) {
                         // Decide if the mouse over on the product helps tell the story.
@@ -390,12 +390,12 @@ class App extends Component {
                         //console.log('mouse over ' + item.title);
                         let e = new UbiEvent('product_hover', client_id, getQueryId());
                         e.message = item.title + ' (' + item.primary_ean + ')';
-      
+
                         e.event_attributes.object = new UbiEventData('product', item.id, item.title);
                         e.event_attributes.object.key_value = item.primary_ean;
                         ubi_client.log_event(e);
                     }
-                  }                  
+                  }
                   >
                   <ResultCard key={item._id} >
                     <ResultCard.Image
@@ -433,31 +433,31 @@ class App extends Component {
                     >
                       <label htmlFor="pos-relevant"
                           style={{ backgroundColor: "#ABEBC6", }}> 👍
-                      <input type="radio" id={`pos-${item.id}`} name={`pos-${item.id}`} value="pos"  
+                      <input type="radio" id={`pos-${item.id}`} name={`pos-${item.id}`} value="pos"
                           onClick={function(event){
                             var neg = document.getElementById(`neg-${item.id}`);
                             neg.checked = false;
-                        
+
                             let e = new UbiEvent('positive', client_id, getQueryId());
                             e.message_type = 'RELEVANCY';
                             e.message = item.title + ' (' + item.id + ')';
-                        
+
                             e.event_attributes.object = new UbiEventData('product', item.primary_ean, item.title, {'pos-relevant':item.primary_ean});
                             ubi_client.log_event(e);
                             console.log('pos review of ' + item.title)
                           }}/>
                       </label>
                       <label htmlFor="neg-relevant"
-                          style={{ backgroundColor: "#EC7063", }}>👎 
-                      <input type="radio" id={`neg-${item.id}`} name={`neg-${item.id}`} value="neg"  
+                          style={{ backgroundColor: "#EC7063", }}>👎
+                      <input type="radio" id={`neg-${item.id}`} name={`neg-${item.id}`} value="neg"
                       onClick={function(event){
                         var pos = document.getElementById(`pos-${item.id}`);
                         pos.checked = false;
-                    
+
                         let e = new UbiEvent('negative', client_id, getQueryId());
                         e.message_type = 'RELEVANCY';
                         e.message = item.title + ' (' + item.id + ')';
-                    
+
                         e.event_attributes.object = new UbiEventData('product', item.primary_ean, item.title, {'pos-relevant':item.primary_ean});
                         ubi_client.log_event(e);
                         console.log('pos review of ' + item.title)
@@ -490,7 +490,7 @@ class App extends Component {
             }
           />
         </div>
-        
+
       </div>
     </ReactiveBase>
   );
