@@ -14,8 +14,4 @@ To get started you need to have a recent Python version.
 
 1. Lastly, install all the required libraries: `pip install -r requirements.txt`
 
-Great!  You are all set up.   Now to fire up the Jupyter notebook run
-
-```bash
-$ jupyter notebook 005_2_run_a_hybrid_search.ipynb
-```
+Great!  You are all set up.   Now to fire up the Jupyter notebook run: ` jupyter notebook 005_2_run_a_hybrid_search.ipynb`
