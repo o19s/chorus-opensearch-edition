@@ -10,9 +10,11 @@ class AlgoPicker extends Component {
   
   writer = null;
   state = {
-    value: 'default',
-    selectedValue: 'default',
+    value: 'keyword',
+    selectedValue: 'keyword',
   };
+
+
 
   onChangeValue = (event) => {
     this.setState({
@@ -28,11 +30,11 @@ class AlgoPicker extends Component {
       const client_id = this.props['client_id'];
       const query_id = this.props['query_id'];
       const session_id = this.props['session_id'];
-      let e = new Ubi.UbiEvent('product_sort', client_id, query_id);
+      let e = new Ubi.UbiEvent('algorithm', client_id, query_id);
       e.message = selection;
-      e.message_type = 'SORT'
+      e.message_type = 'ALGO'
       e.event_attributes['session_id'] = session_id;
-      e.event_attributes.data = new Ubi.UbiEventData('sort_event', 'fake object id', ''. event);
+      e.event_attributes.data = new Ubi.UbiEventData('change_algo', 'fake object id', ''. event);
       ubi_client.log_event(e);
     }
     else

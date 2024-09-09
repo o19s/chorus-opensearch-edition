@@ -20,7 +20,6 @@ var UbiPosition = require('./ts/UbiEvent.ts').UbiPosition;
 // global variables
 const event_server = "http://127.0.0.1:9090"; // Middleware
 //const event_server = "http://localhost:2021"; //data prepper
-const event_server = "http://localhost:9200"; //open search
 const search_server = "http://localhost:9200"; //open search
 const search_credentials = "*:*";
 const search_index = 'ecommerce'
@@ -131,37 +130,10 @@ function logClickPosition(event) {
   //document.addEventListener("click", logClickPosition);
 //EVENTS ###############################################################
 
-const queries = {
-  'default': function( user_query) {
-    return {
-    ext:{
-      ubi:{
-        query_id: getQueryId(),
-        user_query:user_query,
-        client_id:client_id,
-        object_id_field:object_id_field,
-        query_attributes:{
-          application:ubi_application
-        }
-      }
-    },
-    query: {
-      multi_match: {
-        query: user_query,
-        fields: [ "id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]
-      }
-    }
-  }}
-}
-
 class App extends Component {
   constructor(){
     super();
   }
-
-  state = {
-    customQuery: queries['default']('')
-  };
 
   handleSearch = value => {
     this.setState({
@@ -203,6 +175,11 @@ class App extends Component {
       }}
       transformRequest={async (request) => {
         //intercept request headers here
+        // For example, if we wanted to change the url or the parameters, this is where
+        // we would do it:
+        //request.url = "http://localhost:9200/ecommerce/_msearch/template?"
+        //console.log(request)
+        
         return request;
       }} >
 
@@ -235,14 +212,10 @@ class App extends Component {
             marginTop: "50px"
           }}
         >
+
           <AlgoPicker
-            title="Product Sort"
-            componentId="algopicker"
-            ubi_client={ubi_client}
-            client_id={client_id}
-            query_id={getQueryId()}
-            session_id={session_id}
-            />
+            title="Pick your Algo"
+            componentId="algopicker" />
           <MultiList
             componentId="supplier_name"
             dataField="supplier"
@@ -354,7 +327,76 @@ class App extends Component {
             dataField={["id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]}
             customQuery={
               function(value) {
-                  return queries[ 'default' ](value);
+                //return queries[ 'default' ](value);
+                var elem = document.getElementById('algopicker');
+                var algo = "";
+                if (elem) {
+                  algo = elem.value
+                } else {
+                  console.log("Unable to determine selected algorithm!");
+                }
+                
+                if (algo === "default") {
+                  return {
+                    ext:{
+                      ubi:{
+                        query_id: getQueryId(),
+                        user_query:value,
+                        client_id:client_id,
+                        object_id_field:object_id_field,
+                        query_attributes:{
+                          application:ubi_application
+                        }
+                      }
+                    },
+                    query: {
+                      multi_match: {
+                        query: value,
+                        fields: [ "id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]
+                      }
+                    }
+                  }
+                } else if (algo === "neural_only") {
+                  return {
+                    ext:{
+                      ubi:{
+                        query_id: getQueryId(),
+                        user_query:value,
+                        client_id:client_id,
+                        object_id_field:object_id_field,
+                        query_attributes:{
+                          application:ubi_application
+                        }
+                      }
+                    },                    
+                    query: {
+                      multi_match: {
+                        query: value,
+                        fields: [ "id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]
+                      }
+                    }
+                  }
+                } else if (algo === "hybrid") {
+                  return {
+                    ext:{
+                      ubi:{
+                        query_id: getQueryId(),
+                        user_query:value,
+                        client_id:client_id,
+                        object_id_field:object_id_field,
+                        query_attributes:{
+                          application:ubi_application
+                        }
+                      }
+                    },                    
+                    query: {
+                      multi_match: {
+                        query: value,
+                        fields: [ "id"]
+                      }
+                    }
+                  }
+                } 
               }
             }
           />
