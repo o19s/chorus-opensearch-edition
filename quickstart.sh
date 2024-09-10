@@ -29,6 +29,8 @@ offline_lab=false
 local_deploy=true
 stop=false
 
+hostname_or_public_ip="chorus-opensearch-edition.dev.o19s.com"
+
 while [ ! $# -eq 0 ]
 do
 	case "$1" in
@@ -53,7 +55,7 @@ do
     	;;
     --online-deployment | -online)
       local_deploy=false
-      echo -e "${MAJOR}Configuring Chorus for chorus-opensearch-edition.dev.o19s.com environment\n${RESET}"
+      echo -e "${MAJOR}Configuring Chorus for ${hostname_or_public_ip} environment\n${RESET}"
       ;;
 	esac
 	shift
@@ -67,9 +69,11 @@ fi
 
 if ! $local_deploy; then
   echo -e "${MAJOR}Updating configuration files for online deploy${RESET}"
-  sed -i.bu 's/localhost/chorus-opensearch-edition.dev.o19s.com/g'  ./chorus_ui/src/Logs.js
-  sed -i.bu 's/localhost/chorus-opensearch-edition.dev.o19s.com/g'  ./chorus_ui/src/App.js
-  sed -i.bu 's/localhost/chorus-opensearch-edition.dev.o19s.com/g'  ./opensearch/wait-for-os.sh
+  sed -i.bu "s/localhost/${hostname_or_public_ip}/g"  ./chorus_ui/src/Logs.js
+  sed -i.bu "s/localhost/${hostname_or_public_ip}/g"  ./chorus_ui/src/App.js
+  sed -i.bu "s/127.0.0.1/${hostname_or_public_ip}/g"  ./chorus_ui/src/App.js
+  sed -i.bu "s/localhost/${hostname_or_public_ip}/g"  ./opensearch/wait-for-os.sh
+  sed -i.bu "s/localhost/${hostname_or_public_ip}/g"  ./middleware/app.py
 fi
 
 if $stop; then
