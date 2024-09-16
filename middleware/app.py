@@ -1,3 +1,4 @@
+import json
 import os
 import uuid
 
@@ -15,16 +16,18 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 OTEL_COLLECTOR_ENDPOINT = os.getenv("OTEL_COLLECTOR_ENDPOINT", "http://dataprepper:21890/opentelemetry.proto.collector.trace.v1.TraceService/Export")
 OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "http://opensearch:9200")
+OPENSEARCH_HOST = os.getenv("OPENSEARCH_HOST", "opensearch")
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
+# Local cache for product ean -> cost (sensitive information)
 cache = {}
 
 print("Using OTel endpoint: " + OTEL_COLLECTOR_ENDPOINT)
 
 
-@app.route("/ubi_search", methods=["GET"])
+@app.route("/ecommerce/_search", methods=["GET"])
 def search():
 
     # Based on https://stackoverflow.com/a/36601467
@@ -37,23 +40,24 @@ def search():
         allow_redirects = False,
     )
 
-    excluded_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]  #NOTE we here exclude all "hop-by-hop headers" defined by RFC 2616 section 13.5.1 ref. https://www.rfc-editor.org/rfc/rfc2616#section-13.5.1
+    excluded_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]
 
     headers = {}
     for k,v in res.raw.headers.items():
         if k not in excluded_headers:
             headers[k] = v
 
-    response = flask.Response(res.content, res.status_code, headers=headers)
+    search_response = res.json()
 
-    # 	// For each hit in the results, get the product ID and the margin.
-    # 	result := gjson.Get(content, "hits.hits")
-    # 	result.ForEach(func(key, value gjson.Result) bool {
-    # 		id := gjson.Get(value.String(), "_id")
-    # 		cost := gjson.Get(value.String(), "_source.cost")
-    # 		cache[id.String()] = cost.String()
-    # 		return true
-    # 	})
+    for hit in search_response["hits"]["hits"]:
+        ean = hit["_source"]["ean"][0]
+        cost = hit["_source"]["cost"]
+        del hit["_source"]["cost"]
+
+        # Cache cost for products.
+        cache[ean] = cost
+
+    response = flask.Response(json.dumps(search_response), res.status_code, headers=headers)
 
     return response
 
@@ -63,7 +67,7 @@ def ubi_events():
 
     if request.method == "OPTIONS":
         response = flask.jsonify(status=200, mimetype="application/json")
-        response.headers.add("Access-Control-Allow-Origin", "http://localhost:4000")
+        response.headers.add("Access-Control-Allow-Origin", "http://{OPENSEARCH_HOST}:4000")
         response.headers.add("Access-Control-Allow-Headers", "Content-Type")
         return response
 
@@ -102,7 +106,7 @@ def ubi_events():
         # ]
 
         # Index the UBI event to OpenSearch.
-        client = OpenSearch(hosts=[{"host": "opensearch", "port": 9200}])
+        client = OpenSearch(hosts=[{"host": OPENSEARCH_HOST, "port": 9200}])
 
         # Make OTel traces from UBI events in the request body.
 
@@ -138,6 +142,12 @@ def ubi_events():
                         span.set_attribute("ubi." + key, value)
 
                 # TODO: Handle event_attributes
+
+                # Populate the cost (sensitive information) about the product.
+                ean = event["event_attributes"]["object"]["object_id"]
+                if ean in cache:
+                    cost = cache[ean]
+                    span.set_attribute("ubi.product_cost", cost)
 
         return '{"status": "submitted"}'
 
