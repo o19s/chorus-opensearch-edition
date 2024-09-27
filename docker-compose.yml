@@ -46,7 +46,7 @@ services:
       logger.level: info
       OPENSEARCH_INITIAL_ADMIN_PASSWORD: Mysupersecretpassword_123
       OPENSEARCH_JAVA_OPTS: -Xms1g -Xmx2g
-      ubi.dataprepper.url: "http://dataprepper:2021/log/ingest"
+      # till 2.18 plugin out ubi.dataprepper.url: "http://dataprepper:2021/log/ingest"
 
     ulimits:
       memlock:
