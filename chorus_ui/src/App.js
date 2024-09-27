@@ -21,6 +21,7 @@ var UbiPosition = require('./ts/UbiEvent.ts').UbiPosition;
 const event_server = "http://127.0.0.1:9090"; // Middleware
 //const event_server = "http://localhost:2021"; //data prepper
 const search_server = "http://localhost:9200"; //open search
+//const search_server = "http://localhost:9091"; //Middleware Search API
 const search_credentials = "*:*";
 const search_index = 'ecommerce'
 const object_id_field = 'primary_ean'
@@ -176,9 +177,7 @@ class App extends Component {
       transformRequest={async (request) => {
         //intercept request headers here
         // For example, if we wanted to change the url or the parameters, this is where
-        // we would do it:
-        //request.url = "http://localhost:9200/ecommerce/_msearch/template?"
-        //console.log(request)
+        // we would do it.
         
         return request;
       }} >
@@ -334,21 +333,22 @@ class App extends Component {
                   algo = elem.value
                 } else {
                   console.log("Unable to determine selected algorithm!");
+                  algo = "keyword";
                 }
                 
-                if (algo === "default") {
+                if (algo === "keyword") {
                   return {
-                    ext:{
-                      ubi:{
-                        query_id: getQueryId(),
-                        user_query:value,
-                        client_id:client_id,
-                        object_id_field:object_id_field,
-                        query_attributes:{
-                          application:ubi_application
-                        }
-                      }
-                    },
+                    // ext:{
+                    //   ubi:{
+                    //     query_id: getQueryId(),
+                    //     user_query:value,
+                    //     client_id:client_id,
+                    //     object_id_field:object_id_field,
+                    //     query_attributes:{
+                    //       application:ubi_application
+                    //     }
+                    //   }
+                    // },
                     query: {
                       multi_match: {
                         query: value,
@@ -356,43 +356,78 @@ class App extends Component {
                       }
                     }
                   }
-                } else if (algo === "neural_only") {
+                } else if (algo === "neural") {
                   return {
-                    ext:{
-                      ubi:{
-                        query_id: getQueryId(),
-                        user_query:value,
-                        client_id:client_id,
-                        object_id_field:object_id_field,
-                        query_attributes:{
-                          application:ubi_application
-                        }
-                      }
-                    },                    
+                    search_pipeline: "neural-search-pipeline",
+                    // ext:{
+                    //   ubi:{
+                    //     query_id: getQueryId(),
+                    //     user_query:value,
+                    //     client_id:client_id,
+                    //     object_id_field:object_id_field,
+                    //     query_attributes:{
+                    //       application:ubi_application
+                    //     }
+                    //   }
+                    // },                    
+                    "_source": {
+                        exclude: [
+                          "title_embedding"
+                        ]
+                    },
                     query: {
-                      multi_match: {
-                        query: value,
-                        fields: [ "id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]
+                      hybrid: {
+                        queries: [
+                          {
+                            neural: {
+                              title_embedding: {
+                                query_text: value,
+                                k: 5
+                              }
+                            }
+                          }
+                        ]
                       }
                     }
                   }
                 } else if (algo === "hybrid") {
                   return {
-                    ext:{
-                      ubi:{
-                        query_id: getQueryId(),
-                        user_query:value,
-                        client_id:client_id,
-                        object_id_field:object_id_field,
-                        query_attributes:{
-                          application:ubi_application
-                        }
-                      }
-                    },                    
+                    search_pipeline: "hybrid-search-pipeline",
+                    // ext:{
+                    //   ubi:{
+                    //     query_id: getQueryId(),
+                    //     user_query:value,
+                    //     client_id:client_id,
+                    //     object_id_field:object_id_field,
+                    //     query_attributes:{
+                    //       application:ubi_application
+                    //     }
+                    //   }
+                    // },     
+                    "_source": {
+                        exclude: [
+                          "title_embedding"
+                        ]
+                    },
                     query: {
-                      multi_match: {
-                        query: value,
-                        fields: [ "id"]
+                      hybrid: {
+                        queries: [
+                          {
+                            match: {
+                              title_text: {
+                                query: value
+                              }
+                            }
+                          },
+                          {
+                            neural: {
+                              title_embedding: {
+                                query_text: value,
+                                k: 50
+                              }
+                            }
+                          }
+                        ]
                       }
                     }
                   }
