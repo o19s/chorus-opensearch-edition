@@ -2,13 +2,13 @@
 
 We've noticed that our users of the Chorus Electonics website are truly terrible at spelling, for example this query: __Toner catrdge from leximark brand__ is returning laptop cases:
 
-<img src="images/005_keyword.png" alt="Keyword Search" width="400"/>
+<img src="images/005_keyword.png" alt="Keyword Search" />
 
 Notice that the first toner cartridge is in the third row, and it's an Epson brand!
 
 This is a great use case for vectors, aka neural search.  They can really improve the matching, without the complexity of more traditional spellcheck type approaches:
 
-<img src="images/005_hybrid_search.png" alt="Hybrid Search" width="400"/>
+<img src="images/005_hybrid_search.png" alt="Hybrid Search" />
 
 To run this Kata, we're trying something new, we're going to use a Jupyter Notebook as there are a lot of commands to run to set up hybrid search in OpenSearch.
 
