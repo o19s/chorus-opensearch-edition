@@ -16,6 +16,8 @@ services:
   middleware:
     container_name: middleware
     build: ./middleware
+    environment:
+      OTEL_EXPORT_ENABLED: "true"
     ports:
       - "9090:9090"
   

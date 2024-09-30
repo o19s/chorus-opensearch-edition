@@ -13,6 +13,7 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
+OTEL_EXPORT_ENABLED = os.getenv("OTEL_EXPORT_ENABLED", "true")
 OTEL_COLLECTOR_ENDPOINT = os.getenv("OTEL_COLLECTOR_ENDPOINT", "http://dataprepper:21890/opentelemetry.proto.collector.trace.v1.TraceService/Export")
 OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "http://opensearch:9200")
 
@@ -101,28 +102,39 @@ def ubi_events():
         #     }
         # ]
 
+        if OTEL_EXPORT_ENABLED == "true":
+
+            # Make OTel traces from UBI events in the request body.
+            resource = Resource(attributes={
+                "service.name": "ubi"
+            })
+
+            traceProvider = TracerProvider(resource=resource)
+            processor = BatchSpanProcessor(OTLPSpanExporter(endpoint=OTEL_COLLECTOR_ENDPOINT))
+            traceProvider.add_span_processor(processor)
+            trace.set_tracer_provider(traceProvider)
+
+            trace.set_tracer_provider(TracerProvider(resource=resource))
+            tracer = trace.get_tracer(__name__)
+            otlp_exporter = OTLPSpanExporter()
+
+            span_processor = BatchSpanProcessor(otlp_exporter)
+            trace.get_tracer_provider().add_span_processor(span_processor)
+
+            for event in events:
+
+                with tracer.start_as_current_span("ubi_event") as span:
+
+                    for key, value in event.items():
+                        if value is not None and key is not "event_attributes":
+                            span.set_attribute("ubi." + key, value)
+
+                    # TODO: Handle event_attributes
+
         # Index the UBI event to OpenSearch.
-        client = OpenSearch(hosts=[{"host": "opensearch", "port": 9200}])
-
-        # Make OTel traces from UBI events in the request body.
-
-        resource = Resource(attributes={
-            "service.name": "ubi"
-        })
-
-        traceProvider = TracerProvider(resource=resource)
-        processor = BatchSpanProcessor(OTLPSpanExporter(endpoint=OTEL_COLLECTOR_ENDPOINT))
-        traceProvider.add_span_processor(processor)
-        trace.set_tracer_provider(traceProvider)
-
-        trace.set_tracer_provider(TracerProvider(resource=resource))
-        tracer = trace.get_tracer(__name__)
-        otlp_exporter = OTLPSpanExporter()
-
-        span_processor = BatchSpanProcessor(otlp_exporter)
-        trace.get_tracer_provider().add_span_processor(span_processor)
-
         for event in events:
+
+            client = OpenSearch(hosts=[{"host": "opensearch", "port": 9200}])
 
             client.index(
                 index="ubi_events",
@@ -130,14 +142,6 @@ def ubi_events():
                 id=str(uuid.uuid4()),
                 refresh=True
             )
-
-            with tracer.start_as_current_span("ubi_event") as span:
-
-                for key, value in event.items():
-                    if value is not None and key is not "event_attributes":
-                        span.set_attribute("ubi." + key, value)
-
-                # TODO: Handle event_attributes
 
         return '{"status": "submitted"}'
 
