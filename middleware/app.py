@@ -67,7 +67,7 @@ def ubi_events():
 
     if request.method == "OPTIONS":
         response = flask.jsonify(status=200, mimetype="application/json")
-        response.headers.add("Access-Control-Allow-Origin", "http://{OPENSEARCH_HOST}:4000")
+        response.headers.add("Access-Control-Allow-Origin", "*")
         response.headers.add("Access-Control-Allow-Headers", "Content-Type")
         return response
 
