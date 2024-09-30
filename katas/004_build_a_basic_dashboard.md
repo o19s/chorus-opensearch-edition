@@ -9,6 +9,7 @@ Depending on your configuration: http://localhost:5601/app/home#/
 ## 2) Create an index pattern
 http://localhost:5601/app/management/opensearch-dashboards/indexPatterns
 ![Index Patterns](images/index_pattern1.png "Index Patterns")
+
 Index patterns are how OpenSearch dashboards access your indices.  
 
 After you click on "Create index pattern" you'll see a list of indices in your OpenSearch instance.  The UBI stores may be hidden by default; so, be sure to click on "Include system and hidden indices".  
