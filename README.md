@@ -59,7 +59,7 @@ Learn more by following this sequence of Katas:
 To start your environment, but still run each command to set up the integrations manually, run:
 
 ```
-docker-compose up --build -d
+docker compose up --build -d
 ```
 
 The quickstart script will launch OpenSearch, download and index the sample product data for the _ecommerce_ index:
@@ -77,14 +77,14 @@ If you want to add in the offline lab environment based on Quepid, then tack on 
 To see what is happening in the Chorus stack you can tail the logs for all the components via:
 
 ```
-docker-compose logs -tf
+docker compose logs -tf
 ```
 
 If you want to see the logs of just one component of the Chorus stack, use:
 
 ```
-docker-compose ps                       # list out the names of the components
-docker-compose logs -tf opensearch      # tail opensearch only
+docker compose ps                       # list out the names of the components
+docker compose logs -tf opensearch      # tail opensearch only
 ```
 
 To stop all containers, you can run:
@@ -96,7 +96,7 @@ To stop all containers, you can run:
 To destroy your environment (including any volumes created, like the mysql DBs), just run:
 
 ```
-docker-compose down -v
+docker compose down -v
 ```
 
 or:
