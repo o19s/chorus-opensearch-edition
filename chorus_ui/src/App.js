@@ -175,9 +175,28 @@ class App extends Component {
         return response;
       }}
       transformRequest={async (request) => {
-        //intercept request headers here
-        // For example, if we wanted to change the url or the parameters, this is where
-        // we would do it.
+        
+        // Need to change the index we are using per algorithm.        
+        const algorithm = document.getElementById('algopicker').value;        
+        let url = request.url;
+        
+        switch (algorithm) {
+          case "keyword":
+            url = url.replace("ecommerce", "ecommerce-keyword");
+            break;
+          case "neural":
+            url = url.replace("ecommerce", "ecommerce-hybrid");
+            break;
+          case "hybrid":
+            url = url.replace("ecommerce", "ecommerce-hybrid");
+            break;
+          default:
+            throw new Error("We don't recognize algorithm " + algorithm);
+        }
+        
+        console.log("Updating default url based on algorithm " + algorithm + " to " + url);
+        
+        request.url = url
         
         return request;
       }} >
