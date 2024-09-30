@@ -10,13 +10,11 @@ We already know the price of the item, but we don't know what the cost of the it
 
 ### Formula for Margin
 
-\[
-\text{Margin} = \frac{\text{Price} - \text{Cost}}{\text{Price}} \times 100
-\]
+`Margin = (Price - Cost) / Price × 100`
 
-However, while we are okay with sharing the price of items with our users, we most definitly do NOT want to share the cost of those items, and therefore our margins with them!
+However, while we are okay with sharing the price of items with our users, we do NOT want to share the cost of those items, and therefore our margins with them!
 
-What to do?  Every query we make returns a set of product results, and it's all stored in the browser so we can provide that information back when you make your clicks.
+What to do?  Every query we make returns a set of product results, and it's all stored in the browser so we can record that information when you make your clicks and other actions for tracking in the `ubi_events` index.
 
 Welcome to the __Panama Canal__.
 
@@ -39,5 +37,6 @@ sequenceDiagram
     Alice->> API: "Click iPhone 15 Pro" with QueryId and EAN
     API->> Cache: Retrieve cost using QueryId and EAN as key
     API->> UBI Event Datastore: Store QueryId, EAN, price, cost
-    
+```
+
 The key for your data in the cache is a combination of the QueryId and the primary key of your document, in our case we are using EAN.
