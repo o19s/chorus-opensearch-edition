@@ -1,7 +1,8 @@
 #!/bin/bash -e
 
-curl -X PUT http://localhost:9200/ubi_events -H "Content-Type: application/json" -d'
-{
+curl -X PUT http://localhost:9090/ubi_events -H "Content-Type: application/json" -d'
+[
+  {
     "action_name": "product_hover",
     "client_id": "USER-eeed-43de-959d-90e6040e84f9",
     "message_type": "INFO",
@@ -20,4 +21,5 @@ curl -X PUT http://localhost:9200/ubi_events -H "Content-Type: application/json"
         "page_id": null,
         "dwell_time": null
     }
-}'
+  }
+]'
