@@ -19,8 +19,9 @@ var UbiPosition = require('./ts/UbiEvent.ts').UbiPosition;
 //######################################
 // global variables
 const event_server = "http://127.0.0.1:9090"; // Middleware
-//const event_server = "http://localhost:2021"; //data prepper
-const search_server = "http://localhost:9200"; //open search
+//const event_server = "http://localhost:2021"; // DataPrepper
+//const search_server = "http://localhost:9200"; // OpenSearch
+const search_server = "http://localhost:9090"; // Proxy queries through Middleware
 const search_credentials = "*:*";
 const search_index = 'ecommerce'
 const object_id_field = 'primary_ean'
@@ -51,7 +52,7 @@ sessionStorage.setItem('shopping_cart', 0);
 //######################################
 // util functions, TODO: reorganize files
   
-export function add_to_cart(item=null)
+export function addToCart(item=null)
 {
   if(item != null){
     let shopping_cart = sessionStorage.getItem("shopping_cart");
@@ -94,8 +95,8 @@ String.prototype.f = function () {
   });
 };
 
-export function genQueryId(){
-  const query_id = 'Q-'+ genGuid();
+export function generateQueryId(){
+  const query_id = genGuid();
   sessionStorage.setItem('query_id', query_id);
   return query_id;
 }
@@ -312,7 +313,7 @@ class App extends Component {
               console.log("onValueChanged search value: ", value)
 
               //generate a new query id to track events
-              const query_id = genQueryId();
+              const query_id = generateQueryId();
               let e = new UbiEvent('on_search', client_id, query_id, value);
               e.message_type = 'QUERY'
               ubi_client.log_event(e);
@@ -380,15 +381,18 @@ class App extends Component {
                   <div id='product_item' key={item.id} 
                   onMouseOver={
                     function(_event) {
-                        // Decide if the mouse over on the product helps tell the story.
-                        // preference would be to log when a product comes into the "viewport".
-                        //console.log('mouse over ' + item.title);
+                      // Decide if the mouse over on the product helps tell the story.
+                      // preference would be to log when a product comes into the "viewport".
+                      //console.log('mouse over ' + item.title);
+                      const enabled = false;
+                      if (enabled) {
                         let e = new UbiEvent('product_hover', client_id, getQueryId());
                         e.message = item.title + ' (' + item.primary_ean + ')';
-      
+
                         e.event_attributes.object = new UbiEventData('product', item.id, item.title);
                         e.event_attributes.object.key_value = item.primary_ean;
                         ubi_client.log_event(e);
+                      }
                     }
                   }                  
                   >
@@ -462,7 +466,7 @@ class App extends Component {
                     </fieldset>
                   <button style={{ fontSize:"14px", position:"relative" }} onClick ={
             function(el) {
-              add_to_cart(item);
+              addToCart(item);
             }}>
               Add to<span style={{fontSize:24 }}> 🛒</span>
                   </button>
