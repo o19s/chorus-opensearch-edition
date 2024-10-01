@@ -66,3 +66,10 @@ for hit in search_response["hits"]["hits"]:
     # Cache cost for products.
     cache[ean] = cost
 ```
+
+
+show the query to OS and getting back cost
+
+show the same query via middleware and not getting the cost back.
+
+Then do a event to the middleware..  and look it up in ubi_events with cost data as a screenshot./
