@@ -29,14 +29,40 @@ For example, let's store the cost of our mobile phones under the EAN (European A
 ```mermaid
 sequenceDiagram
     actor Alice
-    Alice ->> API: "I want a mobile phone"
-    API ->> SearchEngine: "q=mobile phone"
-    SearchEngine ->> API: A QueryId and list of phones with EAN, title, description, image, price and cost 
+    Alice ->>+ API: "I want a mobile phone"
+    API ->>+ SearchEngine: "q=mobile phone"
+    SearchEngine -->>- API: A QueryId and list of phones with EAN, price and cost 
     API ->> Cache: Store cost using QueryId and EAN as key
-    API->> Alice: QueryID and list of phones with title, description,image, price but NO cost
+    API-->>- Alice: QueryID and list of phones with EAN and price but NO cost
     Alice->> API: "Click iPhone 15 Pro" with QueryId and EAN
-    API->> Cache: Retrieve cost using QueryId and EAN as key
+    API->>+ Cache: Retrieve cost using QueryId and EAN as key
+    Cache-->>-API: Return cost value
     API->> UBI Event Datastore: Store QueryId, EAN, price, cost
 ```
 
 The key for your data in the cache is a combination of the QueryId and the primary key of your document, in our case we are using EAN.
+
+## How it's Implemented
+
+We have a field `primary_ean` defined in the schema that represents for a product the EAn to reference.
+
+In the file `middleware/app.py` we are using just a simple in memory hash: `cache = {}`.
+
+As part of the proxied method we have defined for search:
+
+```python
+@app.route("/ecommerce/_search", methods=["GET"])
+def search():
+```
+
+We are extracting the cost information for each document, storing it, and removing it from what we send on to the front end:
+
+```python
+for hit in search_response["hits"]["hits"]:
+    ean = hit["_source"]["ean"][0]
+    cost = hit["_source"]["cost"]
+    del hit["_source"]["cost"]
+
+    # Cache cost for products.
+    cache[ean] = cost
+```
