@@ -60,16 +60,18 @@ def search(prefix):
       search_response = res.json()
       
       response = search_response
-
-      for hit in response["hits"]["hits"]:
-        ean = hit["_source"]["ean"][0]
-        cost = hit["_source"]["cost"]
-        
-        # Strip out of the sensitive data from what is sent to browser
-        del hit["_source"]["cost"]
-
-        # Cache cost for product based on QueryId + EAN
-        cache[ean] = cost
+      
+      ubi_query_id = search_response.get("ext", {}).get("ubi", {}).get("query_id")
+      if ubi_query_id is not None:
+        for hit in response["hits"]["hits"]:
+          ean = hit["_source"]["primary_ean"]
+          cost = hit["_source"]["cost"]
+          
+          # Strip out of the sensitive data from what is sent to browser
+          del hit["_source"]["cost"]
+  
+          # Cache cost for product based on QueryId + EAN
+          cache[f"{ubi_query_id}-{ean}"] = cost
   
       response = flask.Response(json.dumps(search_response), res.status_code, headers=headers)
   
@@ -109,16 +111,18 @@ def multisearch(prefix):
   
       search_response = res.json()
       
-      for response in search_response["responses"]:
-        for hit in response["hits"]["hits"]:
-          ean = hit["_source"]["ean"][0]
-          cost = hit["_source"]["cost"]
-          
-          # Strip out of the sensitive data from what is sent to browser
-          del hit["_source"]["cost"]
-  
-          # Cache cost for product based on QueryId + EAN
-          cache[ean] = cost
+      ubi_query_id = search_response.get("ext", {}).get("ubi", {}).get("query_id")
+      if ubi_query_id is not None:
+        for response in search_response["responses"]:
+          for hit in response["hits"]["hits"]:
+            ean = hit["_source"]["ean"][0]
+            cost = hit["_source"]["cost"]
+            
+            # Strip out of the sensitive data from what is sent to browser
+            del hit["_source"]["cost"]
+    
+            # Cache cost for product based on QueryId + EAN
+            cache[f"{ubi_query_id}-{ean}"] = cost
   
       response = flask.Response(json.dumps(search_response), res.status_code, headers=headers)
   
@@ -149,7 +153,7 @@ def ubi_events():
         #     {
         #         "action_name": "product_hover",
         #         "client_id": "USER-eeed-43de-959d-90e6040e84f9",
-        #         "query_id": null,
+        #         "query_id": "00112233-4455-6677-8899-aabbccddeeff",
         #         "page_id": "/",
         #         "message_type": "INFO",
         #         "message": "Integral 2GB SD Card memory card (undefined)",
@@ -188,6 +192,7 @@ def ubi_events():
 
         for event in events:
                      
+            ubi_query_id = event["query_id"]
             # Add back the sensitive information (cost) to the data being sent to the UBI Events datastore.            
             cost = None
             
@@ -199,10 +204,8 @@ def ubi_events():
               obj = event_attributes["object"]
               if obj is not None:
                 ean = obj["object_id"]                    
-                if ean is not None:
-                  if ean in cache:
-                      print(f"Found EAN {ean} in cache")
-                      cost = cache[ean]
+                if ean is not None:                 
+                  cost = cache[f"{ubi_query_id}-{ean}"]
 
             if cost is not None:
               event['event_attributes']['cost'] = cost
@@ -225,6 +228,11 @@ def ubi_events():
                 span.set_attribute("ubi.event_attributes", json.dumps(event['event_attributes']))
 
         return '{"status": "submitted"}'
+        
+@app.route('/dump_cache', methods=["GET"])
+def dump_cache():
+  response = flask.jsonify(cache=cache)
+  return response
 
 
 if __name__ == "__main__":
