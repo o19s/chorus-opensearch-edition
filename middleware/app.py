@@ -204,8 +204,11 @@ def ubi_events():
               obj = event_attributes["object"]
               if obj is not None:
                 ean = obj["object_id"]                    
-                if ean is not None:                 
-                  cost = cache[f"{ubi_query_id}-{ean}"]
+                if ean is not None:
+                  if f"{ubi_query_id}-{ean}" in cache:
+                    cost = cache[f"{ubi_query_id}-{ean}"]
+                  else:
+                    cost = None
 
             if cost is not None:
               event['event_attributes']['cost'] = cost
