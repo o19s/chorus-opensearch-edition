@@ -18,6 +18,8 @@ services:
     build: ./middleware
     ports:
       - "9090:9090"
+    volumes:
+      - ./middleware:/python-docker/
   
   mysql:
     container_name: mysql
