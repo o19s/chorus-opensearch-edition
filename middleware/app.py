@@ -13,9 +13,10 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
+OTEL_EXPORT_ENABLED = os.getenv("OTEL_EXPORT_ENABLED", "false")
 OTEL_COLLECTOR_ENDPOINT = os.getenv("OTEL_COLLECTOR_ENDPOINT", "http://dataprepper:21890/opentelemetry.proto.collector.trace.v1.TraceService/Export")
-OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "http://localhost:9200")
-OPENSEARCH_HOST = os.getenv("OPENSEARCH_HOST", "localhost")
+OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "http://opensearch:9200")
+OPENSEARCH_HOST = os.getenv("OPENSEARCH_HOST", "opensearch")
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -177,55 +178,59 @@ def ubi_events():
         # Index the UBI event to OpenSearch.
         client = OpenSearch(hosts=[{"host": OPENSEARCH_HOST, "port": 9200}])
 
-        # Make OTel traces from UBI events in the request body.
-
-        resource = Resource(attributes={
-            "service.name": "ubi"
-        })
-
-        traceProvider = TracerProvider(resource=resource)
-        processor = BatchSpanProcessor(OTLPSpanExporter(endpoint=OTEL_COLLECTOR_ENDPOINT))
-        traceProvider.add_span_processor(processor)
-        trace.set_tracer_provider(traceProvider)
-
-        tracer = trace.get_tracer(__name__)
-
         for event in events:
-                     
-            ubi_query_id = event["query_id"]
-            # Add back the sensitive information (cost) to the data being sent to the UBI Events datastore.            
-            cost = None
-            
-            # couldn't get this to work so doing a more painful approach below.
-            # ean = event["event_attributes"]["object"]["object_id"] 
-            
-            event_attributes = event["event_attributes"]
-            if event_attributes is not None:
-              obj = event_attributes["object"]
-              if obj is not None:
-                ean = obj["object_id"]                    
-                if ean is not None:                 
-                  cost = cache[f"{ubi_query_id}-{ean}"]
 
-            if cost is not None:
-              event['event_attributes']['cost'] = cost
-            
-            
-            # First we demonstrate indexing directly into ubi_events index
-            client.index(
-                index="ubi_events",
-                body=event,
-                id=str(uuid.uuid4()),
-                refresh=True
-            )
+              # First we demonstrate indexing directly into ubi_events index
+              client.index(
+                  index="ubi_events",
+                  body=event,
+                  id=str(uuid.uuid4()),
+                  refresh=True
+              )          
+
+        # If OTel is enabled, send trace events.
+        if OTEL_EXPORT_ENABLED == "true":
+
+          # Make OTel traces from UBI events in the request body.
+
+          resource = Resource(attributes={
+              "service.name": "ubi"
+          })
+
+          traceProvider = TracerProvider(resource=resource)
+          processor = BatchSpanProcessor(OTLPSpanExporter(endpoint=OTEL_COLLECTOR_ENDPOINT))
+          traceProvider.add_span_processor(processor)
+          trace.set_tracer_provider(traceProvider)
+
+          tracer = trace.get_tracer(__name__)
+
+          for event in events:
+                       
+              ubi_query_id = event["query_id"]
+              # Add back the sensitive information (cost) to the data being sent to the UBI Events datastore.            
+              cost = None
               
-            # Now we demonstrate indexing via OTEL into otel_ubi_events index
-            with tracer.start_as_current_span("ubi_event") as span:
+              # couldn't get this to work so doing a more painful approach below.
+              # ean = event["event_attributes"]["object"]["object_id"] 
+              
+              event_attributes = event["event_attributes"]
+              if event_attributes is not None:
+                obj = event_attributes["object"]
+                if obj is not None:
+                  ean = obj["object_id"]                    
+                  if ean is not None:                 
+                    cost = cache[f"{ubi_query_id}-{ean}"]
 
-                for key, value in event.items():
-                    if value is not None and key != "event_attributes":
-                        span.set_attribute("ubi." + key, value)
-                span.set_attribute("ubi.event_attributes", json.dumps(event['event_attributes']))
+              if cost is not None:
+                event['event_attributes']['cost'] = cost                        
+                
+              # Now we demonstrate indexing via OTEL into otel_ubi_events index
+              with tracer.start_as_current_span("ubi_event") as span:
+
+                  for key, value in event.items():
+                      if value is not None and key != "event_attributes":
+                          span.set_attribute("ubi." + key, value)
+                  span.set_attribute("ubi.event_attributes", json.dumps(event['event_attributes']))
 
         return '{"status": "submitted"}'
         

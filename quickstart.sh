@@ -74,6 +74,8 @@ if ! $local_deploy; then
   sed -i.bu "s/127.0.0.1/${hostname_or_public_ip}/g"  ./chorus_ui/src/App.js
   sed -i.bu "s/localhost/${hostname_or_public_ip}/g"  ./opensearch/wait-for-os.sh
   sed -i.bu "s/localhost/${hostname_or_public_ip}/g"  ./middleware/app.py
+else
+  sed -i.bu "s/localhost/opensearch/g"  ./middleware/app.py 
 fi
 
 if $stop; then
