@@ -179,15 +179,36 @@ def ubi_events():
         client = OpenSearch(hosts=[{"host": OPENSEARCH_HOST, "port": 9200}])
 
         for event in events:
+                
+          ubi_query_id = event["query_id"]
+          # Add back the sensitive information (cost) to the data being sent to the UBI Events datastore.            
+          cost = None
+          
+          # couldn't get this to work so doing a more painful approach below.
+          # ean = event["event_attributes"]["object"]["object_id"] 
+          
+          event_attributes = event["event_attributes"]
+          if event_attributes is not None:
+            obj = event_attributes["object"]
+            if obj is not None:
+              ean = obj["object_id"]                    
+              if ean is not None:
+                if f"{ubi_query_id}-{ean}" in cache:
+                  cost = cache[f"{ubi_query_id}-{ean}"]
+                else:
+                  cost = None
 
-              # First we demonstrate indexing directly into ubi_events index
-              client.index(
-                  index="ubi_events",
-                  body=event,
-                  id=str(uuid.uuid4()),
-                  refresh=True
-              )          
+          if cost is not None:
+            event['event_attributes']['cost'] = cost
 
+          # Index directly into ubi_events index
+          client.index(
+              index="ubi_events",
+              body=event,
+              id=str(uuid.uuid4()),
+              refresh=True
+          ) 
+        
         # If OTel is enabled, send trace events.
         if OTEL_EXPORT_ENABLED == "true":
 
@@ -218,8 +239,11 @@ def ubi_events():
                 obj = event_attributes["object"]
                 if obj is not None:
                   ean = obj["object_id"]                    
-                  if ean is not None:                 
-                    cost = cache[f"{ubi_query_id}-{ean}"]
+                  if ean is not None:
+                    if f"{ubi_query_id}-{ean}" in cache:
+                      cost = cache[f"{ubi_query_id}-{ean}"]
+                    else:
+                      cost = None
 
               if cost is not None:
                 event['event_attributes']['cost'] = cost                        
