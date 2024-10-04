@@ -14,8 +14,8 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 OTEL_COLLECTOR_ENDPOINT = os.getenv("OTEL_COLLECTOR_ENDPOINT", "http://dataprepper:21890/opentelemetry.proto.collector.trace.v1.TraceService/Export")
-OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "http://opensearch:9200")
-OPENSEARCH_HOST = os.getenv("OPENSEARCH_HOST", "opensearch")
+OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "http://localhost:9200")
+OPENSEARCH_HOST = os.getenv("OPENSEARCH_HOST", "localhost")
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
