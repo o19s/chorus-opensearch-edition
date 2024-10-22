@@ -24,6 +24,15 @@ To get started you need to have a recent Python version.
 
 1. Lastly, install all the required libraries: `pip install -r requirements.txt`
 
-Great!  You are all set up.   Now to fire up the Jupyter notebook run: `jupyter notebook 005_2_run_a_hybrid_search.ipynb`
+There are two ways to play with this.  
 
-Once you are done, check out the
+First, you can use notebook visualization tool Mercury to play with keyword and neural weightings and try out different queries.
+
+Run `mercury run` and browse to http://127.0.0.1:8000/ to see the Hybrid notebook.  It will take 2 minutes to load as
+reindexing the data with vector embeddings takes a while!
+
+<img src="images/005_mercury_visualization.png" alt="Mercury Visualization" />
+
+If you want to see all the commands for setting Hybrid search, then use the Jupyter notebook directory.
+
+Run: `jupyter notebook 005_2_run_a_hybrid_search.ipynb`
