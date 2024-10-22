@@ -87,8 +87,12 @@ docker compose up -d --build ${services}
 echo -e "${MAJOR}Waiting for OpenSearch to start up and be online.${RESET}"
 ./opensearch/wait-for-os.sh # Wait for OpenSearch to be online
 
-echo -e "${MAJOR}Creating ecommerce index, defining its mapping & settings\n${RESET}"
-curl -s -X PUT "http://localhost:9200/ecommerce/" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
+echo -e "${MAJOR}Creating ecommerce-keyword index, defining its mapping & settings\n${RESET}"
+curl -s -X PUT "http://localhost:9200/ecommerce-keyword/" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
+echo -e "\n"
+
+echo -e "${MAJOR}Creating ecommerce alias for ecommerce-keyword index\n${RESET}"
+curl -s -X POST "http://localhost:9200/ecommerce-keyword/_aliases/ecommerce" -H "Content-Type: application/json"
 echo -e "\n"
 
 echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"

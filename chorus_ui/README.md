@@ -6,7 +6,10 @@ Step-by-step guide available at [ReactiveSearch Quickstart Doc](https://docs.app
 
 ### Configure
 
-The ReactiveSearch components code resides in `src/App.js` file.  
+The ReactiveSearch components code resides in `src/App.js` file. 
+
+**Note that we use ReactionSearch v3, an older release!** 
+
 **Note that this requires Node.js < v17** 
 1. The following standard components from ReactiveSearch are used:
  - **ReactiveBase** - ReactiveBase is the provider component that connects the UI with the backend app (OpenSearch). 
@@ -18,5 +21,3 @@ The ReactiveSearch components code resides in `src/App.js` file.
 2. In `src/custom` a custom component was developed to choose the relevance algorithm in the frontend: AlgoPicker
  - Basically, it only is a dropdown with three fixed entries.
  - Styles for this component are located in `src/styles`.
-
-
