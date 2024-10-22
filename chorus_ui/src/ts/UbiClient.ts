@@ -19,11 +19,11 @@ export class UbiClient {
     private object_id_field:string;
     private verbose:number=0;
 
-
-    //TODO: capture response and request headers
     constructor(baseUrl:string) {
 
+        // Eric: baseUrl isn't working I think.  
         this.url = baseUrl + "/ubi_events";
+        //this.url = "http://localhost:9200/ubi_events"
 
         //TODO: make these parameters when the interface is more finalized
         this.search_index = sessionStorage.getItem('search_index');

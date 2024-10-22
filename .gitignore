@@ -7,5 +7,9 @@ icecat-products-w_price-19k-20201127.json
 *.DS_Store
 .*.json
 *.json
+katas/.venv
+katas/.ipynb_checkpoints
+katas/celerybeat-schedule.db
+katas/django-errors.log
 venv/
 __pycache__/

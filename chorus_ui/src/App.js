@@ -29,7 +29,7 @@ const verbose_ubi_client = true;
 
 const client_id = 'USER-eeed-43de-959d-90e6040e84f9'; // demo user id
 const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
-          sessionStorage.getItem('session_id') 
+          sessionStorage.getItem('session_id')
           : 'SESSION-' + genGuid()); //<- new fake session, otherwise it should reuse the sessionStorage version
 
 
@@ -125,42 +125,15 @@ function logClickPosition(event) {
   e.event_attributes.object.object_type = 'click_location';
   e.event_attributes.position = new UbiPosition({x:event.clientX, y:event.clientY});
   ubi_client.log_event(e);
-   
+
   }
   //document.addEventListener("click", logClickPosition);
 //EVENTS ###############################################################
-
-const queries = {
-  'default': function( user_query) { 
-    return {
-    ext:{
-      ubi:{
-        query_id: getQueryId(),
-        user_query:user_query,
-        client_id:client_id,
-        object_id_field:object_id_field,
-        query_attributes:{
-          application:ubi_application
-        }
-      } 
-    },
-    query: {
-      multi_match: {
-        query: user_query,
-        fields: [ "id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]
-      }
-    }
-  }}
-}
 
 class App extends Component {
   constructor(){
     super();
   }
-
-  state = {
-    customQuery: queries['default']('')
-  };
 
   handleSearch = value => {
     this.setState({
@@ -182,7 +155,7 @@ class App extends Component {
       credentials={search_credentials}
       recordAnalytics={true}
       searchStateHeader={true}
-      
+
       transformResponse={async (response, componentId) => {
         if( componentId == 'product_type'){
           //console.log('** Type change =>' + response);
@@ -201,10 +174,32 @@ class App extends Component {
         return response;
       }}
       transformRequest={async (request) => {
-        //intercept request headers here
+        
+        // Need to change the index we are using per algorithm.        
+        const algorithm = document.getElementById('algopicker').value;        
+        let url = request.url;
+        
+        switch (algorithm) {
+          case "keyword":
+            url = url.replace("ecommerce", "ecommerce-keyword");
+            break;
+          case "neural":
+            url = url.replace("ecommerce", "ecommerce-hybrid");
+            break;
+          case "hybrid":
+            url = url.replace("ecommerce", "ecommerce-hybrid");
+            break;
+          default:
+            throw new Error("We don't recognize algorithm " + algorithm);
+        }
+        
+        console.log("Updating default url based on algorithm " + algorithm + " to " + url);
+        
+        request.url = url
+        
         return request;
       }} >
-      
+
       <div style={{ height: "140px", width: "100%"}}>
         <img style={{ height: "100%", class: "center"  }} src={chorusLogo} />
         <div style={{float:"right"}}>
@@ -220,7 +215,7 @@ class App extends Component {
                   0
             </button>
             </code>
-          </small>         
+          </small>
         </div>
       </div>
       <br/>
@@ -234,14 +229,10 @@ class App extends Component {
             marginTop: "50px"
           }}
         >
+
           <AlgoPicker
-            title="Product Sort"
-            componentId="algopicker" 
-            ubi_client={ubi_client}
-            client_id={client_id}
-            query_id={getQueryId()}
-            session_id={session_id}
-            />
+            title="Pick your Algo"
+            componentId="algopicker" />
           <MultiList
             componentId="supplier_name"
             dataField="supplier"
@@ -261,7 +252,7 @@ class App extends Component {
                 ubi_client.log_event(e);
               }
             }
-            onQueryChange={  
+            onQueryChange={
               function(prevQuery, nextQuery) {
                 if(nextQuery != prevQuery){
 
@@ -292,10 +283,10 @@ class App extends Component {
               ubi_client.log_event(e);
               }
             }
-            onQueryChange={  
+            onQueryChange={
               function(prevQuery, nextQuery) {
                 if(nextQuery != prevQuery){
-                
+
                 }
               }
             }
@@ -306,50 +297,159 @@ class App extends Component {
           />
         </div>
         <div style={{ display: "flex", flexDirection: "column", width: "75%" }}>
-          <DataSearch 
-          onValueChange={
-            function(value) {
-              console.log("onValueChanged search value: ", value)
+          <DataSearch
+            onValueChange={
+              function(value) {
+                console.log("onValueChanged search value: ", value)
 
-              //generate a new query id to track events
-              const query_id = generateQueryId();
-              let e = new UbiEvent('on_search', client_id, query_id, value);
-              e.message_type = 'QUERY'
-              ubi_client.log_event(e);
+                //generate a new query id to track events
+                const query_id = genQueryId();
+                let e = new UbiEvent('on_search', client_id, query_id, value);
+                e.message_type = 'QUERY'
+                ubi_client.log_event(e);
+              }
             }
-          }
-          onChange={
-            function(value, cause, source) {
-              console.log("onChange current value: ", value)
+            onChange={
+              function(value, cause, source) {
+                console.log("onChange current value: ", value)
+              }
             }
-          } 
-          onValueSelected={
-            function(value, cause, source) {
-              console.log("onValueSelected current value: ", value)
+            onValueSelected={
+              function(value, cause, source) {
+                console.log("onValueSelected current value: ", value)
+              }
             }
-          }
-          beforeValueChange = { function(value){
-            // The update is accepted by default
-            //if (value) {
-                // To reject the update, throw an error
-        }}
-          onQueryChange={
-            function(prevQuery, nextQuery) {
-              // use the query with other js code
-              console.log('prevQuery', prevQuery);
-              console.log('nextQuery', nextQuery);
+            beforeValueChange = {
+              function(value){
+              // The update is accepted by default
+              //if (value) {
+                  // To reject the update, throw an error
+              }
             }
-          }
-            style={{
-              marginTop: "35px"
-            }}
+            onQueryChange={
+              function(prevQuery, nextQuery) {
+                // use the query with other js code
+                console.log('prevQuery', prevQuery);
+                console.log('nextQuery', nextQuery);
+              }
+            }
+            style={
+              {
+                marginTop: "35px"
+              }
+            }
             componentId="searchbox"
             placeholder="Search for products, brands or EAN"
             autosuggest={false}
             dataField={["id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]}
-            customQuery={ 
+            customQuery={
               function(value) {
-                  return queries[ 'default' ](value);
+                //return queries[ 'default' ](value);
+                var elem = document.getElementById('algopicker');
+                var algo = "";
+                if (elem) {
+                  algo = elem.value
+                } else {
+                  console.log("Unable to determine selected algorithm!");
+                  algo = "keyword";
+                }
+                
+                if (algo === "keyword") {
+                  return {
+                    // ext:{
+                    //   ubi:{
+                    //     query_id: getQueryId(),
+                    //     user_query:value,
+                    //     client_id:client_id,
+                    //     object_id_field:object_id_field,
+                    //     query_attributes:{
+                    //       application:ubi_application
+                    //     }
+                    //   }
+                    // },
+                    query: {
+                      multi_match: {
+                        query: value,
+                        fields: [ "id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]
+                      }
+                    }
+                  }
+                } else if (algo === "neural") {
+                  return {
+                    search_pipeline: "neural-search-pipeline",
+                    // ext:{
+                    //   ubi:{
+                    //     query_id: getQueryId(),
+                    //     user_query:value,
+                    //     client_id:client_id,
+                    //     object_id_field:object_id_field,
+                    //     query_attributes:{
+                    //       application:ubi_application
+                    //     }
+                    //   }
+                    // },                    
+                    "_source": {
+                        exclude: [
+                          "title_embedding"
+                        ]
+                    },
+                    query: {
+                      hybrid: {
+                        queries: [
+                          {
+                            neural: {
+                              title_embedding: {
+                                query_text: value,
+                                k: 5
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                } else if (algo === "hybrid") {
+                  return {
+                    search_pipeline: "hybrid-search-pipeline",
+                    // ext:{
+                    //   ubi:{
+                    //     query_id: getQueryId(),
+                    //     user_query:value,
+                    //     client_id:client_id,
+                    //     object_id_field:object_id_field,
+                    //     query_attributes:{
+                    //       application:ubi_application
+                    //     }
+                    //   }
+                    // },     
+                    "_source": {
+                        exclude: [
+                          "title_embedding"
+                        ]
+                    },
+                    query: {
+                      hybrid: {
+                        queries: [
+                          {
+                            match: {
+                              title_text: {
+                                query: value
+                              }
+                            }
+                          },
+                          {
+                            neural: {
+                              title_embedding: {
+                                query_text: value,
+                                k: 50
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                } 
               }
             }
           />
@@ -377,7 +477,7 @@ class App extends Component {
             render={({ data }) => (
               <ReactiveList.ResultCardsWrapper>
                 {data.map((item) => (
-                  <div id='product_item' key={item.id} 
+                  <div id='product_item' key={item.id}
                   onMouseOver={
                     function(_event) {
                       // Decide if the mouse over on the product helps tell the story.
@@ -393,7 +493,7 @@ class App extends Component {
                         ubi_client.log_event(e);
                       }
                     }
-                  }                  
+                  }
                   >
                   <ResultCard key={item._id} >
                     <ResultCard.Image
@@ -431,31 +531,31 @@ class App extends Component {
                     >
                       <label htmlFor="pos-relevant"
                           style={{ backgroundColor: "#ABEBC6", }}> 👍
-                      <input type="radio" id={`pos-${item.id}`} name={`pos-${item.id}`} value="pos"  
+                      <input type="radio" id={`pos-${item.id}`} name={`pos-${item.id}`} value="pos"
                           onClick={function(event){
                             var neg = document.getElementById(`neg-${item.id}`);
                             neg.checked = false;
-                        
+
                             let e = new UbiEvent('positive', client_id, getQueryId());
                             e.message_type = 'RELEVANCY';
                             e.message = item.title + ' (' + item.id + ')';
-                        
+
                             e.event_attributes.object = new UbiEventData('product', item.primary_ean, item.title, {'pos-relevant':item.primary_ean});
                             ubi_client.log_event(e);
                             console.log('pos review of ' + item.title)
                           }}/>
                       </label>
                       <label htmlFor="neg-relevant"
-                          style={{ backgroundColor: "#EC7063", }}>👎 
-                      <input type="radio" id={`neg-${item.id}`} name={`neg-${item.id}`} value="neg"  
+                          style={{ backgroundColor: "#EC7063", }}>👎
+                      <input type="radio" id={`neg-${item.id}`} name={`neg-${item.id}`} value="neg"
                       onClick={function(event){
                         var pos = document.getElementById(`pos-${item.id}`);
                         pos.checked = false;
-                    
+
                         let e = new UbiEvent('negative', client_id, getQueryId());
                         e.message_type = 'RELEVANCY';
                         e.message = item.title + ' (' + item.id + ')';
-                    
+
                         e.event_attributes.object = new UbiEventData('product', item.primary_ean, item.title, {'pos-relevant':item.primary_ean});
                         ubi_client.log_event(e);
                         console.log('pos review of ' + item.title)
@@ -488,7 +588,7 @@ class App extends Component {
             }
           />
         </div>
-        
+
       </div>
     </ReactiveBase>
   );

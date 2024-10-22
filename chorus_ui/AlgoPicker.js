@@ -52,7 +52,6 @@ class AlgoPicker extends Component {
           <option checked={this.state.selectedValue === "neural"} value="neural">Neural</option>
           <option checked={this.state.selectedValue === "hybrid"} value="hybrid">Hybrid</option>          
         </select>
-        <i><small>You will need to change the query to make the new algorithm choice take effect.</small></i>
       </Container>
     )
   }
