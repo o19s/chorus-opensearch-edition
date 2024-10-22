@@ -19,9 +19,8 @@ var UbiPosition = require('./ts/UbiEvent.ts').UbiPosition;
 //######################################
 // global variables
 const event_server = "http://127.0.0.1:9090"; // Middleware
-//const event_server = "http://localhost:2021"; // DataPrepper
-//const search_server = "http://localhost:9200"; // OpenSearch
 const search_server = "http://localhost:9090"; // Proxy queries through Middleware
+
 const search_credentials = "*:*";
 const search_index = 'ecommerce'
 const object_id_field = 'primary_ean'

@@ -54,6 +54,18 @@ Learn more by following this sequence of Katas:
 1. Third Kata: [Importing Pre-Existing Event Data](katas/003_import_preexisting_event_data.md)
 1. Fourth Kata: [Build a Basic Dashboard](katas/004_build_a_basic_dashboard.md)
 
+# Ports
+
+These are the ports that Chorus uses:
+
+* `4000` - Chorus UI
+* `9090` - Search "middleware" that handles queries and User Behavior Insights (UBI) data.
+* `2021` - Data Prepper - HTTP source for UBI events
+* `4900` - Data Prepper
+* `21890` - Data Prepper - OTEL trace source for UBI events
+* `9200` - OpenSearch
+* `5601` - OpenSearch Dashboards
+
 # Useful Commands for Chorus
 
 To start your environment, but still run each command to set up the integrations manually, run:
