@@ -1,7 +1,7 @@
-FROM opensearchproject/opensearch:2.17.0
+FROM opensearchproject/opensearch:2.17.1
 
-# currently doesn't work with 2.18.0.
-#FROM opensearchstaging/opensearch:2.18.0
+# Install the OTel plugin.
+RUN /usr/share/opensearch/bin/opensearch-plugin install --batch telemetry-otel
 
 # Install the opensearch-ubi plugin.
-RUN /usr/share/opensearch/bin/opensearch-plugin install --batch https://github.com/opensearch-project/user-behavior-insights/releases/download/2.16.0.0/opensearch-ubi-2.16.0.0.zip
+RUN /usr/share/opensearch/bin/opensearch-plugin install --batch https://github.com/opensearch-project/user-behavior-insights/releases/download/2.17.1.0/opensearch-ubi-2.17.1.0.zip

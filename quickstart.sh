@@ -106,10 +106,9 @@ if [ ! -f ./icecat-products-w_price-19k-20201127.json ]; then
   tar xzf icecat-products-w_price-19k-20201127.tar.gz
 fi
 
-if [ ! -f ./transformed_data.json ]; then
-  echo -e "${MINOR}Transforming the sample product data into JSON format, please give it a few minutes!\n${RESET}"
-  docker run -v ./:/app -w /app python:3 python3 ./opensearch/transform_data.py icecat-products-w_price-19k-20201127.json transformed_data.json
-fi
+echo -e "${MINOR}Transforming the sample product data into JSON format, please give it a few minutes!\n${RESET}"
+docker run -v ./:/app -w /app python:3 python3 ./opensearch/transform_data.py icecat-products-w_price-19k-20201127.json transformed_data.json
+
 echo -e "${MAJOR}Indexing the sample product data, please wait...\n${RESET}"
 curl -s -X POST "http://localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items" -H 'Content-Type: application/json' --data-binary @transformed_data.json
 
