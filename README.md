@@ -53,6 +53,8 @@ Learn more by following this sequence of Katas:
 1. Second Kata: [Deriving Interaction Data](katas/002_derive_interaction_data.md)
 1. Third Kata: [Importing Pre-Existing Event Data](katas/003_import_preexisting_event_data.md)
 1. Fourth Kata: [Build a Basic Dashboard](katas/004_build_a_basic_dashboard.md)
+1. Fifth Kata: [Hybrid Search in OpenSearch](katas/005_1_run_a_hybrid_search.md)
+1. Sixth Kata: [Protecting Sensitive Information while using UBI](katas/006_protecting_sensitive_information.md)
 
 # Useful Commands for Chorus
 
