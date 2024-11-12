@@ -304,7 +304,7 @@ class App extends Component {
                 console.log("onValueChanged search value: ", value)
 
                 //generate a new query id to track events
-                const query_id = genQueryId();
+                const query_id = generateQueryId();
                 let e = new UbiEvent('on_search', client_id, query_id, value);
                 e.message_type = 'QUERY'
                 ubi_client.log_event(e);
