@@ -24,7 +24,7 @@ const event_server = "http://127.0.0.1:9090"; // Middleware
 const search_server = "http://localhost:9090"; // Proxy queries through Middleware
 const search_credentials = "*:*";
 const search_index = 'ecommerce'
-const object_id_field = 'primary_ean'
+const object_id_field = 'asin'
 const ubi_application = 'chorus'
 const verbose_ubi_client = true;
 
@@ -342,7 +342,7 @@ class App extends Component {
             componentId="searchbox"
             placeholder="Search for products, brands or EAN"
             autosuggest={false}
-            dataField={["id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]}
+            dataField={["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]}
             customQuery={
               function(value) {
                 //return queries[ 'default' ](value);
@@ -371,7 +371,7 @@ class App extends Component {
                     query: {
                       multi_match: {
                         query: value,
-                        fields: [ "id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]
+                        fields: ["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]
                       }
                     }
                   }
@@ -500,7 +500,7 @@ class App extends Component {
                     <ResultCard.Image
                       style={{
                         backgroundSize: "cover",
-                        backgroundImage: `url(${item.img_500x500})`
+                        backgroundImage: `url(${item.image})`
                       }}
 
                     />

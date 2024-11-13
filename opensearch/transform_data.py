@@ -1,22 +1,39 @@
 import sys
 import json
-import random
 
-
+# Input and output file settings
 n = len(sys.argv)
-fIn = 'icecat-products-w_price-19k-20201127.json' if n <= 1 else sys.argv[1]
-fOut = 'transformed_data.json' if n <= 2 else sys.argv[2]
+fIn = 'esci_10000.json' if n <= 1 else sys.argv[1]
+outfile_prefix = 'transformed_esci_'
 
+# Open the input file
+with open(fIn, encoding='utf8', errors='ignore') as fIn:
+    batch_size = 5000
+    actions = ""
+    n = 0
+    i = 1
+    index_name = "ecommerce"
 
-fIn = open(fIn, encoding='utf8', errors='ignore')
-data = json.load(fIn)
+    # Process each line in the input file
+    for line in fIn:
+        if line.strip():  # Avoid processing empty lines
+            json_obj = json.loads(line)
+            if json_obj['locale'] == "us":  # skip non-English products
+                # Create the bulk action line for OpenSearch
+                action_meta = {"index": {"_index": index_name, "_id": json_obj['asin']}}
+                action_line = json.dumps(action_meta) + '\n' + json.dumps(json_obj) + '\n'
+                actions += action_line
+                n += 1
 
-with open(fOut, 'w', encoding='utf8') as fOut:
-	for row in data:
-		price = row.get('price', 1)
-		cost = 0 if price < 2 else random.randint(0, price - 1)
+                # Write to file when batch size is reached
+                if n >= batch_size:
+                    with open(f"{outfile_prefix}{i}.json", 'w', encoding='utf8') as fOut:
+                        fOut.write(actions)
+                    actions = ""
+                    n = 0
+                    i += 1
 
-		row['primary_ean'] = row['ean'][0]
-		row['cost'] = cost
-		fOut.write('{ "index" : {"_id" : "' + row['id'] + '"}}\n')
-		fOut.write(json.dumps(row) + '\n')
+    # Write any remaining actions to a final file
+    if actions:
+        with open(f"{outfile_prefix}final.json", 'w', encoding='utf8') as fOut:
+            fOut.write(actions)
