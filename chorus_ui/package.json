@@ -9,7 +9,7 @@
     "node": ">=18.0.0 <19.0.0"
   },
   "dependencies": {
-    "@appbaseio/reactivesearch": "^3.28.0",
+    "@appbaseio/reactivesearch": "^3.45.0",
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@opensearch-project/opensearch": "^2.5.0",
     "assert": "^2.1.0",
