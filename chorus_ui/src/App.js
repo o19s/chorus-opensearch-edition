@@ -236,7 +236,7 @@ class App extends Component {
             componentId="algopicker" />
           <MultiList
             componentId="supplier_name"
-            dataField="supplier"
+            dataField="attrs.Brand.keyword"
             title="Filter by Brands"
             size={20}
             showSearch={false}
@@ -267,7 +267,7 @@ class App extends Component {
           />
           <MultiList
             componentId="product_type"
-            dataField="filter_product_type"
+            dataField="category_filter"
             title="Filter by Product Types"
             size={20}
             showSearch={false}
@@ -342,7 +342,7 @@ class App extends Component {
             componentId="searchbox"
             placeholder="Search for products, brands or EAN"
             autosuggest={false}
-            dataField={["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]}
+            dataField={["id", "title", "category_filter", "bullets", "description", "attrs.Brand", "attrs.Color"]}
             customQuery={
               function(value) {
                 //return queries[ 'default' ](value);
@@ -510,9 +510,9 @@ class App extends Component {
                       }}
                     />
                     <ResultCard.Description>
-                      {item.price/100 +
+                      {item.price +
                         " $ | " +
-                        item.supplier}
+                        item.attrs.Brand}
                   <div>
                   <fieldset style={{
                       width:"120px",
