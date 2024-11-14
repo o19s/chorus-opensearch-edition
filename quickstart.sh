@@ -88,11 +88,11 @@ echo -e "${MAJOR}Waiting for OpenSearch to start up and be online.${RESET}"
 ./opensearch/wait-for-os.sh # Wait for OpenSearch to be online
 
 echo -e "${MAJOR}Creating ecommerce-keyword index, defining its mapping & settings\n${RESET}"
-curl -s -X PUT "http://localhost:9201/ecommerce-keyword/" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
+curl -s -X PUT "http://localhost:9200/ecommerce-keyword/" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
 echo -e "\n"
 
 echo -e "${MAJOR}Creating ecommerce alias for ecommerce-keyword index\n${RESET}"
-curl -s -X POST "http://localhost:9201/ecommerce-keyword/_aliases/ecommerce" -H "Content-Type: application/json"
+curl -s -X POST "http://localhost:9200/ecommerce-keyword/_aliases/ecommerce" -H "Content-Type: application/json"
 echo -e "\n"
 
 echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"
@@ -105,7 +105,7 @@ if [ ! -f ./esci.json ]; then
   echo -e "${MINOR}Unpacking the sample product data, please give it a few minutes!\n${RESET}"
   zstd --decompress esci.json.zst 
   # create a sample for starters
-  head -n 10000 esci.json > esci_10000.json
+  head -n 100000 esci.json > esci_100000.json
 fi
 
 echo -e "${MINOR}Transforming the sample product data into JSON format, please give it a few minutes!\n${RESET}"
@@ -113,8 +113,9 @@ if [ ! -f ./transformed_esci_1.json ]; then
   docker run -v "$(pwd)":/app -w /app python:3 bash -c "python3 ./opensearch/transform_data.py"
 fi
 
+echo -e "${MAJOR}Indexing the product data, please wait...\n${RESET}"
 # Define the OpenSearch endpoint and content header
-OPENSEARCH_URL="http://localhost:9201/ecommerce/_bulk?pretty=false&filter_path=-items"
+OPENSEARCH_URL="http://localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items"
 CONTENT_TYPE="Content-Type: application/json"
 
 # Loop through each JSON file with the prefix "transformed_esci_"

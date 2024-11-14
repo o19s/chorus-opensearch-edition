@@ -3,7 +3,7 @@ import json
 
 # Input and output file settings
 n = len(sys.argv)
-fIn = 'esci_10000.json' if n <= 1 else sys.argv[1]
+fIn = 'esci_100000.json' if n <= 1 else sys.argv[1]
 outfile_prefix = 'transformed_esci_'
 
 # Open the input file
