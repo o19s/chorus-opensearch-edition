@@ -21,6 +21,7 @@ const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
           sessionStorage.getItem('session_id')
           : 'SESSION-' + generateGuid());
 
+const object_id_field = 'primary_ean'; // When we refer to a object by it's ID, this describes what the ID field represents
 
 
 function addToCart(item) {
@@ -211,6 +212,19 @@ class App extends Component {
                 } else {
                   algo = 'keyword';
                 }
+                
+                const extJson = {
+                  ubi: {
+                    query_id: getQueryId(),
+                    user_query: value,
+                    client_id: client_id,
+                    object_id_field: object_id_field,
+                    query_attributes: {
+                      application: 'Chorus'
+                    }
+                  }
+                };
+                
                 if (algo === "keyword") {
                   return {
                     query: {
@@ -219,22 +233,13 @@ class App extends Component {
                         //fields: [ "id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]
                         fields: [  "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]
                       }
-                    }
+                    },
+                    ext: extJson
                   }
                 } else if (algo === "neural") {
                   return {
                     search_pipeline: "neural-search-pipeline",
-                    // ext:{
-                    //   ubi:{
-                    //     query_id: getQueryId(),
-                    //     user_query:value,
-                    //     client_id:client_id,
-                    //     object_id_field:object_id_field,
-                    //     query_attributes:{
-                    //       application:ubi_application
-                    //     }
-                    //   }
-                    // },                    
+                    ext: extJson,                    
                     "_source": {
                         exclude: [
                           "title_embedding"
@@ -258,17 +263,7 @@ class App extends Component {
                 } else if (algo === "hybrid") {
                   return {
                     search_pipeline: "hybrid-search-pipeline",
-                    // ext:{
-                    //   ubi:{
-                    //     query_id: getQueryId(),
-                    //     user_query:value,
-                    //     client_id:client_id,
-                    //     object_id_field:object_id_field,
-                    //     query_attributes:{
-                    //       application:ubi_application
-                    //     }
-                    //   }
-                    // },     
+                    ext: extJson,     
                     "_source": {
                         exclude: [
                           "title_embedding"
