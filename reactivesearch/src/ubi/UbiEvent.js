@@ -2,11 +2,11 @@ class UbiEvent {
   /**
    * This maps to the UBI Specification at https://github.com/o19s/ubi
    */
-  constructor(action_name, client_id, query_id, event_attributes, message = null) {
+  constructor(action_name, client_id, session_id, query_id, event_attributes, message = null) {
     this.application = "Chorus"
     this.action_name = action_name;
     this.query_id = query_id;
-    this.session_id = '';        
+    this.session_id = session_id;        
     this.client_id = client_id;
     this.user_id = '';
     this.timestamp = Date.now();

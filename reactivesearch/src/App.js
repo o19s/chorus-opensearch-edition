@@ -19,7 +19,7 @@ const search_server = "http://localhost:9090"; // Send all queries through Middl
 const client_id = 'CLIENT-eeed-43de-959d-90e6040e84f9'; // demo client id
 const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
           sessionStorage.getItem('session_id')
-          : 'SESSION-' + genGuid());
+          : 'SESSION-' + generateGuid());
 
 
 
@@ -31,8 +31,7 @@ function addToCart(item) {
   var cart = document.getElementById("cart");
   cart.textContent = shopping_cart;
   
-  const event = new UbiEvent('add_to_cart', client_id, 
-    getQueryId(), 
+  const event = new UbiEvent('add_to_cart', client_id, session_id, getQueryId(), 
     new UbiEventAttributes('product', item.primary_ean, item.title, item), 
     item.title + ' (' + item.id + ')');
   
@@ -42,17 +41,33 @@ function addToCart(item) {
 
 }
 
+/**
+ * Generates a unique query ID and stores it in sessionStorage.
+ *
+ * This function creates a new GUID using the `generateGuid` function,
+ * saves it in the session storage under the key 'query_id',
+ * and returns the generated query ID.
+ *
+ * It represents a unique Search Query.  It optionally can be 
+ * generated on the server side and returned in the response.
+ */
+function generateQueryId(){
+  const query_id = generateGuid();
+  sessionStorage.setItem('query_id', query_id);
+  return query_id;
+}
+
 function getQueryId(){
   return sessionStorage.getItem('query_id');
 }
 
-function genGuid() {
+function generateGuid() {
   let id = '';
   try{
     id = crypto.randomUUID();
   }
   catch(error){
-    console.log('tried to generate a genGuid in insecure context')
+    console.log('tried to generate a generateGuid in insecure context')
     id ='10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c =>
       (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
@@ -70,6 +85,29 @@ class App extends Component {
       app="ecommerce"
       credentials="*:*"
       enableAppbase={false}
+      transformRequest={async (request) => {
+        // Need to change the index we are referencing in queries per algorithm.        
+        const algorithm = document.getElementById('algopicker').value;   
+        let url = request.url;
+        
+        switch (algorithm) {    
+          case "keyword":
+            url = url.replace("ecommerce", "ecommerce-keyword");
+            break;
+          case "neural":
+            url = url.replace("ecommerce", "ecommerce-hybrid");
+            break;
+          case "hybrid":
+            url = url.replace("ecommerce", "ecommerce-hybrid");
+            break;
+          default:
+            throw new Error("We don't recognize algorithm " + algorithm);
+        }
+        
+        request.url = url
+        
+        return request;
+      }}
     >
       <div style={{ height: "200px", width: "100%"}}>
         <img style={{ height: "100%", class: "center"  }} src={chorusLogo} />
@@ -99,26 +137,50 @@ class App extends Component {
             title="Pick your Algo"
             componentId="algopicker" />
           <MultiList
-            componentId="supplier_name"
+            componentId="brands_list"
             dataField="supplier"
             title="Filter by Brands"
             size={20}
             showSearch={false}
             react={{
-              and: ["searchbox", "product_type"]
+              and: ["searchbox", "product_types"]
             }}
             style={{ "paddingBottom": "10px", "paddingTop": "10px" }}
+            onValueChange={
+              function(arr) {
+                //convert array into json object
+                let brands = String(arr)
+                let filter = { 'filter':brands };
+                const event = new UbiEvent('brand_filter', client_id, session_id, getQueryId(), 
+                  new UbiEventAttributes('filter_data', genObjectId(), "brands_list", filter), 
+                  'filtering on brands: ' + brands);
+                event.message_type = 'FILTER';               
+                console.log(event);
+              }
+            }
           />
           <MultiList
-            componentId="product_type"
+            componentId="product_types"
             dataField="filter_product_type"
             title="Filter by Product Types"
             size={20}
             showSearch={false}
             react={{
-              and: ["searchbox", "supplier_name"]
+              and: ["searchbox", "brands_list"]
             }}
             style={{ "paddingBottom": "10px", "paddingTop": "10px" }}
+            onValueChange={
+              function(arr) {
+                //convert array into json object
+                let product_types = String(arr)
+                let filter = { 'filter':product_types };
+                const event = new UbiEvent('product_types_filter', client_id, session_id, getQueryId(), 
+                  new UbiEventAttributes('filter_data', genObjectId(), "product_types", filter), 
+                  'filtering on product types: ' + brands);
+                event.message_type = 'FILTER';               
+                console.log(event);
+              }
+            }
           />
         </div>
         <div style={{ display: "flex", flexDirection: "column", width: "75%" }}>
@@ -129,15 +191,24 @@ class App extends Component {
             componentId="searchbox"
             placeholder="Search for products, brands or EAN"
             autosuggest={false}
-            dataField={["id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]}
+            dataField={["id", "name", "title", "product_type" , "short_description", "search_attributes", "primary_ean"]}
+            onValueChange={
+              function(value) {
+                
+                //generate a new query id to track events
+                const query_id = generateQueryId();
+                const event = new UbiEvent('on_search', client_id, session_id, query_id, null, value);
+                event.message_type = 'QUERY'
+                console.log(event)
+              }
+            }
             customQuery={
               function(value) {
-                var elem = document.getElementById('algopicker');
-                var algo = "";
-                if (elem) {
-                  algo = elem.value
+                var algopicker = document.getElementById('algopicker');
+                var algo = null;
+                if (algopicker) {
+                  algo = algopicker.value
                 } else {
-                  console.log("Unable to determine selected algorithm!");
                   algo = 'keyword';
                 }
                 if (algo === "keyword") {
@@ -145,7 +216,8 @@ class App extends Component {
                     query: {
                       multi_match: {
                         query: value,
-                        fields: [ "id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]
+                        //fields: [ "id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]
+                        fields: [  "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]
                       }
                     }
                   }
