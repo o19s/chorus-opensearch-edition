@@ -92,13 +92,23 @@ services:
       - './chorus_ui:/usr/src/app'
       - '/usr/src/app/node_modules'
     ports:
-      - 4000:3000
+      - 3001:3000
+      
+  reactivesearch:
+    container_name: reactivesearch
+    build: ./reactivesearch/.
+
+    volumes:
+      - './reactivesearch:/usr/src/app'
+      - '/usr/src/app/node_modules'
+    ports:
+      - 3000:3000   
 
   quepid:
     container_name: quepid
     image: o19s/quepid:7.15.1
     ports:
-      - 3000:3000
+      - 4000:3000
     environment:
       - PORT=3000
       - RACK_ENV=production

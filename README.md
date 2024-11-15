@@ -26,11 +26,12 @@ Want to stay up-to-date with the community? Visit https://querqy.org/ to learn m
 
 # What Runs Where
 
-* The UI (Reactivesearch) runs at http://localhost:4000 |  http://chorus-opensearch-edition.dev.o19s.com:4000
+* The UI (Reactivesearch) runs at http://localhost:3000 |  http://chorus-opensearch-edition.dev.o19s.com:3000
+* The UI (Chorus UI) runs at http://localhost:3001 |  http://chorus-opensearch-edition.dev.o19s.com:3001
 * OpenSearch runs at http://localhost:9200 |  http://chorus-opensearch-edition.dev.o19s.com:9200
 * OpenSearch Dashboards runs at http://localhost:5601/app/home |  http://chorus-opensearch-edition.dev.o19s.com:5601/app/home
 * OpenSearch Data Prepper runs at http://localhost:2021/ |  http://chorus-opensearch-edition.dev.o19s.com:2021/
-* Quepid runs at http://localhost:3000  |  http://chorus-opensearch-edition.dev.o19s.com:3000
+* Quepid runs at http://localhost:4000  |  http://chorus-opensearch-edition.dev.o19s.com43000
 
 Working with macOS? Pop open all the tuning related web pages with one terminal command:
 > open http://localhost:4000 http://localhost:5601/app/home http://localhost:3000
@@ -141,7 +142,8 @@ The version of the Icecat product data that Chorus [provides](https://querqy.org
 
 # Known Issues
 
-1. We have removed SMUI until Querqy is updated to OpenSearch 1.12.
+1. We have removed SMUI until Querqy is updated for recent OpenSearch versions.
 1. We have removed the kata `001_optimize_a_query.md` until SMUI is back.
+1. Waiting for OpenSearch 2.18 and UBI 2.18 with the fix for _msearch and pipelines.
 
 Of course, contributions are very welcome to improve Chorus - The OpenSearch Edition!

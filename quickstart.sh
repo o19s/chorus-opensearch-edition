@@ -59,7 +59,7 @@ do
 	shift
 done
 
-services="opensearch opensearch-dashboards dataprepper middleware chorus-ui"
+services="opensearch opensearch-dashboards dataprepper middleware chorus-ui reactivesearch"
 
 if $offline_lab; then
   services="${services} quepid"

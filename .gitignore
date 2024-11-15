@@ -13,3 +13,4 @@ katas/celerybeat-schedule.db
 katas/django-errors.log
 venv/
 __pycache__/
+reactivesearch/node_modules
