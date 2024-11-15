@@ -56,6 +56,18 @@ Learn more by following this sequence of Katas:
 1. Fifth Kata: [Hybrid Search in OpenSearch](katas/005_1_run_a_hybrid_search.md)
 1. Sixth Kata: [Protecting Sensitive Information while using UBI](katas/006_protecting_sensitive_information.md)
 
+# Ports
+
+These are the ports that Chorus uses:
+
+* `4000` - Chorus UI
+* `9090` - Search "middleware" that handles queries and User Behavior Insights (UBI) data.
+* `2021` - Data Prepper - HTTP source for UBI events
+* `4900` - Data Prepper
+* `21890` - Data Prepper - OTEL trace source for UBI events
+* `9200` - OpenSearch
+* `5601` - OpenSearch Dashboards
+
 # Useful Commands for Chorus
 
 To start your environment, but still run each command to set up the integrations manually, run:
