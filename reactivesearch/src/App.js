@@ -10,6 +10,8 @@ import {
 } from "@appbaseio/reactivesearch";
 import AlgoPicker from './custom/AlgoPicker';
 import ShoppingCartButton from './custom/ShoppingCartButton';
+import UbiEvent from './ubi/UbiEvent';
+import UbiEventAttributes from './ubi/UbiEventAttributes'
 import chorusLogo from './assets/chorus-logo.png';
 
 const search_server = "http://localhost:9090"; // Send all queries through Middleware
@@ -21,23 +23,28 @@ const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
 
 
 
-function addToCart(item=null) {
+function addToCart(item) {
   let shopping_cart = sessionStorage.getItem("shopping_cart");
   shopping_cart = parseInt(shopping_cart, 10) || 0
   shopping_cart++;
   sessionStorage.setItem("shopping_cart", shopping_cart);
   var cart = document.getElementById("cart");
   cart.textContent = shopping_cart;
+  
+  const event = new UbiEvent('add_to_cart', client_id, 
+    getQueryId(), 
+    new UbiEventAttributes('product', item.primary_ean, item.title, item), 
+    item.title + ' (' + item.id + ')');
+  
+  event.message_type = 'CONVERSION';
+  
+  console.log(event);
 
-  // let e = new UbiEvent('add_to_cart', client_id, getQueryId());
-  // e.message_type = 'CONVERSION';
-  // e.message = item.title + ' (' + item.id + ')';
-
-  // e.event_attributes.object = new UbiEventData('product', item.primary_ean, item.title, item);
-  // ubi_client.log_event(e);
-  console.log('User just bought ' + item.title);
 }
 
+function getQueryId(){
+  return sessionStorage.getItem('query_id');
+}
 
 function genGuid() {
   let id = '';
