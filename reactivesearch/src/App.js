@@ -9,6 +9,7 @@ import {
   SingleList
 } from "@appbaseio/reactivesearch";
 import AlgoPicker from './custom/AlgoPicker';
+import ShoppingCartButton from './custom/ShoppingCartButton';
 import chorusLogo from './assets/chorus-logo.png';
 
 const search_server = "http://localhost:9090"; // Send all queries through Middleware
@@ -71,14 +72,8 @@ class App extends Component {
             <br/>
             <code>Your Session ID: {session_id}</code>
             <br/>
-            <code>Your <span style={{fontSize:24 }}>🛒</span>
-              Items:
-              <button id="cart" onClick ={
-                function(results) {
-                  alert("Maybe someday I'll show you what's in your cart!");
-                }}>
-                  0
-            </button>
+            <code>Your <span style={{fontSize:24 }}>🛒</span> Items:
+              <ShoppingCartButton/>              
             </code>
           </small>
         </div>
