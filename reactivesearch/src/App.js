@@ -238,32 +238,25 @@ class App extends Component {
                   }
                 } else if (algo === "neural") {
                   return {
-                    search_pipeline: "neural-search-pipeline",
-                    ext: extJson,                    
+                    search_pipeline: "neural-search-pipeline",                                      
                     "_source": {
                         exclude: [
                           "title_embedding"
                         ]
                     },
-                    query: {
-                      hybrid: {
-                        queries: [
-                          {
-                            neural: {
-                              title_embedding: {
-                                query_text: value,
-                                k: 5
-                              }
-                            }
-                          }
-                        ]
+                    query: {                  
+                      neural: {
+                        title_embedding: {
+                          query_text: value,
+                          k: 50
+                        }
                       }
-                    }
+                    },                    
+                    ext: extJson                 
                   }
                 } else if (algo === "hybrid") {
                   return {
-                    search_pipeline: "hybrid-search-pipeline",
-                    ext: extJson,     
+                    search_pipeline: "hybrid-search-pipeline",     
                     "_source": {
                         exclude: [
                           "title_embedding"
@@ -289,7 +282,8 @@ class App extends Component {
                           }
                         ]
                       }
-                    }
+                    },
+                    ext: extJson
                   }
                 } 
                else {
