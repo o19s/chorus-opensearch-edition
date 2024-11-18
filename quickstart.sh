@@ -105,12 +105,11 @@ if [ ! -f ./esci.json ]; then
   echo -e "${MINOR}Unpacking the sample product data, please give it a few minutes!\n${RESET}"
   zstd --decompress esci.json.zst 
   # create a sample for starters
-  head -n 100000 esci.json > esci_100000.json
 fi
 
 echo -e "${MINOR}Transforming the sample product data into JSON format, please give it a few minutes!\n${RESET}"
 if [ ! -f ./transformed_esci_1.json ]; then
-  docker run -v "$(pwd)":/app -w /app python:3 bash -c "python3 ./opensearch/transform_data.py"
+  docker run -v "$(pwd)":/app -w /app python:3 bash -c "pip install -r requirements.txt && python3 ./opensearch/transform_data.py"
 fi
 
 echo -e "${MAJOR}Indexing the product data, please wait...\n${RESET}"
