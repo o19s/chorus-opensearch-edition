@@ -12,8 +12,12 @@ import AlgoPicker from './custom/AlgoPicker';
 import ShoppingCartButton from './custom/ShoppingCartButton';
 import UbiEvent from './ubi/UbiEvent';
 import UbiEventAttributes from './ubi/UbiEventAttributes'
+import UbiClient from './ubi/UbiClient'
 import chorusLogo from './assets/chorus-logo.png';
 
+const event_server = "http://localhost:9090"; // Middleware
+//const event_server = "http://localhost:2021"; // DataPrepper
+//const search_server = "http://localhost:9200"; // OpenSearch
 const search_server = "http://localhost:9090"; // Send all queries through Middleware
 
 const client_id = 'CLIENT-eeed-43de-959d-90e6040e84f9'; // demo client id
@@ -23,6 +27,7 @@ const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
 
 const object_id_field = 'primary_ean'; // When we refer to a object by it's ID, this describes what the ID field represents
 
+const ubiClient = new  UbiClient(event_server);
 
 function addToCart(item) {
   let shopping_cart = sessionStorage.getItem("shopping_cart");
@@ -38,6 +43,7 @@ function addToCart(item) {
   
   event.message_type = 'CONVERSION';
   
+  ubiClient.log_event(event);
   console.log(event);
 
 }
@@ -60,6 +66,10 @@ function generateQueryId(){
 
 function getQueryId(){
   return sessionStorage.getItem('query_id');
+}
+
+function generateObjectId(){
+  return 'OBJECT-'+genGuid();
 }
 
 function generateGuid() {
@@ -86,6 +96,8 @@ class App extends Component {
       app="ecommerce"
       credentials="*:*"
       enableAppbase={false}
+      recordAnalytics={true}
+      searchStateHeader={true}
       transformRequest={async (request) => {
         // Need to change the index we are referencing in queries per algorithm.        
         const algorithm = document.getElementById('algopicker').value;   
@@ -137,52 +149,71 @@ class App extends Component {
           <AlgoPicker
             title="Pick your Algo"
             componentId="algopicker" />
-          <MultiList
-            componentId="brands_list"
-            dataField="supplier"
-            title="Filter by Brands"
-            size={20}
-            showSearch={false}
-            react={{
-              and: ["searchbox", "product_types"]
-            }}
-            style={{ "paddingBottom": "10px", "paddingTop": "10px" }}
-            onValueChange={
-              function(arr) {
+            <MultiList
+              componentId="supplier_name"
+              dataField="supplier"
+              title="Filter by Brands"
+              size={20}
+              showSearch={false}
+              onValueChange={
+                function(arr) {
+                  console.log('filtering on brands');
+                  //convert array into json object
+                  let sfilter = String(arr)
+                  let filter = {'filter':sfilter};
+                  var event = new UbiEvent('brand_filter', client_id, session_id, getQueryId(), 
+                    new UbiEventAttributes('filter_data', null, "brands_list", sfilter), 
+                    'filtering on brands: ' + sfilter);
+                  event.message_type = 'FILTER';               
+                  console.log(event);
+                  ubiClient.log_event(event);
+                }
+              }
+              onQueryChange={
+                function(prevQuery, nextQuery) {
+                  if(nextQuery != prevQuery){
+  
+                  }
+                }
+              }
+              react={{
+                and: ["searchbox", "product_type"]
+              }}
+              style={{ "paddingBottom": "10px", "paddingTop": "10px" }}
+            />
+            <MultiList
+              componentId="product_type"
+              dataField="filter_product_type"
+              title="Filter by Product Types"
+              size={20}
+              showSearch={false}
+              react={{
+                and: ["searchbox", "supplier_name"]
+              }}            
+              style={{ "paddingBottom": "10px", "paddingTop": "10px" }}
+              onValueChange={
+                function(arr) {
+                console.log('filtering on product types');
                 //convert array into json object
-                let brands = String(arr)
-                let filter = { 'filter':brands };
-                const event = new UbiEvent('brand_filter', client_id, session_id, getQueryId(), 
-                  new UbiEventAttributes('filter_data', genObjectId(), "brands_list", filter), 
-                  'filtering on brands: ' + brands);
+                let sfilter = String(arr)
+                let filter = {'filter':sfilter};
+                var event = new UbiEvent('product_type_filter', client_id, session_id, getQueryId(), 
+                  new UbiEventAttributes('filter_data', null, "product_types", sfilter), 
+                  'filtering on product types: ' + sfilter);
                 event.message_type = 'FILTER';               
                 console.log(event);
+                ubiClient.log_event(event);
+                }
               }
-            }
-          />
-          <MultiList
-            componentId="product_types"
-            dataField="filter_product_type"
-            title="Filter by Product Types"
-            size={20}
-            showSearch={false}
-            react={{
-              and: ["searchbox", "brands_list"]
-            }}
-            style={{ "paddingBottom": "10px", "paddingTop": "10px" }}
-            onValueChange={
-              function(arr) {
-                //convert array into json object
-                let product_types = String(arr)
-                let filter = { 'filter':product_types };
-                const event = new UbiEvent('product_types_filter', client_id, session_id, getQueryId(), 
-                  new UbiEventAttributes('filter_data', genObjectId(), "product_types", filter), 
-                  'filtering on product types: ' + brands);
-                event.message_type = 'FILTER';               
-                console.log(event);
+              onQueryChange={
+                function(prevQuery, nextQuery) {
+                  if(nextQuery != prevQuery){
+  
+                  }
+                }
               }
-            }
-          />
+  
+            />
         </div>
         <div style={{ display: "flex", flexDirection: "column", width: "75%" }}>
           <DataSearch
@@ -196,11 +227,15 @@ class App extends Component {
             onValueChange={
               function(value) {
                 
-                //generate a new query id to track events
+                //generate a new query id to track events against
                 const query_id = generateQueryId();
-                const event = new UbiEvent('on_search', client_id, session_id, query_id, null, value);
+                
+                // We log the event to ubi_events but that isn't strictly required since
+                // the plugin in OpenSearch will log a record into ubi_queries.
+                const event = new UbiEvent('search', client_id, session_id, query_id, null, value);
                 event.message_type = 'QUERY'
                 console.log(event)
+                ubiClient.log_event(event);
               }
             }
             customQuery={
