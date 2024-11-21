@@ -144,6 +144,5 @@ The version of the Icecat product data that Chorus [provides](https://querqy.org
 
 1. We have removed SMUI until Querqy is updated for recent OpenSearch versions.
 1. We have removed the kata `001_optimize_a_query.md` until SMUI is back.
-1. Waiting for OpenSearch 2.18 and UBI 2.18 with the fix for _msearch and pipelines.
 
 Of course, contributions are very welcome to improve Chorus - The OpenSearch Edition!
