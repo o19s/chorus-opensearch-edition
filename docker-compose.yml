@@ -82,17 +82,6 @@ services:
       DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
     depends_on:
       - opensearch
-
-  chorus-ui:
-    container_name: chorus_ui
-    build: ./chorus_ui/.
-    depends_on:
-      - opensearch
-    volumes:
-      - './chorus_ui:/usr/src/app'
-      - '/usr/src/app/node_modules'
-    ports:
-      - 3001:3000
       
   reactivesearch:
     container_name: reactivesearch

@@ -59,7 +59,7 @@ do
 	shift
 done
 
-services="opensearch opensearch-dashboards dataprepper middleware chorus-ui reactivesearch"
+services="opensearch opensearch-dashboards dataprepper middleware reactivesearch"
 
 if $offline_lab; then
   services="${services} quepid"
@@ -67,8 +67,7 @@ fi
 
 if ! $local_deploy; then
   echo -e "${MAJOR}Updating configuration files for online deploy${RESET}"
-  sed -i.bu 's/localhost/chorus-opensearch-edition.dev.o19s.com/g'  ./chorus_ui/src/Logs.js
-  sed -i.bu 's/localhost/chorus-opensearch-edition.dev.o19s.com/g'  ./chorus_ui/src/App.js
+  sed -i.bu 's/localhost/chorus-opensearch-edition.dev.o19s.com/g'  ./reactivesearch/src/App.js
   sed -i.bu 's/localhost/chorus-opensearch-edition.dev.o19s.com/g'  ./opensearch/wait-for-os.sh
 fi
 
