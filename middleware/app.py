@@ -133,11 +133,12 @@ def multisearch(prefix):
 def ubi_events():
 
     if request.method == "OPTIONS":
-        response = flask.jsonify(status=200, mimetype="application/json")
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Headers", "Content-Type")
-        return response
-
+      response = flask.jsonify(status=200, mimetype="application/json")
+      response.headers.add("Access-Control-Allow-Origin", "*")
+      response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+      response.headers.add("Access-Control-Request-Method", "*")
+      return response
+        
     else:
 
         # Send the event to Data Prepper.
