@@ -6,8 +6,13 @@ import { UbiEvent } from './UbiEvent';
  * for logging events
  */
 
+/**
+ * Class to handle OpenSearch authentication (eventually) log connectivity
+ */
 class UbiClient {
     constructor(baseUrl) {
+        this.url = `${baseUrl}/ubi_events`;
+        console.warn("baseUrl is " + baseUrl)
         
         //TODO: add authentication
         this.rest_config = {
