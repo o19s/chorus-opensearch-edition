@@ -9,7 +9,7 @@ class UbiEvent {
     this.session_id = session_id;        
     this.client_id = client_id;
     this.user_id = '';
-    this.timestamp = Date.now();
+    this.timestamp = new Date().toISOString();
     this.message_type = 'INFO';
     this.message = message || '';     // Default to an empty string if no message
     this.event_attributes = event_attributes
