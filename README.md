@@ -27,7 +27,6 @@ Want to stay up-to-date with the community? Visit https://querqy.org/ to learn m
 # What Runs Where
 
 * The UI (Reactivesearch) runs at http://localhost:3000 |  http://chorus-opensearch-edition.dev.o19s.com:3000
-* The UI (Chorus UI) runs at http://localhost:3001 |  http://chorus-opensearch-edition.dev.o19s.com:3001
 * OpenSearch runs at http://localhost:9200 |  http://chorus-opensearch-edition.dev.o19s.com:9200
 * OpenSearch Dashboards runs at http://localhost:5601/app/home |  http://chorus-opensearch-edition.dev.o19s.com:5601/app/home
 * OpenSearch Data Prepper runs at http://localhost:2021/ |  http://chorus-opensearch-edition.dev.o19s.com:2021/
@@ -149,14 +148,36 @@ Of course, contributions are very welcome to improve Chorus - The OpenSearch Edi
 
 
 # Demo Script
+Here is a reasonable script for demonstrating the power of UBI in Cjhorus.
 
 1. Open up Firefox and put web inspector on the right.
-1. Filter logs to ONLY "Logs", disable all the other options so you only see our events.
-1. Search for "Notebook Case"
-1. Highlight that we get a "query_id".
+1. Filter logs to ONLY **Logs**, disable all the other options so you only see our events.
+1. Search for `Notebook Case`
+1. Highlight that we get a `query_id`.
 1. Clear the history of logs
-1. Notice you like Kensington brand and pick it
+1. Notice you like __Kensington__ brand and pick it
+1. Highlight that we get a new filter event, but with the same `query_id`.
 1. Pick one and click add to cart.
-
 1. Jump to http://chorus-opensearch-edition.dev.o19s.com:5601/
-1. Go to devtools
+1. Go to devtools and run the below queries, swapping your own specific `query_id` in:
+
+```
+GET ubi_events/_search
+{
+  "query": {
+    "match": {
+      "query_id": "9d32df94-64ac-4673-abfd-bab889e275d9"
+    }
+  },
+  "sort": {
+    "timestamp": "asc"
+  }
+}
+
+GET ubi_queries/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+```
