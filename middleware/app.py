@@ -35,7 +35,7 @@ def search(prefix):
     if request.method == "OPTIONS":
         response = flask.jsonify(status=200, mimetype="application/json")
         response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Headers", "Authorization,Content-Type")
+        response.headers.add("Access-Control-Allow-Headers", "Authorization, Content-Type")
         response.headers.add("Access-Control-Request-Method", "*")
         return response
 
@@ -87,7 +87,7 @@ def multisearch(prefix):
     if request.method == "OPTIONS":
         response = flask.jsonify(status=200, mimetype="application/json")
         response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Headers", "Authorization,Content-Type")
+        response.headers.add("Access-Control-Allow-Headers", "Authorization, Content-Type")
         response.headers.add("Access-Control-Request-Method", "*")
         return response
 
@@ -135,8 +135,8 @@ def ubi_events():
     if request.method == "OPTIONS":
       response = flask.jsonify(status=200, mimetype="application/json")
       response.headers.add("Access-Control-Allow-Origin", "*")
-      response.headers.add("Access-Control-Allow-Headers", "Content-Type")
-      response.headers.add("Access-Control-Request-Method", "*")
+      response.headers.add("Access-Control-Allow-Headers", "Authorization, Content-Type")
+      response.headers.add("Access-Control-Request-Method", "POST")
       return response
         
     else:

@@ -146,3 +146,17 @@ The version of the Icecat product data that Chorus [provides](https://querqy.org
 1. We have removed the kata `001_optimize_a_query.md` until SMUI is back.
 
 Of course, contributions are very welcome to improve Chorus - The OpenSearch Edition!
+
+
+# Demo Script
+
+1. Open up Firefox and put web inspector on the right.
+1. Filter logs to ONLY "Logs", disable all the other options so you only see our events.
+1. Search for "Notebook Case"
+1. Highlight that we get a "query_id".
+1. Clear the history of logs
+1. Notice you like Kensington brand and pick it
+1. Pick one and click add to cart.
+
+1. Jump to http://chorus-opensearch-edition.dev.o19s.com:5601/
+1. Go to devtools
