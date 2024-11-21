@@ -5,14 +5,10 @@ import { UbiEvent } from './UbiEvent';
  * Methods and client to talk directly with the OpenSearch UBI plugin
  * for logging events
  */
-
-/**
- * Class to handle OpenSearch authentication (eventually) log connectivity
- */
 class UbiClient {
     constructor(baseUrl) {
+        // point to the speicfic middleware endpoint for receiving events
         this.url = `${baseUrl}/ubi_events`;
-        console.warn("baseUrl is " + baseUrl)
         
         //TODO: add authentication
         this.rest_config = {
@@ -47,7 +43,7 @@ class UbiClient {
             }
         }
 
-        // Data prepper appears to always want an array of JSON.
+        // Data prepper wants an array of JSON.
         let json = JSON.stringify([e]);
         if (this.verbose > 0) {
             console.log('POSTing event: ' + json);
