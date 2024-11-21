@@ -112,6 +112,9 @@ docker run -v ./:/app -w /app python:3 python3 ./opensearch/transform_data.py ic
 echo -e "${MAJOR}Indexing the sample product data, please wait...\n${RESET}"
 curl -s -X POST "http://localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items" -H 'Content-Type: application/json' --data-binary @transformed_data.json
 
+echo -e "${MAJOR}Setting up User Behavior Insights indexes...\n${RESET}"
+curl -s -X POST "http://localhost:9200/_plugins/ubi/initialize"
+
 
 if $offline_lab; then
   echo -e "${MAJOR}Setting up Quepid${RESET}"
