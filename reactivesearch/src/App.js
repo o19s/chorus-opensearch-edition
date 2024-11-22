@@ -250,9 +250,8 @@ class App extends Component {
                     user_query: value,
                     client_id: client_id,
                     object_id_field: object_id_field,
-                    query_attributes: {
-                      application: 'Chorus'
-                    }
+                    application: 'Chorus',
+                    query_attributes: {}
                   }
                 };
                 
