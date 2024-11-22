@@ -24,6 +24,18 @@ To get started you need to have a recent Python version.
 
 1. Lastly, install all the required libraries: `pip install -r requirements.txt`
 
+Or:
+
+```
+cd ./katas
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+jupyter notebook 005_2_run_a_hybrid_search.ipynb
+```
+
+
+
 There are two ways to play with this.  
 
 First, you can use notebook visualization tool Mercury to play with keyword and neural weightings and try out different queries.

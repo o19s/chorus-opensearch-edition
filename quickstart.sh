@@ -59,7 +59,7 @@ do
 	shift
 done
 
-services="opensearch opensearch-dashboards dataprepper middleware chorus-ui"
+services="opensearch opensearch-dashboards dataprepper middleware reactivesearch"
 
 if $offline_lab; then
   services="${services} quepid"
@@ -67,8 +67,7 @@ fi
 
 if ! $local_deploy; then
   echo -e "${MAJOR}Updating configuration files for online deploy${RESET}"
-  sed -i.bu 's/localhost/chorus-opensearch-edition.dev.o19s.com/g'  ./chorus_ui/src/Logs.js
-  sed -i.bu 's/localhost/chorus-opensearch-edition.dev.o19s.com/g'  ./chorus_ui/src/App.js
+  sed -i.bu 's/localhost/chorus-opensearch-edition.dev.o19s.com/g'  ./reactivesearch/src/App.js
   sed -i.bu 's/localhost/chorus-opensearch-edition.dev.o19s.com/g'  ./opensearch/wait-for-os.sh
 fi
 
@@ -111,6 +110,9 @@ docker run -v ./:/app -w /app python:3 python3 ./opensearch/transform_data.py ic
 
 echo -e "${MAJOR}Indexing the sample product data, please wait...\n${RESET}"
 curl -s -X POST "http://localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items" -H 'Content-Type: application/json' --data-binary @transformed_data.json
+
+echo -e "${MAJOR}Setting up User Behavior Insights indexes...\n${RESET}"
+curl -s -X POST "http://localhost:9200/_plugins/ubi/initialize"
 
 
 if $offline_lab; then
