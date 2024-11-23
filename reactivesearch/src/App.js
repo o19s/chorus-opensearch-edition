@@ -10,9 +10,9 @@ import {
 } from "@appbaseio/reactivesearch";
 import AlgoPicker from './custom/AlgoPicker';
 import ShoppingCartButton from './custom/ShoppingCartButton';
-import UbiEvent from './ubi/UbiEvent';
-import UbiEventAttributes from './ubi/UbiEventAttributes'
-import UbiClient from './ubi/UbiClient'
+import { UbiEvent } from './ubi/ubi';
+import { UbiEventAttributes } from './ubi/ubi'
+import { UbiClient } from './ubi/ubi'
 import chorusLogo from './assets/chorus-logo.png';
 
 const event_server = "http://localhost:9090"; // Middleware
@@ -37,7 +37,7 @@ function addToCart(item) {
   var cart = document.getElementById("cart");
   cart.textContent = shopping_cart;
   
-  const event = new UbiEvent('add_to_cart', client_id, session_id, getQueryId(), 
+  var event = new UbiEvent('add_to_cart', client_id, session_id, getQueryId(), 
     new UbiEventAttributes('product', item.primary_ean, item.title, item), 
     item.title + ' (' + item.id + ')');
   
