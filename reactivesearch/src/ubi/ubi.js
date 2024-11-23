@@ -32,7 +32,7 @@ export class UbiClient {
         this.verbose = 0; // Default value for verbose
     }
 
-    async log_event(e, message = null, message_type = null) {
+    async trackEvent(e, message = null, message_type = null) {
         if (message) {
             if (e.message) {
                 e['extra_info'] = message;

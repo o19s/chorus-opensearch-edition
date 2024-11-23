@@ -43,7 +43,7 @@ function addToCart(item) {
   
   event.message_type = 'CONVERSION';
   
-  ubiClient.log_event(event);
+  ubiClient.trackEvent(event);
   console.log(event);
 
 }
@@ -162,7 +162,7 @@ class App extends Component {
                     'filtering on brands: ' + sfilter);
                   event.message_type = 'FILTER';               
                   console.log(event);
-                  ubiClient.log_event(event);
+                  ubiClient.trackEvent(event);
                 }
               }
               onQueryChange={
@@ -198,7 +198,7 @@ class App extends Component {
                   'filtering on product types: ' + sfilter);
                 event.message_type = 'FILTER';               
                 console.log(event);
-                ubiClient.log_event(event);
+                ubiClient.trackEvent(event);
                 }
               }
               onQueryChange={
@@ -231,7 +231,7 @@ class App extends Component {
                 const event = new UbiEvent('search', client_id, session_id, query_id, null, value);
                 event.message_type = 'QUERY'
                 console.log(event)
-                ubiClient.log_event(event);
+                ubiClient.trackEvent(event);
               }
             }
             customQuery={
