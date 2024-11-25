@@ -1,5 +1,0 @@
-# Ignore everything in this directory, 
-# unless/until we move App.js and other static .js files here.
-*
-# Except this file
-!.gitignore

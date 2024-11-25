@@ -15,3 +15,4 @@ venv/
 __pycache__/
 esci.json.zst
 sample.json.gz
+reactivesearch/node_modules
