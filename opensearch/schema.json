@@ -3,7 +3,8 @@
     "index": {
       "number_of_shards": 1,
       "number_of_replicas": 0,
-      "mapping.total_fields.limit": 20000
+      "mapping.total_fields.limit": 20000,
+      "knn": true
     },
     "analysis": {
       "filter": {
@@ -42,6 +43,16 @@
       "title": {
         "type": "text",
         "analyzer": "english_stemmed"
+      },
+      "title_embedding": {
+        "type": "knn_vector",
+        "dimension": 384,
+        "method": {
+          "engine": "lucene",
+          "space_type": "l2",
+          "name": "hnsw",
+          "parameters": {}
+        }
       },
       "bullets": {
         "type": "text",

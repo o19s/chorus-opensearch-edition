@@ -86,12 +86,114 @@ docker compose up -d --build ${services}
 echo -e "${MAJOR}Waiting for OpenSearch to start up and be online.${RESET}"
 ./opensearch/wait-for-os.sh # Wait for OpenSearch to be online
 
-echo -e "${MAJOR}Creating ecommerce-keyword index, defining its mapping & settings\n${RESET}"
-curl -s -X PUT "http://localhost:9200/ecommerce-keyword/" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
-echo -e "\n"
+echo -e "${MAJOR}Configuring the ML Commons plugin.${RESET}"
+curl -s -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: application/json' --data-binary '{
+  "persistent": {
+        "plugins": {
+            "ml_commons": {
+                "only_run_on_ml_node": "false",
+                "model_access_control_enabled": "true",
+                "native_memory_threshold": "99"
+            }
+        }
+    }
+}'
 
-echo -e "${MAJOR}Creating ecommerce alias for ecommerce-keyword index\n${RESET}"
-curl -s -X POST "http://localhost:9200/ecommerce-keyword/_aliases/ecommerce" -H "Content-Type: application/json"
+echo -e "${MAJOR}Registering a model group.${RESET}"
+response=$(curl -s -X POST "http://localhost:9200/_plugins/_ml/model_groups/_register" \
+  -H 'Content-Type: application/json' \
+  --data-binary '{
+    "name": "neural_search_model_group",
+    "description": "A model group for neural search models"
+  }')
+
+# Extract the model_group_id from the JSON response
+model_group_id=$(echo "$response" | jq -r '.model_group_id')
+
+# Use the extracted model_group_id
+echo "Created Model Group with id: $model_group_id"
+
+echo -e "${MAJOR}Registering a model in the model group.${RESET}"
+response=$(curl -s -X POST "http://localhost:9200/_plugins/_ml/models/_register" \
+  -H 'Content-Type: application/json' \
+  --data-binary "{
+     \"name\": \"huggingface/sentence-transformers/all-MiniLM-L6-v2\",
+     \"version\": \"1.0.1\",
+     \"model_group_id\": \"$model_group_id\",
+     \"model_format\": \"TORCH_SCRIPT\"
+  }")
+
+# Extract the task_id from the JSON response
+task_id=$(echo "$response" | jq -r '.task_id')
+
+# Use the extracted task_id
+echo "Created Model, get status with task id: $task_id"
+
+
+echo -e "${MAJOR}Waiting for the model to be registered.${RESET}"
+max_attempts=10
+attempts=0
+
+# Wait for task to be COMPLETED
+while [[ "$(curl -s localhost:9200/_plugins/_ml/tasks/$task_id | jq -r '.state')" != "COMPLETED" && $attempts -lt $max_attempts ]]; do
+    echo "Waiting for task to complete... attempt $((attempts + 1))/$max_attempts"
+    sleep 5
+    attempts=$((attempts + 1))
+done
+
+if [[ $attempts -ge $max_attempts ]]; then
+    echo "Limit of attempts reached. Something went wrong with registering the model. Check OpenSearch logs."
+else
+    response=$(curl -s localhost:9200/_plugins/_ml/tasks/$task_id)
+    model_id=$(echo "$response" | jq -r '.model_id')
+    echo "Task completed successfully! Model registered with id: $model_id"
+fi
+
+echo -e "${MAJOR}Deploying the model.${RESET}"
+response=$(curl -s -X POST "http://localhost:9200/_plugins/_ml/models/$model_id/_deploy")
+
+# Extract the task_id from the JSON response
+deploy_task_id=$(echo "$response" | jq -r '.task_id')
+
+echo "Model deployment started, get status with task id: $deploy_task_id"
+
+echo -e "${MAJOR}Waiting for the model to be deployed.${RESET}"
+# Reset attempts
+attempts=0
+
+while [[ "$(curl -s localhost:9200/_plugins/_ml/tasks/$task_id | jq -r '.state')" != "COMPLETED" && $attempts -lt $max_attempts ]]; do
+    echo "Waiting for task to complete... attempt $((attempts + 1))/$max_attempts"
+    sleep 5
+    attempts=$((attempts + 1))
+done
+
+if [[ $attempts -ge $max_attempts ]]; then
+    echo "Limit of attempts reached. Something went wrong with deploying the model. Check OpenSearch logs."
+else
+    response=$(curl -s localhost:9200/_plugins/_ml/tasks/$task_id)
+    model_id=$(echo "$response" | jq -r '.model_id')
+    echo "Task completed successfully! Model deployed with id: $model_id"
+fi
+
+echo -e "${MAJOR}Creating an ingest pipeline for embedding generation during index time.${RESET}"
+curl -s -X PUT "http://localhost:9200/_ingest/pipeline/embeddings-pipeline" \
+  -H 'Content-Type: application/json' \
+  --data-binary "{
+     \"description\": \"A text embedding pipeline\",
+       \"processors\": [
+         {
+          \"text_embedding\": {
+          \"model_id\": \"$model_id\",
+          \"field_map\": {
+            \"title\": \"title_embedding\"
+          }
+        }
+      }
+    ]
+  }"
+
+echo -e "${MAJOR}Creating ecommerce index, defining its mapping & settings\n${RESET}"
+curl -s -X PUT "http://localhost:9200/ecommerce" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
 echo -e "\n"
 
 echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"
@@ -113,7 +215,7 @@ fi
 
 echo -e "${MAJOR}Indexing the product data, please wait...\n${RESET}"
 # Define the OpenSearch endpoint and content header
-OPENSEARCH_URL="http://localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items"
+OPENSEARCH_URL="http://localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items&pipeline=embeddings-pipeline"
 CONTENT_TYPE="Content-Type: application/json"
 
 # Loop through each JSON file with the prefix "transformed_esci_"
