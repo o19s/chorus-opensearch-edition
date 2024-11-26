@@ -12,6 +12,7 @@ import AlgoPicker from './custom/AlgoPicker';
 import ShoppingCartButton from './custom/ShoppingCartButton';
 import { UbiEvent } from './ubi/ubi';
 import { UbiEventAttributes } from './ubi/ubi'
+import { UbiQuery } from './ubi/ubi';
 import { UbiClient } from './ubi/ubi'
 import chorusLogo from './assets/chorus-logo.png';
 
@@ -20,6 +21,7 @@ const event_server = "http://localhost:9090"; // Middleware
 //const search_server = "http://localhost:9200"; // OpenSearch
 const search_server = "http://localhost:9090"; // Send all queries through Middleware
 
+const APPLICATION = "Chorus";
 const client_id = 'CLIENT-eeed-43de-959d-90e6040e84f9'; // demo client id
 const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
           sessionStorage.getItem('session_id')
@@ -37,7 +39,7 @@ function addToCart(item) {
   var cart = document.getElementById("cart");
   cart.textContent = shopping_cart;
   
-  var event = new UbiEvent('add_to_cart', client_id, session_id, getQueryId(), 
+  var event = new UbiEvent(APPLICATION, 'add_to_cart', client_id, session_id, getQueryId(), 
     new UbiEventAttributes('product', item.primary_ean, item.title, item), 
     item.title + ' (' + item.id + ')');
   
@@ -157,7 +159,7 @@ class App extends Component {
                   //convert array into json object
                   let sfilter = String(arr)
                   let filter = {'filter':sfilter};
-                  var event = new UbiEvent('brand_filter', client_id, session_id, getQueryId(), 
+                  var event = new UbiEvent(APPLICATION, 'brand_filter', client_id, session_id, getQueryId(), 
                     new UbiEventAttributes('filter_data', null, "brands_list", sfilter), 
                     'filtering on brands: ' + sfilter);
                   event.message_type = 'FILTER';               
@@ -193,7 +195,7 @@ class App extends Component {
                 //convert array into json object
                 let sfilter = String(arr)
                 let filter = {'filter':sfilter};
-                var event = new UbiEvent('product_type_filter', client_id, session_id, getQueryId(), 
+                var event = new UbiEvent(APPLICATION, 'product_type_filter', client_id, session_id, getQueryId(), 
                   new UbiEventAttributes('filter_data', null, "product_types", sfilter), 
                   'filtering on product types: ' + sfilter);
                 event.message_type = 'FILTER';               
@@ -226,9 +228,15 @@ class App extends Component {
                 //generate a new query id to track events against
                 const query_id = generateQueryId();
                 
+                // If you do not have the UBI plugin enabled in your search engine, then you need
+                // to track the query yourself.
+                // const query = new UbiQuery(APPLICATION, client_id, query_id, value, "_id", {});
+                // query.message_type = 'QUERY'
+                // ubiClient.trackQuery(query)
+                
                 // We log the event to ubi_events but that isn't strictly required since
                 // the plugin in OpenSearch will log a record into ubi_queries.
-                const event = new UbiEvent('search', client_id, session_id, query_id, null, value);
+                const event = new UbiEvent(APPLICATION, 'search', client_id, session_id, query_id, null, value);
                 event.message_type = 'QUERY'
                 console.log(event)
                 ubiClient.trackEvent(event);
