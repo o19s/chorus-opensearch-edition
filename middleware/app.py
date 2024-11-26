@@ -47,31 +47,31 @@ def search(prefix):
           headers         = {k:v for k,v in request.headers if k.lower() != "host"}, # exclude "host" header
           data            = request.get_data(),
           cookies         = request.cookies,
-          allow_redirects = False,
+          allow_redirects = False
       )
-  
+
       excluded_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]
-  
+
       headers = {}
       for k,v in res.raw.headers.items():
           if k not in excluded_headers:
               headers[k] = v
-  
+
       search_response = res.json()
-      
+
       response = search_response
-      
+
       ubi_query_id = search_response.get("ext", {}).get("ubi", {}).get("query_id")
       if ubi_query_id is not None:
-        for hit in response["hits"]["hits"]:
-          ean = hit["_source"]["primary_ean"]
-          cost = hit["_source"]["cost"]
-          
-          # Strip out of the sensitive data from what is sent to browser
-          del hit["_source"]["cost"]
-  
-          # Cache cost for product based on QueryId + EAN
-          cache[f"{ubi_query_id}-{ean}"] = cost
+          for hit in response["hits"]["hits"]:
+              ean = hit["_source"]["primary_ean"]
+              cost = hit["_source"]["cost"]
+              
+              # Strip out of the sensitive data from what is sent to browser
+              del hit["_source"]["cost"]
+      
+              # Cache cost for product based on QueryId + EAN
+              cache[f"{ubi_query_id}-{ean}"] = cost
   
       response = flask.Response(json.dumps(search_response), res.status_code, headers=headers)
   
@@ -117,15 +117,15 @@ def multisearch(prefix):
           for hit in response["hits"]["hits"]:
             ean = hit["_source"]["ean"][0]
             cost = hit["_source"]["cost"]
-            
+
             # Strip out of the sensitive data from what is sent to browser
             del hit["_source"]["cost"]
-    
+
             # Cache cost for product based on QueryId + EAN
             cache[f"{ubi_query_id}-{ean}"] = cost
-  
+
       response = flask.Response(json.dumps(search_response), res.status_code, headers=headers)
-  
+
       return response
 
 
@@ -133,18 +133,15 @@ def multisearch(prefix):
 def ubi_events():
 
     if request.method == "OPTIONS":
-      response = flask.jsonify(status=200, mimetype="application/json")
-      response.headers.add("Access-Control-Allow-Origin", "*")
-      response.headers.add("Access-Control-Allow-Headers", "Authorization, Content-Type")
-      response.headers.add("Access-Control-Request-Method", "POST")
-      return response
-        
+        response = flask.jsonify(status=200, mimetype="application/json")
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "Authorization, Content-Type")
+        response.headers.add("Access-Control-Request-Method", "POST")
+        return response
     else:
 
         # Send the event to Data Prepper.
         events = request.get_json()
-        
-        print("I am posting an event")
 
         #print("Received UBI events:")
         #print(events)
@@ -166,11 +163,6 @@ def ubi_events():
         #             "description": "Integral 2GB SD Card memory card",
         #             "object_detail": null
         #         },
-        #         "position": null,
-        #         "browser": null,
-        #         "session_id": null,
-        #         "page_id": null,
-        #         "dwell_time": null
         #         }
         #     }
         # ]
@@ -191,30 +183,28 @@ def ubi_events():
 
         tracer = trace.get_tracer(__name__)
 
-        for event in events:
-                     
+        for event in events:                     
             ubi_query_id = event["query_id"]
             # Add back the sensitive information (cost) to the data being sent to the UBI Events datastore.            
             cost = None
-            
+
             # couldn't get this to work so doing a more painful approach below.
             # ean = event["event_attributes"]["object"]["object_id"] 
-            
+
             event_attributes = event["event_attributes"]
             if event_attributes is not None:
-              obj = event_attributes["object"]
-              if obj is not None:
-                ean = obj["object_id"]                    
-                if ean is not None:
-                  if f"{ubi_query_id}-{ean}" in cache:
-                    cost = cache[f"{ubi_query_id}-{ean}"]
-                  else:
-                    cost = None
+                obj = event_attributes["object"]
+                if obj is not None:
+                    ean = obj["object_id"]                    
+                    if ean is not None:
+                        if f"{ubi_query_id}-{ean}" in cache:
+                            cost = cache[f"{ubi_query_id}-{ean}"]
+                        else:
+                            cost = None
 
             if cost is not None:
-              event['event_attributes']['cost'] = cost
-            
-            
+                event['event_attributes']['cost'] = cost
+
             # First we demonstrate indexing directly into ubi_events index
             client.index(
                 index="ubi_events",
@@ -222,7 +212,7 @@ def ubi_events():
                 id=str(uuid.uuid4()),
                 refresh=True
             )
-              
+
             # Now we demonstrate indexing via OTEL into otel_ubi_events index
             with tracer.start_as_current_span("ubi_event") as span:
 
@@ -232,6 +222,60 @@ def ubi_events():
                 span.set_attribute("ubi.event_attributes", json.dumps(event['event_attributes']))
 
         return '{"status": "submitted"}'
+
+
+@app.route("/ubi_queries", methods=["PUT", "POST", "OPTIONS"])
+def ubi_queries():
+    if request.method == "OPTIONS":
+        response = flask.jsonify(status=200, mimetype="application/json")
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "Authorization, Content-Type")
+        response.headers.add("Access-Control-Request-Method", "POST")
+        return response
+        
+    else:
+
+        # Send the event to Data Prepper.
+        queries = request.get_json()
+
+        print("Received UBI query:")
+        print(queries)
+
+        # Example received UBI event.
+        # [
+        #     {
+        #         "application": "Chorus",
+        #         "client_id": "USER-eeed-43de-959d-90e6040e84f9",
+        #         "query_id": "00112233-4455-6677-8899-aabbccddeeff",
+        #         "user_query": "Ram memory"
+        #         "object_id_field": "_id"
+        #         "message_type": "INFO",
+        #         "message": "Integral 2GB SD Card memory card (undefined)",
+        #         "timestamp": 1724944081669,
+        #         "query_attributes": {},
+        #         }
+        #     }
+        # ]
+
+        # Index the UBI event to OpenSearch.
+        client = OpenSearch(hosts=[{"host": OPENSEARCH_HOST, "port": 9200}])
+
+
+        # only one, but we use an array to make DataPrepper happy
+        for query in queries:
+                     
+            ubi_query_id = query["query_id"]
+            
+            # First we demonstrate indexing directly into ubi_queries index
+            client.index(
+                index="ubi_queries",
+                body=query,
+                id=ubi_query_id,
+                refresh=True
+            )
+              
+        return '{"status": "submitted"}'
+
         
 @app.route('/dump_cache', methods=["GET"])
 def dump_cache():
