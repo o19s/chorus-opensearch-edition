@@ -205,11 +205,10 @@ fi
 if [ ! -f ./esci.json ]; then
   echo -e "${MINOR}Unpacking the sample product data, please give it a few minutes!\n${RESET}"
   zstd --decompress esci.json.zst 
-  # create a sample for starters
 fi
 
-echo -e "${MINOR}Transforming the sample product data into JSON format, please give it a few minutes!\n${RESET}"
 if [ ! -f ./transformed_esci_1.json ]; then
+  echo -e "${MINOR}Transforming the sample product data into JSON format, please give it a few minutes!\n${RESET}"
   docker run -v "$(pwd)":/app -w /app python:3 bash -c "pip install -r requirements.txt && python3 ./opensearch/transform_data.py"
 fi
 
@@ -236,6 +235,58 @@ for file in transformed_esci_*.json; do
         echo "No files found with the prefix 'transformed_esci_'"
     fi
 done
+
+echo -e "${MAJOR}Creating pipelines for neural search and hybrid search\n${RESET}"
+curl -s -X PUT "http://localhost:9200/_search/pipeline/neural-search-pipeline" \
+  -H 'Content-Type: application/json' \
+  --data-binary "{
+     \"description\": \"Neural Only Search\",
+     \"request_processors\": [
+      {
+      \"neural_query_enricher\" : {
+        \"description\": \"Sets the default model ID at index and field levels\",
+        \"default_model_id\": \"$model_id\",
+        \"neural_field_default_id\": {
+           \"title_embeddings\": \"$model_id\"
+        }
+      }
+    }
+  ]
+  }"
+
+curl -s -X PUT "http://localhost:9200/_search/pipeline/hybrid-search-pipeline" \
+  -H 'Content-Type: application/json' \
+  --data-binary "{
+     \"request_processors\": [
+    {
+      \"neural_query_enricher\" : {
+        \"description\": \"Sets the default model ID at index and field levels\",
+        \"default_model_id\": \"$model_id\",
+        \"neural_field_default_id\": {
+           \"title_embeddings\": \"$model_id\"
+        }
+      }
+    }
+  ],
+  \"phase_results_processors\": [
+    {
+      \"normalization-processor\": {
+        \"normalization\": {
+          \"technique\": \"min_max\"
+        },
+        \"combination\": {
+          \"technique\": \"arithmetic_mean\",
+          \"parameters\": {
+            \"weights\": [
+              0.3,
+              0.7
+            ]
+          }
+        }
+      }
+    }
+  ]    
+  }"
 
 echo -e "${MAJOR}Setting up User Behavior Insights indexes...\n${RESET}"
 curl -s -X POST "http://localhost:9200/_plugins/ubi/initialize"
