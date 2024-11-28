@@ -27,7 +27,7 @@ const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
           sessionStorage.getItem('session_id')
           : 'SESSION-' + generateGuid());
 
-const object_id_field = 'primary_ean'; // When we refer to a object by it's ID, this describes what the ID field represents
+const object_id_field = 'asin'; // When we refer to a object by it's ID, this describes what the ID field represents
 
 const ubiClient = new  UbiClient(event_server);
 
@@ -39,7 +39,7 @@ function addToCart(item) {
   var cart = document.getElementById("cart");
   cart.textContent = shopping_cart;
   
-  var event = new UbiEvent(APPLICATION, 'add_to_cart', client_id, session_id, getQueryId(), 
+ var event = new UbiEvent(APPLICATION, 'add_to_cart', client_id, session_id, getQueryId(), 
     new UbiEventAttributes('product', item.primary_ean, item.title, item), 
     item.title + ' (' + item.id + ')');
   
@@ -149,7 +149,7 @@ class App extends Component {
             componentId="algopicker" />
             <MultiList
               componentId="supplier_name"
-              dataField="supplier"
+              dataField="attrs.Brand.keyword"
               title="Filter by Brands"
               size={20}
               showSearch={false}
@@ -181,7 +181,7 @@ class App extends Component {
             />
             <MultiList
               componentId="product_type"
-              dataField="filter_product_type"
+              dataField="category_filter"
               title="Filter by Product Types"
               size={20}
               showSearch={false}
@@ -221,7 +221,7 @@ class App extends Component {
             componentId="searchbox"
             placeholder="Search for products, brands or EAN"
             autosuggest={false}
-            dataField={["id", "name", "title", "product_type" , "short_description", "search_attributes", "primary_ean"]}
+            dataField={["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]}
             onValueChange={
               function(value) {
                 
@@ -268,8 +268,7 @@ class App extends Component {
                     query: {
                       multi_match: {
                         query: value,
-                        //fields: [ "id", "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]
-                        fields: [  "name", "title", "product_type" , "short_description", "ean", "search_attributes", "primary_ean"]
+                        fields: ["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]
                       }
                     },
                     ext: extJson
@@ -346,7 +345,7 @@ class App extends Component {
                     <ResultCard.Image
                       style={{
                         backgroundSize: "cover",
-                        backgroundImage: `url(${item.img_500x500})`
+                        backgroundImage: `url(${item.image})`
                       }}
                     />
                     <ResultCard.Title
@@ -355,7 +354,7 @@ class App extends Component {
                       }}
                     />
                     <ResultCard.Description>
-                      {item.price/100 + " $ | " + item.supplier}
+                      {item.price + " $ | " + item.attrs.Brand}
                     </ResultCard.Description>
                     <button style={{ fontSize:"14px", position:"relative" }} onClick ={
                       function(el) {

@@ -95,25 +95,47 @@ curl -s -X POST "http://localhost:9200/ecommerce-keyword/_aliases/ecommerce" -H 
 echo -e "\n"
 
 echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"
-if [ ! -f ./icecat-products-w_price-19k-20201127.tar.gz ]; then
+if [ ! -f ./esci.json.zst ]; then
   echo -e "${MINOR}Downloading the sample product data\n${RESET}"
-  wget http://querqy.org/datasets/icecat/icecat-products-w_price-19k-20201127.tar.gz
+  wget https://esci-s.s3.amazonaws.com/esci.json.zst
 fi
 
-if [ ! -f ./icecat-products-w_price-19k-20201127.json ]; then
+if [ ! -f ./esci.json ]; then
   echo -e "${MINOR}Unpacking the sample product data, please give it a few minutes!\n${RESET}"
-  tar xzf icecat-products-w_price-19k-20201127.tar.gz
+  zstd --decompress esci.json.zst 
 fi
 
-echo -e "${MINOR}Transforming the sample product data into JSON format, please give it a few minutes!\n${RESET}"
-docker run -v ./:/app -w /app python:3 python3 ./opensearch/transform_data.py icecat-products-w_price-19k-20201127.json transformed_data.json
+if [ ! -f ./transformed_esci_1.json ]; then
+  echo -e "${MINOR}Transforming the sample product data into JSON format, please give it a few minutes!\n${RESET}"
+  docker run -v "$(pwd)":/app -w /app python:3 bash -c "pip install -r requirements.txt && python3 ./opensearch/transform_data.py"
+fi
 
-echo -e "${MAJOR}Indexing the sample product data, please wait...\n${RESET}"
-curl -s -X POST "http://localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items" -H 'Content-Type: application/json' --data-binary @transformed_data.json
+echo -e "${MAJOR}Indexing the product data, please wait...\n${RESET}"
+# Define the OpenSearch endpoint and content header
+OPENSEARCH_URL="http://localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items"
+CONTENT_TYPE="Content-Type: application/json"
+
+# Loop through each JSON file with the prefix "transformed_esci_"
+for file in transformed_esci_*.json; do
+    if [[ -f "$file" ]]; then
+        echo "Processing $file..."
+
+        # Send the file to OpenSearch using curl
+        curl -X POST "$OPENSEARCH_URL" -H "$CONTENT_TYPE" --data-binary @"$file"
+
+        # Check the response code to see if the request was successful
+        if [[ $? -ne 0 ]]; then
+            echo "Failed to send $file"
+        else
+            echo "$file successfully sent to OpenSearch"
+        fi
+    else
+        echo "No files found with the prefix 'transformed_esci_'"
+    fi
+done
 
 echo -e "${MAJOR}Setting up User Behavior Insights indexes...\n${RESET}"
 curl -s -X POST "http://localhost:9200/_plugins/ubi/initialize"
-
 
 if $offline_lab; then
   echo -e "${MAJOR}Setting up Quepid${RESET}"
