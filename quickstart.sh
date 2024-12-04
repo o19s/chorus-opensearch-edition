@@ -143,7 +143,7 @@ if $offline_lab; then
   docker compose run quepid bundle exec thor user:create -a admin@choruselectronics.com "Chorus Admin" password
 fi
 
-# we start dataprepper as the last component to not interfere with ubi index creation
+# we start dataprepper as the last service to prevent it from creating the ubi_queries index using the wrong mappings.
 echo -e "${MAJOR}Starting Dataprepper...\n${RESET}"
 docker compose up -d --build dataprepper
 
