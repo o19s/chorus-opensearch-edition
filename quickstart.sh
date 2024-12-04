@@ -65,7 +65,7 @@ do
 	shift
 done
 
-services="opensearch opensearch-dashboards dataprepper middleware reactivesearch"
+services="opensearch opensearch-dashboards middleware reactivesearch"
 
 if $offline_lab; then
   services="${services} quepid"
@@ -316,5 +316,9 @@ update_docs_task_id=$(curl -s -X POST "http://localhost:9200/ecommerce/_update_b
 echo -e "${MAJOR}This process runs in the background. Plese give it a couple of minutes. You can check the progress with the following curl command:
 
 curl -s GET http://localhost:9200/_tasks/$update_docs_task_id\n${RESET}"
+
+# we start dataprepper as the last service to prevent it from creating the ubi_queries index using the wrong mappings.
+echo -e "${MAJOR}Starting Dataprepper...\n${RESET}"
+docker compose up -d --build dataprepper
 
 echo -e "${MAJOR}Welcome to Chorus OpenSearch Edition!${RESET}"
