@@ -143,6 +143,7 @@ done
 
 if [[ $attempts -ge $max_attempts ]]; then
     echo "Limit of attempts reached. Something went wrong with registering the model. Check OpenSearch logs."
+    exit 1
 else
     response=$(curl -s localhost:9200/_plugins/_ml/tasks/$task_id)
     model_id=$(echo "$response" | jq -r '.model_id')
@@ -214,7 +215,7 @@ fi
 
 echo -e "${MAJOR}Indexing the product data, please wait...\n${RESET}"
 # Define the OpenSearch endpoint and content header
-OPENSEARCH_URL="http://localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items&pipeline=embeddings-pipeline"
+OPENSEARCH_URL="http://localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items"
 CONTENT_TYPE="Content-Type: application/json"
 
 # Loop through each JSON file with the prefix "transformed_esci_"
@@ -296,5 +297,12 @@ if $offline_lab; then
   docker compose run --rm quepid bundle exec bin/rake db:setup
   docker compose run quepid bundle exec thor user:create -a admin@choruselectronics.com "Chorus Admin" password
 fi
+
+echo -e "${MAJOR}Updating the indexed data with embeddings...\n${RESET}"
+update_docs_task_id=$(curl -s -X POST "http://localhost:9200/ecommerce/_update_by_query?pipeline=embeddings-pipeline&wait_for_completion=false" | jq -r '.task')
+
+echo -e "${MAJOR}This process runs in the background. Plese give it a couple of minutes. You can check the progress with the following curl command:
+
+curl -s GET http://localhost:9200/_tasks/$update_docs_task_id\n${RESET}"
 
 echo -e "${MAJOR}Welcome to Chorus OpenSearch Edition!${RESET}"
