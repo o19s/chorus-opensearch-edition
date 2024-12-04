@@ -253,11 +253,6 @@ class App extends Component {
                 } else if (algo === "neural") {
                   return {
                     search_pipeline: "neural-search-pipeline",                                      
-                    "_source": {
-                        exclude: [
-                          "title_embedding"
-                        ]
-                    },
                     query: {                  
                       neural: {
                         title_embedding: {
@@ -270,12 +265,7 @@ class App extends Component {
                   }
                 } else if (algo === "hybrid") {
                   return {
-                    search_pipeline: "hybrid-search-pipeline",     
-                    "_source": {
-                        exclude: [
-                          "title_embedding"
-                        ]
-                    },
+                    search_pipeline: "hybrid-search-pipeline",
                     query: {
                       hybrid: {
                         queries: [
@@ -310,6 +300,7 @@ class App extends Component {
             componentId="results"
             dataField="title"
             size={20}
+            excludeFields={["title_embedding", "reviews", "description", "bullets"]}
             pagination={true}
             react={{
               and: ["searchbox", "supplier_name", "product_type"]
