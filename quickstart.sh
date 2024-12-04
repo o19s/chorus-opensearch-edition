@@ -59,7 +59,7 @@ do
 	shift
 done
 
-services="opensearch opensearch-dashboards dataprepper middleware reactivesearch"
+services="opensearch opensearch-dashboards middleware reactivesearch"
 
 if $offline_lab; then
   services="${services} quepid"
@@ -142,5 +142,9 @@ if $offline_lab; then
   docker compose run --rm quepid bundle exec bin/rake db:setup
   docker compose run quepid bundle exec thor user:create -a admin@choruselectronics.com "Chorus Admin" password
 fi
+
+# we start dataprepper as the last service to prevent it from creating the ubi_queries index using the wrong mappings.
+echo -e "${MAJOR}Starting Dataprepper...\n${RESET}"
+docker compose up -d --build dataprepper
 
 echo -e "${MAJOR}Welcome to Chorus OpenSearch Edition!${RESET}"
