@@ -28,6 +28,7 @@ shutdown=false
 offline_lab=false
 local_deploy=true
 stop=false
+full_dataset=false
 
 while [ ! $# -eq 0 ]
 do
@@ -37,6 +38,7 @@ do
 	    echo -e "Use the option --shutdown | -s to shutdown and remove the Docker containers and data."
 	    echo -e "Use the option --stop to stop the Docker containers."
 	    echo -e "Use the option --online-deployment | -online to update configuration to run on chorus-opensearch-edition.dev.o19s.com environment."
+      echo -e "Use the option --full-dataset | -full to index the whole dataset. This takes some time depending on your hardware."
 			exit
 			;;
     --with-offline-lab | -lab)
@@ -54,6 +56,10 @@ do
     --online-deployment | -online)
       local_deploy=false
       echo -e "${MAJOR}Configuring Chorus for chorus-opensearch-edition.dev.o19s.com environment\n${RESET}"
+      ;;
+      --full-dataset | -full)
+      full_dataset=true
+      echo -e "${MAJOR}Indexing whole dataset\n${RESET}"
       ;;
 	esac
 	shift
@@ -221,6 +227,12 @@ CONTENT_TYPE="Content-Type: application/json"
 # Loop through each JSON file with the prefix "transformed_esci_"
 for file in transformed_esci_*.json; do
     if [[ -f "$file" ]]; then
+
+        if [[ "$file" == "transformed_esci_11.json" && "$full_dataset" == "false" ]]; then
+            echo "Indexing data partially only, exiting loop. Run quickstart.sh with --full-dataset option to index whole dataset."
+            break
+        fi
+
         echo "Processing $file..."
 
         # Send the file to OpenSearch using curl
