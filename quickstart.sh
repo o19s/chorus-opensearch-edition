@@ -38,29 +38,29 @@ do
 	    echo -e "Use the option --shutdown | -s to shutdown and remove the Docker containers and data."
 	    echo -e "Use the option --stop to stop the Docker containers."
 	    echo -e "Use the option --online-deployment | -online to update configuration to run on chorus-opensearch-edition.dev.o19s.com environment."
-      echo -e "Use the option --full-dataset | -full to index the whole data set. This takes some time depending on your hardware."
-			exit
-			;;
-    --with-offline-lab | -lab)
-			offline_lab=true
-      echo -e "${MAJOR}Running Chorus with offline lab environment enabled\n${RESET}"
-			;;
-    --shutdown | -s)
-			shutdown=true
-      echo -e "${MAJOR}Shutting down Chorus\n${RESET}"
-			;;
-	  --stop)
-    	stop=true
-      echo -e "${MAJOR}Stopping Chorus\n${RESET}"
-    	;;
-    --online-deployment | -online)
-      local_deploy=false
-      echo -e "${MAJOR}Configuring Chorus for chorus-opensearch-edition.dev.o19s.com environment\n${RESET}"
-      ;;
-    --full-dataset | -full)
-      full_dataset=true
-      echo -e "${MAJOR}Indexing whole data set\n${RESET}"
-      ;;
+	    echo -e "Use the option --full-dataset | -full to index the whole data set. This takes some time depending on your hardware."
+	    exit
+	    ;;
+		--with-offline-lab | -lab)
+	    offline_lab=true
+	    echo -e "${MAJOR}Running Chorus with offline lab environment enabled\n${RESET}"
+	    ;;
+		--shutdown | -s)
+	    shutdown=true
+	    echo -e "${MAJOR}Shutting down Chorus\n${RESET}"
+	    ;;
+		--stop)
+	    stop=true
+	    echo -e "${MAJOR}Stopping Chorus\n${RESET}"
+	    ;;
+		--online-deployment | -online)
+	    local_deploy=false
+	    echo -e "${MAJOR}Configuring Chorus for chorus-opensearch-edition.dev.o19s.com environment\n${RESET}"
+	    ;;
+		--full-dataset | -full)
+	    full_dataset=true
+	    echo -e "${MAJOR}Indexing whole data set\n${RESET}"
+	    ;;
 	esac
 	shift
 done
