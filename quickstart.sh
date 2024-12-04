@@ -38,7 +38,7 @@ do
 	    echo -e "Use the option --shutdown | -s to shutdown and remove the Docker containers and data."
 	    echo -e "Use the option --stop to stop the Docker containers."
 	    echo -e "Use the option --online-deployment | -online to update configuration to run on chorus-opensearch-edition.dev.o19s.com environment."
-      echo -e "Use the option --full-dataset | -full to index the whole dataset. This takes some time depending on your hardware."
+      echo -e "Use the option --full-dataset | -full to index the whole data set. This takes some time depending on your hardware."
 			exit
 			;;
     --with-offline-lab | -lab)
@@ -57,9 +57,9 @@ do
       local_deploy=false
       echo -e "${MAJOR}Configuring Chorus for chorus-opensearch-edition.dev.o19s.com environment\n${RESET}"
       ;;
-      --full-dataset | -full)
+    --full-dataset | -full)
       full_dataset=true
-      echo -e "${MAJOR}Indexing whole dataset\n${RESET}"
+      echo -e "${MAJOR}Indexing whole data set\n${RESET}"
       ;;
 	esac
 	shift
@@ -229,7 +229,7 @@ for file in transformed_esci_*.json; do
     if [[ -f "$file" ]]; then
 
         if [[ "$file" == "transformed_esci_11.json" && "$full_dataset" == "false" ]]; then
-            echo "Indexing data partially only, exiting loop. Run quickstart.sh with --full-dataset option to index whole dataset."
+            echo "Indexing subset of full data set, exiting loop. Run quickstart.sh with --full-dataset option to index whole data set."
             break
         fi
 
