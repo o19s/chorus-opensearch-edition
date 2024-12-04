@@ -96,29 +96,6 @@ class App extends Component {
       enableAppbase={false}
       recordAnalytics={true}
       searchStateHeader={true}
-      transformRequest={async (request) => {
-        // Need to change the index we are referencing in queries per algorithm.        
-        const algorithm = document.getElementById('algopicker').value;   
-        let url = request.url;
-        
-        switch (algorithm) {    
-          case "keyword":
-            url = url.replace("ecommerce", "ecommerce-keyword");
-            break;
-          case "neural":
-            url = url.replace("ecommerce", "ecommerce-hybrid");
-            break;
-          case "hybrid":
-            url = url.replace("ecommerce", "ecommerce-hybrid");
-            break;
-          default:
-            throw new Error("We don't recognize algorithm " + algorithm);
-        }
-        
-        request.url = url
-        
-        return request;
-      }}
     >
       <div style={{ height: "200px", width: "100%"}}>
         <img style={{ height: "100%", class: "center"  }} src={chorusLogo} />
@@ -276,11 +253,6 @@ class App extends Component {
                 } else if (algo === "neural") {
                   return {
                     search_pipeline: "neural-search-pipeline",                                      
-                    "_source": {
-                        exclude: [
-                          "title_embedding"
-                        ]
-                    },
                     query: {                  
                       neural: {
                         title_embedding: {
@@ -293,12 +265,7 @@ class App extends Component {
                   }
                 } else if (algo === "hybrid") {
                   return {
-                    search_pipeline: "hybrid-search-pipeline",     
-                    "_source": {
-                        exclude: [
-                          "title_embedding"
-                        ]
-                    },
+                    search_pipeline: "hybrid-search-pipeline",
                     query: {
                       hybrid: {
                         queries: [
@@ -333,6 +300,7 @@ class App extends Component {
             componentId="results"
             dataField="title"
             size={20}
+            excludeFields={["title_embedding", "reviews", "description", "bullets"]}
             pagination={true}
             react={{
               and: ["searchbox", "supplier_name", "product_type"]
