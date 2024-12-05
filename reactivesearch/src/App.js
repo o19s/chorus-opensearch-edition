@@ -206,10 +206,13 @@ class App extends Component {
                 const query_id = generateQueryId();
                 
                 // If you do not have the UBI plugin enabled in your search engine, then you need
-                // to track the query yourself.
-                // const query = new UbiQuery(APPLICATION, client_id, query_id, value, "_id", {});
-                // query.message_type = 'QUERY'
+                // to track the query request yourself.
+                // const query = new UbiQueryRequest(APPLICATION, client_id, query_id, value, "_id", {});
+                // console.log(query)
                 // ubiClient.trackQuery(query)
+                // 
+                // Don't forget to change the query to use ext: extJsonDisabledUBI instead of ext: extJson
+                // to make sure you don't double track the events, once in the ubiClient.trackQuery and once in the OS UBI plugin!
                 
                 // We log the event to ubi_events but that isn't strictly required since
                 // the plugin in OpenSearch will log a record into ubi_queries.
@@ -228,7 +231,11 @@ class App extends Component {
                 } else {
                   algo = 'keyword';
                 }
-                
+            
+                // no UBI clauses means no use of the OpenSearch UBI plugin.
+                const extJsonDisabledUBI = {
+            
+                }
                 const extJson = {
                   ubi: {
                     query_id: getQueryId(),
