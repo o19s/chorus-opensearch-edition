@@ -20,7 +20,7 @@ OPENSEARCH_HOST = os.getenv("OPENSEARCH_HOST", "opensearch")
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
-# Local cache for product ean -> cost (sensitive information)
+# Local cache for product asin -> cost (sensitive information)
 cache = {}
 
 print("Using OTel endpoint: " + OTEL_COLLECTOR_ENDPOINT)
@@ -64,14 +64,14 @@ def search(prefix):
       ubi_query_id = search_response.get("ext", {}).get("ubi", {}).get("query_id")
       if ubi_query_id is not None:
           for hit in response["hits"]["hits"]:
-              ean = hit["_source"]["primary_ean"]
+              asin = hit["_source"]["asin"]
               cost = hit["_source"]["cost"]
               
               # Strip out of the sensitive data from what is sent to browser
               del hit["_source"]["cost"]
       
-              # Cache cost for product based on QueryId + EAN
-              cache[f"{ubi_query_id}-{ean}"] = cost
+              # Cache cost for product based on QueryId + ASIN
+              cache[f"{ubi_query_id}-{asin}"] = cost
   
       response = flask.Response(json.dumps(search_response), res.status_code, headers=headers)
   
@@ -115,14 +115,14 @@ def multisearch(prefix):
       if ubi_query_id is not None:
         for response in search_response["responses"]:
           for hit in response["hits"]["hits"]:
-            ean = hit["_source"]["ean"][0]
+            asin = hit["_source"]["asin"][0]
             cost = hit["_source"]["cost"]
 
             # Strip out of the sensitive data from what is sent to browser
             del hit["_source"]["cost"]
 
-            # Cache cost for product based on QueryId + EAN
-            cache[f"{ubi_query_id}-{ean}"] = cost
+            # Cache cost for product based on QueryId + ASIN
+            cache[f"{ubi_query_id}-{asin}"] = cost
 
       response = flask.Response(json.dumps(search_response), res.status_code, headers=headers)
 
@@ -189,16 +189,16 @@ def ubi_events():
             cost = None
 
             # couldn't get this to work so doing a more painful approach below.
-            # ean = event["event_attributes"]["object"]["object_id"] 
+            # asin = event["event_attributes"]["object"]["object_id"] 
 
             event_attributes = event["event_attributes"]
             if event_attributes is not None:
                 obj = event_attributes["object"]
                 if obj is not None:
-                    ean = obj["object_id"]                    
-                    if ean is not None:
-                        if f"{ubi_query_id}-{ean}" in cache:
-                            cost = cache[f"{ubi_query_id}-{ean}"]
+                    asin = obj["object_id"]                    
+                    if asin is not None:
+                        if f"{ubi_query_id}-{asin}" in cache:
+                            cost = cache[f"{ubi_query_id}-{asin}"]
                         else:
                             cost = None
 
