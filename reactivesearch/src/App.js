@@ -12,7 +12,7 @@ import AlgoPicker from './custom/AlgoPicker';
 import ShoppingCartButton from './custom/ShoppingCartButton';
 import { UbiEvent } from './ubi/ubi';
 import { UbiEventAttributes } from './ubi/ubi'
-import { UbiQuery } from './ubi/ubi';
+import { UbiQueryRequest } from './ubi/ubi';
 import { UbiClient } from './ubi/ubi'
 import chorusLogo from './assets/chorus-logo.png';
 
