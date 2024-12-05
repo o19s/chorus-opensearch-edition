@@ -271,7 +271,7 @@ class App extends Component {
                         queries: [
                           {
                             match: {
-                              title_text: {
+                              title: {
                                 query: value
                               }
                             }
