@@ -102,9 +102,9 @@ class App extends Component {
                 const rank = parseInt(entry.target.attributes.rank.value, 10)
                 const title = entry.target.attributes.title?.value || "";
                 var event = new UbiEvent(APPLICATION, 'impression', client_id, session_id, getQueryId(), 
-                  new UbiEventAttributes('asin', entry.target.attributes.asin.value, title, {rank: rank}), 
+                  new UbiEventAttributes('asin', entry.target.attributes.asin.value, title, {}, {ordinal:  rank}), 
                   'impression made on doc ranked ' + entry.target.attributes.rank.value);
-                event.message_type = 'IMPRESSION';               
+                event.message_type = 'IMPRESSION';
                 console.log(event);
                 ubiClient.trackEvent(event);
                 // Optionally unobserve the button after visibility
