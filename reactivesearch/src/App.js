@@ -99,8 +99,10 @@ class App extends Component {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 console.log(`${entry.target.innerText} is now visible in the viewport!`);
+                const rank = parseInt(entry.target.attributes.rank.value, 10)
+                const title = entry.target.attributes.title?.value || "";
                 var event = new UbiEvent(APPLICATION, 'impression', client_id, session_id, getQueryId(), 
-                  new UbiEventAttributes('asin', entry.target.attributes.asin.value, entry.target.attributes.title, {rank: entry.target.attributes.rank}), 
+                  new UbiEventAttributes('asin', entry.target.attributes.asin.value, title, {rank: rank}), 
                   'impression made on doc ranked ' + entry.target.attributes.rank.value);
                 event.message_type = 'IMPRESSION';               
                 console.log(event);
@@ -375,7 +377,8 @@ class App extends Component {
                       style={{ fontSize:"14px", position:"relative" }}       
                       ref={this.handleRef}   
                       rank={ index }
-                      asin={ item.asin }            
+                      asin={ item.asin }
+                      title={ item.title }            
                       onClick={
                         function(el) {
                           addToCart(item);
