@@ -199,6 +199,9 @@ curl -s -X PUT "http://localhost:9200/_ingest/pipeline/embeddings-pipeline" \
     ]
   }"
 
+echo -e "${MAJOR}Setting up User Behavior Insights indexes...\n${RESET}"
+curl -s -X POST "http://localhost:9200/_plugins/ubi/initialize"
+  
 echo -e "${MAJOR}Creating ecommerce index, defining its mapping & settings\n${RESET}"
 curl -s -X PUT "http://localhost:9200/ecommerce" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
 echo -e "\n"
@@ -295,9 +298,6 @@ curl -s -X PUT "http://localhost:9200/_search/pipeline/hybrid-search-pipeline" \
     }
   ]    
   }"
-
-echo -e "${MAJOR}Setting up User Behavior Insights indexes...\n${RESET}"
-curl -s -X POST "http://localhost:9200/_plugins/ubi/initialize"
 
 if $offline_lab; then
   echo -e "${MAJOR}Setting up Quepid${RESET}"
