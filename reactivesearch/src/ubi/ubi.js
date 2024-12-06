@@ -154,24 +154,25 @@ export class UbiEventAttributes {
 
     // validate positional information
     // either ordinal or xy have to be set with ordinal, x and y being numbers
-    if (position) {
-      const hasOrdinal = 'ordinal' in position && Number.isInteger(position.ordinal);
-      const hasXY =
-        'xy' in position &&
-        typeof position.xy === 'object' &&
-        'x' in position.xy &&
-        'y' in position.xy &&
-        typeof position.xy.x === 'number' &&
-        typeof position.xy.y === 'number';
+    if (!position) {
+      throw new Error("The 'position' parameter is required.");
+    }
+    const hasOrdinal = 'ordinal' in position && Number.isInteger(position.ordinal);
+    const hasXY =
+      'xy' in position &&
+      typeof position.xy === 'object' &&
+      'x' in position.xy &&
+      'y' in position.xy &&
+      typeof position.xy.x === 'number' &&
+      typeof position.xy.y === 'number';
 
-      if (!hasOrdinal && !hasXY) {
-        throw new Error(
-          "The 'position' object must have either an 'ordinal' property (integer) or an 'xy' property (object with 'x' and 'y' as numbers)."
-        );
-      }
+    if (!hasOrdinal && !hasXY) {
+      throw new Error(
+        "The 'position' object must have either an 'ordinal' property (integer) or an 'xy' property (object with 'x' and 'y' as numbers)." + position.ordinal
+      );
+    }
 
-      this.position = { ...position }; // Merge position into top-level property
-    } 
+    this.position = { ...position }; // Merge position into top-level property
   }
 }
 

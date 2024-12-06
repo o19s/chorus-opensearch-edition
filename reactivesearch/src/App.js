@@ -42,9 +42,15 @@ function addToCart(item) {
   sessionStorage.setItem("shopping_cart", shopping_cart);
   var cart = document.getElementById("cart");
   cart.textContent = shopping_cart;
-  
- var event = new UbiEvent(APPLICATION, 'add_to_cart', client_id, session_id, getQueryId(), 
-    new UbiEventAttributes('asin', item.asin, item.title, item), 
+  const rank = parseInt(item.rank, 10);
+
+  if (isNaN(rank)) {
+    console.error('Rank is missing or not a valid number.');
+    return;
+  }
+
+  var event = new UbiEvent(APPLICATION, 'add_to_cart', client_id, session_id, getQueryId(), 
+    new UbiEventAttributes('asin', item.asin, item.title, {}, {ordinal:  rank}), 
     item.title + ' (' + item.id + ')');
   
   event.message_type = 'CONVERSION';
@@ -381,7 +387,7 @@ class App extends Component {
                       title={ item.title }            
                       onClick={
                         function(el) {
-                          addToCart(item);
+                          addToCart({ ...item, rank: index});
                         }
                       }
                     >
