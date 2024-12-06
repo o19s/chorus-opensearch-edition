@@ -42,21 +42,16 @@ function addToCart(item) {
   sessionStorage.setItem("shopping_cart", shopping_cart);
   var cart = document.getElementById("cart");
   cart.textContent = shopping_cart;
-  const rank = parseInt(item.rank, 10);
-
-  if (isNaN(rank)) {
-    console.error('Rank is missing or not a valid number.');
-    return;
+  if (getQueryId()) {
+    var event = new UbiEvent(APPLICATION, 'add_to_cart', client_id, session_id, getQueryId(), 
+      new UbiEventAttributes('asin', item.asin, item.title, {}, {ordinal:  item.position}), 
+      item.title + ' (' + item.id + ')');
+    
+    event.message_type = 'CONVERSION';
+    
+    ubiClient.trackEvent(event);
+    console.log(event);
   }
-
-  var event = new UbiEvent(APPLICATION, 'add_to_cart', client_id, session_id, getQueryId(), 
-    new UbiEventAttributes('asin', item.asin, item.title, {}, {ordinal:  rank}), 
-    item.title + ' (' + item.id + ')');
-  
-  event.message_type = 'CONVERSION';
-  
-  ubiClient.trackEvent(event);
-  console.log(event);
 
 }
 
@@ -77,7 +72,7 @@ function generateQueryId(){
 }
 
 function clearQueryId(){
-  sessionStorage.setItem('query_id', null);
+    sessionStorage.removeItem('query_id');
 }
 
 function getQueryId(){
@@ -103,13 +98,13 @@ class App extends Component {
   componentDidMount() {
     this.observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
+            if (entry.isIntersecting && getQueryId() ) {
                 console.log(`${entry.target.innerText} is now visible in the viewport!`);
-                const rank = parseInt(entry.target.attributes.rank.value, 10)
+                const position = parseInt(entry.target.attributes.position.value, 10)
                 const title = entry.target.attributes.title?.value || "";
                 var event = new UbiEvent(APPLICATION, 'impression', client_id, session_id, getQueryId(), 
-                  new UbiEventAttributes('asin', entry.target.attributes.asin.value, title, {}, {ordinal:  rank}), 
-                  'impression made on doc ranked ' + entry.target.attributes.rank.value);
+                  new UbiEventAttributes('asin', entry.target.attributes.asin.value, title, {}, {ordinal:  position}), 
+                  'impression made on doc position ' + entry.target.attributes.position.value);
                 event.message_type = 'IMPRESSION';
                 console.log(event);
                 ubiClient.trackEvent(event);
@@ -175,15 +170,17 @@ class App extends Component {
               onValueChange={
                 function(arr) {
                   console.log('filtering on brands');
-                  //convert array into json object
-                  let sfilter = String(arr)
-                  let filter = {'filter':sfilter};
-                  var event = new UbiEvent(APPLICATION, 'brand_filter', client_id, session_id, getQueryId(), 
-                    new UbiEventAttributes('filter_data', null, "brands_list", sfilter), 
-                    'filtering on brands: ' + sfilter);
-                  event.message_type = 'FILTER';               
-                  console.log(event);
-                  ubiClient.trackEvent(event);
+                  if (getQueryId()) {
+                    //convert array into json object
+                    let sfilter = String(arr)
+                    let filter = { 'filter': sfilter };
+                    var event = new UbiEvent(APPLICATION, 'brand_filter', client_id, session_id, getQueryId(),
+                      new UbiEventAttributes('filter_data', null, "brands_list", sfilter, {ordinal:  -1}),
+                      'filtering on brands: ' + sfilter);
+                    event.message_type = 'FILTER';
+                    console.log(event);
+                    ubiClient.trackEvent(event);
+                  }
                 }
               }
               onQueryChange={
@@ -211,15 +208,17 @@ class App extends Component {
               onValueChange={
                 function(arr) {
                 console.log('filtering on product types');
-                //convert array into json object
-                let sfilter = String(arr)
-                let filter = {'filter':sfilter};
-                var event = new UbiEvent(APPLICATION, 'product_type_filter', client_id, session_id, getQueryId(), 
-                  new UbiEventAttributes('filter_data', null, "product_types", sfilter), 
-                  'filtering on product types: ' + sfilter);
-                event.message_type = 'FILTER';               
-                console.log(event);
-                ubiClient.trackEvent(event);
+                  if (getQueryId()) {
+                    //convert array into json object
+                    let sfilter = String(arr)
+                    let filter = { 'filter': sfilter };
+                    var event = new UbiEvent(APPLICATION, 'product_type_filter', client_id, session_id, getQueryId(),
+                      new UbiEventAttributes('filter_data', null, "product_types", sfilter, {ordinal:  -1}),
+                      'filtering on product types: ' + sfilter);
+                    event.message_type = 'FILTER';
+                    console.log(event);
+                    ubiClient.trackEvent(event);
+                  }
                 }
               }
               onQueryChange={
@@ -247,7 +246,7 @@ class App extends Component {
                 // We currently don't have any debouncing or triggering only on return.
                 // this ensures we generate the new query_id before the customQuery() function is called.
                 // onValueChange is called AFTER customQuery() function is called.
-                const query_id = generateQueryId();
+                generateQueryId();
               }
             }
             onValueChange={
@@ -382,16 +381,16 @@ class App extends Component {
                     <button 
                       style={{ fontSize:"14px", position:"relative" }}       
                       ref={this.handleRef}   
-                      rank={ index }
+                      position={ index + 1 }
                       asin={ item.asin }
                       title={ item.title }            
                       onClick={
                         function(el) {
-                          addToCart({ ...item, rank: index});
+                          addToCart({ ...item, position: index});
                         }
                       }
                     >
-                      {index} Add to <span style={{fontSize:24 }}> 🛒</span>
+                      {index + 1} Add to <span style={{fontSize:24 }}> 🛒</span>
                     </button>
                   </ResultCard>
                 ))}
