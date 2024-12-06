@@ -1,4 +1,4 @@
-import React, {Component} from "react";
+import React, { Component } from "react";
 import {
   ReactiveBase,
   DataSearch,
@@ -12,7 +12,7 @@ import AlgoPicker from './custom/AlgoPicker';
 import ShoppingCartButton from './custom/ShoppingCartButton';
 import { UbiEvent } from './ubi/ubi';
 import { UbiEventAttributes } from './ubi/ubi'
-import { UbiQuery } from './ubi/ubi';
+import { UbiQueryRequest } from './ubi/ubi';
 import { UbiClient } from './ubi/ubi'
 import chorusLogo from './assets/chorus-logo.png';
 
@@ -22,7 +22,9 @@ const event_server = "http://localhost:9090"; // Middleware
 const search_server = "http://localhost:9090"; // Send all queries through Middleware
 
 const APPLICATION = "Chorus";
-const client_id = 'CLIENT-eeed-43de-959d-90e6040e84f9'; // demo client id
+const client_id = ((sessionStorage.hasOwnProperty('client_id')) ?
+          sessionStorage.getItem('client_id')
+          : 'CLIENT-' + generateGuid());
 const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
           sessionStorage.getItem('session_id')
           : 'SESSION-' + generateGuid());
@@ -30,6 +32,8 @@ const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
 const object_id_field = 'asin'; // When we refer to a object by it's ID, this describes what the ID field represents
 
 const ubiClient = new  UbiClient(event_server);
+
+clearQueryId(); // clear out any existing query_id
 
 function addToCart(item) {
   let shopping_cart = sessionStorage.getItem("shopping_cart");
@@ -40,7 +44,7 @@ function addToCart(item) {
   cart.textContent = shopping_cart;
   
  var event = new UbiEvent(APPLICATION, 'add_to_cart', client_id, session_id, getQueryId(), 
-    new UbiEventAttributes('product', item.primary_ean, item.title, item), 
+    new UbiEventAttributes('asin', item.asin, item.title, item), 
     item.title + ' (' + item.id + ')');
   
   event.message_type = 'CONVERSION';
@@ -66,6 +70,10 @@ function generateQueryId(){
   return query_id;
 }
 
+function clearQueryId(){
+  sessionStorage.setItem('query_id', null);
+}
+
 function getQueryId(){
   return sessionStorage.getItem('query_id');
 }
@@ -85,6 +93,34 @@ function generateGuid() {
 };
 
 class App extends Component {
+
+  componentDidMount() {
+    this.observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                console.log(`${entry.target.innerText} is now visible in the viewport!`);
+                const rank = parseInt(entry.target.attributes.rank.value, 10)
+                const title = entry.target.attributes.title?.value || "";
+                var event = new UbiEvent(APPLICATION, 'impression', client_id, session_id, getQueryId(), 
+                  new UbiEventAttributes('asin', entry.target.attributes.asin.value, title, {rank: rank}), 
+                  'impression made on doc ranked ' + entry.target.attributes.rank.value);
+                event.message_type = 'IMPRESSION';               
+                console.log(event);
+                ubiClient.trackEvent(event);
+                // Optionally unobserve the button after visibility
+                this.observer.unobserve(entry.target);
+            }
+        });
+    });
+  }
+
+
+  handleRef = (node) => {
+       if (node) {
+           this.observer.observe(node); // Observe the node when it is mounted
+       }
+   };
+  
 
   render(){
   return (
@@ -196,24 +232,32 @@ class App extends Component {
               marginTop: "35px"
             }}
             componentId="searchbox"
-            placeholder="Search for products, brands or EAN"
+            placeholder="Search for products, brands or ASIN"
             autosuggest={false}
             dataField={["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]}
-            onValueChange={
+            onKeyPress={
               function(value) {
-                
-                //generate a new query id to track events against
+                // With every keypress generate a new query id and store it in the session to track events against. 
+                // We currently don't have any debouncing or triggering only on return.
+                // this ensures we generate the new query_id before the customQuery() function is called.
+                // onValueChange is called AFTER customQuery() function is called.
                 const query_id = generateQueryId();
-                
+              }
+            }
+            onValueChange={
+              function (value) {
                 // If you do not have the UBI plugin enabled in your search engine, then you need
-                // to track the query yourself.
-                // const query = new UbiQuery(APPLICATION, client_id, query_id, value, "_id", {});
-                // query.message_type = 'QUERY'
+                // to track the query request yourself.
+                // const query = new UbiQueryRequest(APPLICATION, client_id, query_id, value, "_id", {});
+                // console.log(query)
                 // ubiClient.trackQuery(query)
+                // 
+                // Don't forget to change the query to use ext: extJsonDisabledUBI instead of ext: extJson
+                // to make sure you don't double track the events, once in the ubiClient.trackQuery and once in the OS UBI plugin!
                 
                 // We log the event to ubi_events but that isn't strictly required since
                 // the plugin in OpenSearch will log a record into ubi_queries.
-                const event = new UbiEvent(APPLICATION, 'search', client_id, session_id, query_id, null, value);
+                const event = new UbiEvent(APPLICATION, 'search', client_id, session_id, getQueryId(), null, value);
                 event.message_type = 'QUERY'
                 console.log(event)
                 ubiClient.trackEvent(event);
@@ -228,8 +272,12 @@ class App extends Component {
                 } else {
                   algo = 'keyword';
                 }
-                
-                const extJson = {
+            
+                // no UBI clauses means no use of the OpenSearch UBI plugin.
+                const extJsonDisabledUBI = {
+            
+                }
+                let extJson = {
                   ubi: {
                     query_id: getQueryId(),
                     user_query: value,
@@ -308,7 +356,7 @@ class App extends Component {
             style={{ textAlign: "center" }}
             render={({ data }) => (
               <ReactiveList.ResultCardsWrapper>
-                {data.map((item) => (
+                {data.map((item, index) => (
                   <ResultCard key={item._id}>
                     <ResultCard.Image
                       style={{
@@ -322,14 +370,22 @@ class App extends Component {
                       }}
                     />
                     <ResultCard.Description>
-                      {item.price + " $ | " + item.attrs.Brand}
+                      {item.price + " $ | "}
+                      {item.attrs.Brand ? item.attrs.Brand : ""}
                     </ResultCard.Description>
-                    <button style={{ fontSize:"14px", position:"relative" }} onClick ={
-                      function(el) {
-                        addToCart(item);
+                    <button 
+                      style={{ fontSize:"14px", position:"relative" }}       
+                      ref={this.handleRef}   
+                      rank={ index }
+                      asin={ item.asin }
+                      title={ item.title }            
+                      onClick={
+                        function(el) {
+                          addToCart(item);
+                        }
                       }
-                    }>
-                      Add to <span style={{fontSize:24 }}> 🛒</span>
+                    >
+                      {index} Add to <span style={{fontSize:24 }}> 🛒</span>
                     </button>
                   </ResultCard>
                 ))}
