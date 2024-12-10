@@ -33,7 +33,7 @@ const object_id_field = 'asin'; // When we refer to a object by it's ID, this de
 
 const ubiClient = new  UbiClient(event_server);
 
-clearQueryId(); // clear out any existing query_id
+clearQueryId(); // Clear out any existing query_id from the session.
 
 function addToCart(item) {
   let shopping_cart = sessionStorage.getItem("shopping_cart");
@@ -43,6 +43,19 @@ function addToCart(item) {
   var cart = document.getElementById("cart");
   cart.textContent = shopping_cart;
   if (getQueryId()) {
+    // Since we do not have a traditional detail page, which is where you would track
+    // a "click" for Click Through Rate and other traditional implicit judgement based metrics
+    // we are re-purposing add to cart to mean both click and add_to_cart.
+    var event = new UbiEvent(APPLICATION, 'click', client_id, session_id, getQueryId(), 
+      new UbiEventAttributes('asin', item.asin, item.title, {}, {ordinal:  item.position}), 
+      item.title + ' (' + item.id + ')');
+    
+    event.message_type = 'CLICK_THROUGH';
+    
+    ubiClient.trackEvent(event);
+    console.log(event);    
+    
+    // Now track the add_to_cart conversion event.
     var event = new UbiEvent(APPLICATION, 'add_to_cart', client_id, session_id, getQueryId(), 
       new UbiEventAttributes('asin', item.asin, item.title, {}, {ordinal:  item.position}), 
       item.title + ' (' + item.id + ')');
