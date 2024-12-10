@@ -399,7 +399,7 @@ class App extends Component {
                       title={ item.title }            
                       onClick={
                         function(el) {
-                          addToCart({ ...item, position: index});
+                          addToCart({ ...item, position: index + 1});
                         }
                       }
                     >
