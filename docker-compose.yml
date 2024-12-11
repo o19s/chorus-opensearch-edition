@@ -9,6 +9,8 @@ services:
       - "4900:4900"
       - "2021:2021"
       - "21890:21890"
+    networks:
+      - chorus_network      
     volumes:
       - ./dataprepper/pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
       - ./dataprepper/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
@@ -18,6 +20,8 @@ services:
     build: ./middleware
     ports:
       - "9090:9090"
+    networks:
+      - chorus_network       
     volumes:
       - ./middleware:/python-docker/
   mysql:
@@ -25,6 +29,8 @@ services:
     image: amd64/mysql:8
     ports:
       - 3306:3306
+    networks:
+      - chorus_network       
     environment:
       - MYSQL_ROOT_PASSWORD=password
     volumes:
@@ -64,6 +70,8 @@ services:
           memory: 4g  # Optional: reserve memory for the container
     ports:
       - "9200:9200"
+    networks:
+      - chorus_network       
     healthcheck:
       test: [ "CMD", "wget", "http://localhost:9200" ]
       interval: 30s
@@ -75,6 +83,8 @@ services:
     container_name: opensearch-dashboards
     ports:
       - 5601:5601
+    networks:
+      - chorus_network       
     expose:
       - 5601
     environment:
@@ -86,18 +96,21 @@ services:
   reactivesearch:
     container_name: reactivesearch
     build: ./reactivesearch/.
-
+    ports:
+      - 3000:3000   
+    networks:
+      - chorus_network 
     volumes:
       - './reactivesearch:/usr/src/app'
       - '/usr/src/app/node_modules'
-    ports:
-      - 3000:3000   
 
   quepid:
     container_name: quepid
     image: o19s/quepid:7.15.1
     ports:
       - 4000:3000
+    networks:
+      - chorus_network 
     environment:
       - PORT=3000
       - RACK_ENV=production
@@ -126,3 +139,11 @@ services:
     image: redis:7.0.11-alpine
     ports:
       - 6379:6379
+    networks:
+      - chorus_network
+
+
+
+networks:
+  chorus_network:
+    driver: bridge
