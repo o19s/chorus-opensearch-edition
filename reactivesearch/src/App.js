@@ -253,6 +253,7 @@ class App extends Component {
             placeholder="Search for products, brands or ASIN"
             autosuggest={false}
             dataField={["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]}
+            debounce={300}
             onKeyPress={
               function(value) {
                 // With every keypress generate a new query id and store it in the session to track events against. 
