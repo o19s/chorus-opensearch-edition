@@ -291,6 +291,22 @@ class App extends Component {
                 } else {
                   algo = 'keyword';
                 }
+                
+                // getQueryId() is not a blocking operation, and sometimes the onKeyPress
+                // call to create the query_id hasn't finished, so we get back a null.
+                // This is to basically pause long enough till we get a query id.
+                let query_id = null;
+                for (let i = 0; i < 1000; i++) {
+                    query_id = getQueryId();
+                    if (query_id !== null) {
+                        console.log(`Value found: ${query_id}`);
+                        break; // Exit the loop if the value is not null
+                    }
+                }
+                
+                if (query_id === null){
+                  console.error("Query ID was not successfully generated, which means this search sent to OpenSearch will fail!")
+                }
             
                 // no UBI clauses means no use of the OpenSearch UBI plugin.
                 const extJsonDisabledUBI = {
