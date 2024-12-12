@@ -50,6 +50,16 @@ def search():
     else:
       # Based on https://stackoverflow.com/a/36601467
       # 
+      last_search_query = request.get_data().decode('utf-8')
+      last_search = json.loads(last_search_query)
+      user_query = last_search.get("ext", {}).get("ubi", {}).get("user_query")  
+      ubi_query_id_to_cache = last_search.get("ext", {}).get("ubi", {}).get("query_id")     
+      
+      # cache the user_query by the query_id
+      if ubi_query_id_to_cache is not None:
+        if user_query is not None:
+          user_query_cache[ubi_query_id_to_cache] = user_query
+          
       res = requests.request(
           method          = request.method,
           url             = request.url.replace(request.host_url, f"{OPENSEARCH_ENDPOINT}/"),
@@ -102,10 +112,7 @@ def multisearch():
       # Based on https://stackoverflow.com/a/36601467
       # 
 
-      print("Here is some data")
-      print(request.get_data())
       last_search_query = request.get_data().decode('utf-8').splitlines()[-1]
-      logger.info("last search query" + last_search_query)
       last_search = json.loads(last_search_query)
       user_query = last_search.get("ext", {}).get("ubi", {}).get("user_query")  
       ubi_query_id_to_cache = last_search.get("ext", {}).get("ubi", {}).get("query_id")     
