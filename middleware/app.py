@@ -1,6 +1,7 @@
 import json
 import os
 import uuid
+import logging
 import flask
 import requests
 from flask import Flask, request, Response
@@ -20,17 +21,24 @@ OPENSEARCH_HOST = os.getenv("OPENSEARCH_HOST", "opensearch")
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
+# Basic configuration for logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(name)s - %(levelname)s - %(message)s')
+
+logger = logging.getLogger(__name__)
+
 # Local cache for product asin -> cost (sensitive information)
 cache = {}
+
+# Local mapping for query_id -> user_query information
+user_query_cache = {}
 
 print("Using OTel endpoint: " + OTEL_COLLECTOR_ENDPOINT)
 
 # This proxies the traditional _search end point across any index.
 # ecommerce/_search
-# ecommerce_keyword/_search
-# ecommerce_neural/_search
-@app.route('/<path:prefix>/_search', methods=["GET", "POST", "OPTIONS"])
-def search(prefix):
+@app.route('/ecommerce/_search', methods=["GET", "POST", "OPTIONS"])
+def search():
 
     if request.method == "OPTIONS":
         response = flask.jsonify(status=200, mimetype="application/json")
@@ -41,6 +49,7 @@ def search(prefix):
 
     else:
       # Based on https://stackoverflow.com/a/36601467
+      # 
       res = requests.request(
           method          = request.method,
           url             = request.url.replace(request.host_url, f"{OPENSEARCH_ENDPOINT}/"),
@@ -79,10 +88,8 @@ def search(prefix):
 
 # This proxies the Multi Search _msearch end point across any index.
 # ecommerce/_msearch
-# ecommerce_keyword/_msearch
-# ecommerce_neural/_msearch
-@app.route("/<path:prefix>/_msearch", methods=["GET", "POST", "OPTIONS"])
-def multisearch(prefix):
+@app.route("/ecommerce/_msearch", methods=["GET", "POST", "OPTIONS"])
+def multisearch():
 
     if request.method == "OPTIONS":
         response = flask.jsonify(status=200, mimetype="application/json")
@@ -93,6 +100,21 @@ def multisearch(prefix):
 
     else:
       # Based on https://stackoverflow.com/a/36601467
+      # 
+
+      print("Here is some data")
+      print(request.get_data())
+      last_search_query = request.get_data().decode('utf-8').splitlines()[-1]
+      logger.info("last search query" + last_search_query)
+      last_search = json.loads(last_search_query)
+      user_query = last_search.get("ext", {}).get("ubi", {}).get("user_query")  
+      ubi_query_id_to_cache = last_search.get("ext", {}).get("ubi", {}).get("query_id")     
+      
+      # cache the user_query by the query_id
+      if ubi_query_id_to_cache is not None:
+        if user_query is not None:
+          user_query_cache[ubi_query_id_to_cache] = user_query
+      
       res = requests.request(
           method          = request.method,
           url             = request.url.replace(request.host_url, f"{OPENSEARCH_ENDPOINT}/"),
@@ -110,8 +132,9 @@ def multisearch(prefix):
               headers[k] = v
   
       search_response = res.json()
-      
+      #logger.info(search_response)
       ubi_query_id = search_response.get("ext", {}).get("ubi", {}).get("query_id")
+      # for some reasponse we are not getting back the ubi query_id..  
       if ubi_query_id is not None:
         for response in search_response["responses"]:
           for hit in response["hits"]["hits"]:
@@ -123,6 +146,16 @@ def multisearch(prefix):
 
             # Cache cost for product based on QueryId + ASIN
             cache[f"{ubi_query_id}-{asin}"] = cost
+
+
+      
+      logger.info(f"query id is {ubi_query_id} and user query is {user_query}")
+    
+      # cache the user_query by the query_id
+      if ubi_query_id is not None:
+        if user_query is not None:
+          user_query_cache[ubi_query_id] = user_query
+          
 
       response = flask.Response(json.dumps(search_response), res.status_code, headers=headers)
 
@@ -185,6 +218,11 @@ def ubi_events():
 
         for event in events:                     
             ubi_query_id = event["query_id"]
+            
+            # Check if we have a user_query in our cache from the query and add it to the event.BaseException
+            if ubi_query_id in user_query_cache:
+                event['user_query'] = user_query_cache[ubi_query_id]
+            
             # Add back the sensitive information (cost) to the data being sent to the UBI Events datastore.            
             cost = None
 
@@ -241,7 +279,7 @@ def ubi_queries():
         print("Received UBI query:")
         print(queries)
 
-        # Example received UBI event.
+        # Example received UBI query.
         # [
         #     {
         #         "application": "Chorus",
@@ -256,8 +294,10 @@ def ubi_queries():
         #         }
         #     }
         # ]
+        
+       
 
-        # Index the UBI event to OpenSearch.
+        # Index the UBI query to OpenSearch.
         client = OpenSearch(hosts=[{"host": OPENSEARCH_HOST, "port": 9200}])
 
 
@@ -266,6 +306,7 @@ def ubi_queries():
                      
             ubi_query_id = query["query_id"]
             
+                             
             # First we demonstrate indexing directly into ubi_queries index
             client.index(
                 index="ubi_queries",
@@ -280,6 +321,11 @@ def ubi_queries():
 @app.route('/dump_cache', methods=["GET"])
 def dump_cache():
   response = flask.jsonify(cache=cache)
+  return response
+  
+@app.route('/dump_user_query_cache', methods=["GET"])
+def dump_user_query_cache():
+  response = flask.jsonify(user_query_cache=user_query_cache)
   return response
 
 
