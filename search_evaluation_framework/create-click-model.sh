@@ -1,4 +1,4 @@
 #!/bin/bash -e
 
 # Create a click model.
-java -jar ../target/search-evaluation-framework-1.0.0-SNAPSHOT-jar-with-dependencies.jar -c coec
+docker compose run search_evaluation_framework java -jar /app/search-evaluation-framework.jar -o http://opensearch:9200 -c coec
