@@ -1,5 +1,9 @@
 services:
 
+  search_evaluation_framework:
+    container_name: search_evaluation_framework
+    build: ./search_evaluation_framework
+
   dataprepper:
     depends_on:
       - opensearch
