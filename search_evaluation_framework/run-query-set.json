@@ -1,0 +1,10 @@
+{
+  "query_set_id": "20b2c5d3-42bf-4aaf-843e-d806e9fcd3c1",
+  "judgments_id": "69a69c21-f0bb-443e-bf75-bca389704fd0",
+  "index": "ecommerce",
+  "search_pipeline": "hybrid_pipeline",
+  "id_field": "asin",
+  "k": 10,
+  "threshold": 1.0,
+  "query": "{\"query\": {\"match\": {\"description\": \"#$query##\"}}}"
+}
