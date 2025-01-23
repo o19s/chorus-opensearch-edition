@@ -1,10 +1,6 @@
 .idea/
 .vscode/
 transformed_esci_*.json
-transformed_data*.json
-span.json
-icecat-products-w_price-19k-20201127.tar.gz
-icecat-products-w_price-19k-20201127.json
 *.bu
 *.DS_Store
 .*.json
