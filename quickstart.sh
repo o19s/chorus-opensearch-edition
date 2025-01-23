@@ -312,6 +312,9 @@ echo -e "${MAJOR}This process runs in the background. Plese give it a couple of 
 
 curl -s GET http://localhost:9200/_tasks/$update_docs_task_id\n${RESET}"
 
+echo -e "${MAJOR}Installing User Behavior Insights Dashboards...\n${RESET}"
+curl -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H "osd-xsrf: true" --form file=@opensearch-dashboards/ubi_dashboard.ndjson > /dev/null
+
 # we start dataprepper as the last service to prevent it from creating the ubi_queries index using the wrong mappings.
 echo -e "${MAJOR}Starting Dataprepper...\n${RESET}"
 docker compose up -d --build dataprepper
