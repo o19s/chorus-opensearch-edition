@@ -6,5 +6,5 @@
   "id_field": "asin",
   "k": 10,
   "threshold": 1.0,
-  "query": "{\"query\": {\"match\": {\"description\": \"#$query##\"}}}"
+  "query": "{\"query\": {\"match\": {\"description\": \"%SearchText%\"}}}"
 }
