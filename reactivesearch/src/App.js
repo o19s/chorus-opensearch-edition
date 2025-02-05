@@ -420,7 +420,7 @@ class App extends Component {
                         }
                       }
                     >
-                      {index} Add to <span style={{fontSize:24 }}> 🛒</span>
+                      Add to <span style={{fontSize:24 }}> 🛒 </span><span> | rank: {index}</span>
                     </button>
                   </ResultCard>
                 ))}
