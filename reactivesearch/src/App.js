@@ -411,16 +411,16 @@ class App extends Component {
                     <button 
                       style={{ fontSize:"14px", position:"relative" }}       
                       ref={this.handleRef}   
-                      position={ index + 1 }
+                      position={ index }
                       asin={ item.asin }
                       title={ item.title }            
                       onClick={
                         function(el) {
-                          addToCart({ ...item, position: index + 1});
+                          addToCart({ ...item, position: index });
                         }
                       }
                     >
-                      {index + 1} Add to <span style={{fontSize:24 }}> 🛒</span>
+                      {index} Add to <span style={{fontSize:24 }}> 🛒</span>
                     </button>
                   </ResultCard>
                 ))}
