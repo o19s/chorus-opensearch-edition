@@ -1,0 +1,10 @@
+{
+  "judgment_set_type": "implicit",
+  "judgment_set_generator": "coec",
+  "judgment_set_name": "my coec judgments",
+  "judgment_set_description": "created to demo judgments in SRW",
+  "judgment_set_parameters": {
+    "start_date": "",
+    "end_date": ""
+  }
+}
