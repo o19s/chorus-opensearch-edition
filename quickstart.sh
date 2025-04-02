@@ -29,6 +29,7 @@ offline_lab=false
 local_deploy=true
 stop=false
 full_dataset=false
+hostname_or_ip=false
 
 while [ ! $# -eq 0 ]
 do
@@ -61,6 +62,17 @@ do
 	    full_dataset=true
 	    echo -e "${MAJOR}Indexing whole data set\n${RESET}"
 	    ;;
+    --hostname_or_ip | -host)
+	    if [ -n "$2" ] && [[ "$2" != -* ]]; then
+          hostname_or_ip=true
+	        HOST=$2
+	        echo -e "${MAJOR}Using hostname/IP: $HOST\n${RESET}"
+	        shift
+	    else
+	        echo -e "${ERROR}Error: --hostname | -host option requires an argument.${RESET}"
+	        exit 1
+	    fi
+	    ;;
 	esac
 	shift
 done
@@ -75,6 +87,11 @@ if ! $local_deploy; then
   echo -e "${MAJOR}Updating configuration files for online deploy${RESET}"
   sed -i.bu 's/localhost/chorus-opensearch-edition.dev.o19s.com/g'  ./reactivesearch/src/App.js
   sed -i.bu 's/localhost/chorus-opensearch-edition.dev.o19s.com/g'  ./opensearch/wait-for-os.sh
+fi
+
+if $hostname_or_ip; then
+  echo -e "${MAJOR}Updating configuration files for deployment with specific hostname or IP${RESET}"
+  sed -i.bu "s/localhost/$HOST/g" ./reactivesearch/src/App.js
 fi
 
 if $stop; then
