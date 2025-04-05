@@ -104,7 +104,9 @@ if $shutdown; then
   exit
 fi
 
-docker compose up -d --build ${services}
+docker compose build --no-cache ${services}
+
+docker compose up -d ${services}
 
 echo -e "${MAJOR}Waiting for OpenSearch to start up and be online.${RESET}"
 ./opensearch/wait-for-os.sh # Wait for OpenSearch to be online

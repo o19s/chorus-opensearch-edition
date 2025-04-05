@@ -3,8 +3,12 @@ import os
 import uuid
 import logging
 import flask
+import string
+import pickle
 import requests
-from flask import Flask, request, Response
+import numpy as np
+from flask import Flask, request, Response, jsonify
+from sklearn.ensemble import RandomForestRegressor
 from flask_cors import CORS
 from opensearchpy import OpenSearch
 from opentelemetry import trace
@@ -335,6 +339,63 @@ def dump_user_query_cache():
   response = flask.jsonify(user_query_cache=user_query_cache)
   return response
 
+with open("model.pkl", "rb") as model_file:
+    model = pickle.load(model_file)
+
+@app.route("/get_neuralness", methods=["GET"])
+def get_neuralness():
+    # Get the query string from the request
+    query = request.args.get("query")
+    if not query:
+        return jsonify({"error": "Query parameter is missing"}), 400
+    
+    # Initialize variables to track the maximum prediction and corresponding neuralness value
+    max_prediction = float('-inf')
+    best_neuralness = None
+
+    # Iterate over neuralness values from 0 to 1.0 in 0.1 steps
+    for i in range(11):  # 11 because we need 0 to 10 inclusive
+        neuralness = i * 0.1
+
+        # Calculate features
+        features = [
+            neuralness,
+            num_of_terms(query),
+            query_length(query),
+            has_numbers(query),
+            has_special_char(query)
+        ]
+
+        # Predict the value using the model
+        try:
+            prediction = model.predict([features])[0]
+        except Exception as e:
+            return jsonify({"error": f"Model prediction failed: {str(e)}"}), 500
+        
+        # Update max_prediction and best_neuralness if current prediction is greater
+        if prediction > max_prediction:
+            max_prediction = prediction
+            best_neuralness = neuralness
+
+        # Return the prediction as JSON
+    print(f"Ran predictions for query {query}")
+    return jsonify({"best_neuralness": best_neuralness})
+
+def num_of_terms(query_string):
+    terms = query_string.split(" ")
+    return len(terms)
+
+def query_length(query_string):
+    return len(query_string)
+
+def has_numbers(query_string):
+    return int(any(char.isdigit() for char in query_string))
+
+def has_special_char(query_string):
+    # Define special characters (all non-alphanumeric characters)
+    special_chars = string.punctuation
+    # Return True if any character in the string is a special character
+    return int(any(char in special_chars for char in query_string))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=9090, debug=True)
