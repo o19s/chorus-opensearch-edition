@@ -29,6 +29,7 @@ offline_lab=false
 local_deploy=true
 stop=false
 full_dataset=false
+only_transform=false
 hostname_or_ip=false
 
 while [ ! $# -eq 0 ]
@@ -40,6 +41,7 @@ do
 	    echo -e "Use the option --stop to stop the Docker containers."
 	    echo -e "Use the option --online-deployment | -online to update configuration to run on chorus-opensearch-edition.dev.o19s.com environment."
 	    echo -e "Use the option --full-dataset | -full to index the whole data set. This takes some time depending on your hardware."
+			echo -e "Use the option --only-transform to download and convert the esci dataset only"
 	    exit
 	    ;;
 		--with-offline-lab | -lab)
@@ -62,6 +64,10 @@ do
 	    full_dataset=true
 	    echo -e "${MAJOR}Indexing whole data set\n${RESET}"
 	    ;;
+  	--only-transform)
+      only_transform=true
+      echo -e "${MAJOR}Only transforming the data set\n${RESET}"
+      ;;					
     --hostname_or_ip | -host)
 	    if [ -n "$2" ] && [[ "$2" != -* ]]; then
           hostname_or_ip=true
@@ -103,6 +109,23 @@ if $shutdown; then
   docker compose down -v
   exit
 fi
+
+echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"
+if [ ! -f ./esci.json.zst ]; then
+  echo -e "${MINOR}Downloading the sample product data\n${RESET}"
+  wget https://esci-s.s3.amazonaws.com/esci.json.zst
+fi
+
+if [ ! -f ./transformed_esci_1.json ]; then
+  echo -e "${MINOR}Transforming the sample product data into JSON format, please give it a few minutes!\n${RESET}"
+  docker run -v "$(pwd)":/app -w /app python:3 bash -c "pip install -r requirements.txt && python3 ./opensearch/transform_data.py"
+fi
+
+if $only_transform; then
+  echo -e "${MINOR}Done transforming sample product data and quitting.\n${RESET}"
+  exit
+fi
+
 
 docker compose up -d --build ${services}
 
@@ -222,17 +245,6 @@ curl -s -X POST "http://localhost:9200/_plugins/ubi/initialize"
 echo -e "${MAJOR}Creating ecommerce index, defining its mapping & settings\n${RESET}"
 curl -s -X PUT "http://localhost:9200/ecommerce" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
 echo -e "\n"
-
-echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"
-if [ ! -f ./esci.json.zst ]; then
-  echo -e "${MINOR}Downloading the sample product data\n${RESET}"
-  wget https://esci-s.s3.amazonaws.com/esci.json.zst
-fi
-
-if [ ! -f ./transformed_esci_1.json ]; then
-  echo -e "${MINOR}Transforming the sample product data into JSON format, please give it a few minutes!\n${RESET}"
-  docker run -v "$(pwd)":/app -w /app python:3 bash -c "pip install -r requirements.txt && python3 ./opensearch/transform_data.py"
-fi
 
 echo -e "${MAJOR}Indexing the product data, please wait...\n${RESET}"
 # Define the OpenSearch endpoint and content header
