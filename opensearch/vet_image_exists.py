@@ -9,9 +9,6 @@ n = len(sys.argv)
 fIn = 'esci.json.zst' if n <= 1 else sys.argv[1]
 outfile = 'image_exists_esci.json'
 
-# Index name
-index_name = "ecommerce"
-
 previously_processed_products = []
 # Open the file and load the JSON data
 with open(outfile, 'r') as file:
