@@ -312,7 +312,10 @@ class App extends Component {
                 const extJsonDisabledUBI = {
             
                 }
+                // Have to add a component to collect the AB config names to enable AB testing
                 let extJson = {
+                  conf_a: "baseline",
+                  conf_b: "baseline with title weight",
                   ubi: {
                     query_id: getQueryId(),
                     user_query: value,
