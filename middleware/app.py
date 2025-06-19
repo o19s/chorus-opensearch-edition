@@ -336,8 +336,16 @@ def dump_user_query_cache():
   response = flask.jsonify(user_query_cache=user_query_cache)
   return response
 
+def strip_keys(json_rep: str, keys: list) -> str:
+    dict_value = json.loads(json_rep)
+    for key in keys:
+        if ('ext' in dict_value) and (key in dict_value['ext']):
+            del dict_value['ext'][key]
+    return json.dumps(dict_value)
+
 # This provides the ab_search interleaving using search configurations.
-# ecommerce/_search
+# if no configs are provided, employ the original _msearch
+# ecommerce/_msearch
 @app.route('/ecommerce/_msearch', methods=["GET", "POST", "OPTIONS"])
 def ab_search():
 
@@ -348,39 +356,86 @@ def ab_search():
         response.headers.add("Access-Control-Request-Method", "*")
         return response
     else:
-        # FIXME: this needs to do all provided queries (with aggs, etc), rewrite the list items
-        last_search_query = request.get_data().decode('utf-8').splitlines()[-1]
+        # Based on https://stackoverflow.com/a/36601467
+        #
+        req_data_array = request.get_data().decode('utf-8').splitlines()
+        last_search_query = req_data_array[-1]
         last_search = json.loads(last_search_query)
         user_query = last_search.get("ext", {}).get("ubi", {}).get("user_query")
-        conf_a = last_search.get("conf_a", "baseline")
-        conf_b = last_search.get("conf_b", "baseline with title weight")
-        k = last_search.get("size")
-        source = last_search.get("_source")
-        ext = last_search.get("ext", {})
-        """
-        {
- "size":0,
- "_source":{"includes":["*"],"excludes":[]},
- "ext":{
-     "ubi":{
-         "query_id":"88a1b9da-0cb8-44b6-b1fa-3e22ce82e790",
-         "user_query":"mouse",
-         "client_id":"CLIENT-64e52cac-0565-486e-96ea-24b96baa2b0b",
-         "object_id_field":"asin",
-         "application":"Chorus","query_attributes":{}}},
-    "aggs":{
-        "attrs.Brand.keyword":{
-            "terms":{
-                "field":"attrs.Brand.keyword",
-                "size":20,
-                "order":{"_count":"desc"}
-            }
-        }
-    }
-}
-        """
-        search_response = Interleave().run_ab(user_query, conf_a, conf_b, k, source, ext)
-        response = flask.Response(json.dumps(search_response), 200)
+        ubi_query_id_to_cache = last_search.get("ext", {}).get("ubi", {}).get("query_id")
+        # cache the user_query by the query_id
+        if ubi_query_id_to_cache is not None:
+            if user_query is not None:
+                user_query_cache[ubi_query_id_to_cache] = user_query
+        conf_a = last_search.get("ext", {}).get("conf_a", None)
+        conf_b = last_search.get("ext", {}).get("conf_b", None)
+        do_ab = conf_a and conf_b
+        # Are we doing an AB test run?
+        if do_ab:
+            logger.info(f"Performing TDI of {conf_a} and {conf_b} on {user_query}")
+            k = last_search.get("size")
+            source = last_search.get("_source")
+            ext = last_search.get("ext", {})
+            # have to strip out the conf_* parameters
+            try:
+                del ext['conf_a']
+                del ext['conf_b']
+            except:
+                pass
+            interleaved = Interleave().run_ab(user_query, conf_a, conf_b, k, source, ext)
+            #update the req_data to drop the final two items and end with a newline character
+            # have to strip out the conf_* parameters
+            req_data_array = [ strip_keys(x, ['conf_a', 'conf_b']) for x in req_data_array[:-2]]
+            req_data = "\n".join(req_data_array) + "\n"
+            req_data = req_data.encode('utf-8')
+            logger.info(req_data)
+        else:
+            req_data = request.get_data()
+        # run the msearch, getting the aggs, if not doing AB, also get the actual query
+        res = requests.request(
+            method          = request.method,
+            url             = request.url.replace(request.host_url, f"{OPENSEARCH_ENDPOINT}/").replace('_old', ''),
+            headers         = {k:v for k,v in request.headers if k.lower() != "host"}, # exclude "host" header
+            data            = req_data,
+            cookies         = request.cookies,
+            allow_redirects = False,
+        )
+
+        excluded_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]
+
+        headers = {}
+        for k,v in res.raw.headers.items():
+            if k not in excluded_headers:
+                headers[k] = v
+
+        search_response = res.json()
+        logger.info(search_response)
+        if do_ab:
+            search_response["responses"].append(interleaved)
+            logger.info(f"TDI of {conf_a} and {conf_b} returned")
+
+        ubi_query_id = search_response.get("ext", {}).get("ubi", {}).get("query_id")
+        # for some responses we are not getting back the ubi query_id..
+        if ubi_query_id is not None:
+            for response in search_response["responses"]:
+                for hit in response["hits"]["hits"]:
+                    asin = hit["_source"]["asin"][0]
+                    cost = hit["_source"]["cost"]
+
+                    # Strip out of the sensitive data from what is sent to browser
+                    del hit["_source"]["cost"]
+
+                    # Cache cost for product based on QueryId + ASIN
+                    cache[f"{ubi_query_id}-{asin}"] = cost
+
+        logger.info(f"query id is {ubi_query_id} and user query is {user_query}")
+
+        # cache the user_query by the query_id
+        if ubi_query_id is not None:
+            if user_query is not None:
+                user_query_cache[ubi_query_id] = user_query
+
+        response = flask.Response(json.dumps(search_response), res.status_code, headers=headers)
 
         return response
 
