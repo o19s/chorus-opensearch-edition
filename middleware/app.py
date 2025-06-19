@@ -13,6 +13,7 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from interleave import Interleave
 
 OTEL_COLLECTOR_ENDPOINT = os.getenv("OTEL_COLLECTOR_ENDPOINT", "http://dataprepper:21890/opentelemetry.proto.collector.trace.v1.TraceService/Export")
 OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "http://opensearch:9200")
@@ -98,7 +99,7 @@ def search():
 
 # This proxies the Multi Search _msearch end point across any index.
 # ecommerce/_msearch
-@app.route("/ecommerce/_msearch", methods=["GET", "POST", "OPTIONS"])
+@app.route("/ecommerce/_msearch_old", methods=["GET", "POST", "OPTIONS"])
 def multisearch():
 
     if request.method == "OPTIONS":
@@ -121,10 +122,10 @@ def multisearch():
       if ubi_query_id_to_cache is not None:
         if user_query is not None:
           user_query_cache[ubi_query_id_to_cache] = user_query
-      
+      logger.warning(request.url)
       res = requests.request(
           method          = request.method,
-          url             = request.url.replace(request.host_url, f"{OPENSEARCH_ENDPOINT}/"),
+          url             = request.url.replace(request.host_url, f"{OPENSEARCH_ENDPOINT}/").replace('_old', ''),
           headers         = {k:v for k,v in request.headers if k.lower() != "host"}, # exclude "host" header
           data            = request.get_data(),
           cookies         = request.cookies,
@@ -334,6 +335,54 @@ def dump_cache():
 def dump_user_query_cache():
   response = flask.jsonify(user_query_cache=user_query_cache)
   return response
+
+# This provides the ab_search interleaving using search configurations.
+# ecommerce/_search
+@app.route('/ecommerce/_msearch', methods=["GET", "POST", "OPTIONS"])
+def ab_search():
+
+    if request.method == "OPTIONS":
+        response = flask.jsonify(status=200, mimetype="application/json")
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "Authorization, Content-Type")
+        response.headers.add("Access-Control-Request-Method", "*")
+        return response
+    else:
+        # FIXME: this needs to do all provided queries (with aggs, etc), rewrite the list items
+        last_search_query = request.get_data().decode('utf-8').splitlines()[-1]
+        last_search = json.loads(last_search_query)
+        user_query = last_search.get("ext", {}).get("ubi", {}).get("user_query")
+        conf_a = last_search.get("conf_a", "baseline")
+        conf_b = last_search.get("conf_b", "baseline with title weight")
+        k = last_search.get("size")
+        source = last_search.get("_source")
+        ext = last_search.get("ext", {})
+        """
+        {
+ "size":0,
+ "_source":{"includes":["*"],"excludes":[]},
+ "ext":{
+     "ubi":{
+         "query_id":"88a1b9da-0cb8-44b6-b1fa-3e22ce82e790",
+         "user_query":"mouse",
+         "client_id":"CLIENT-64e52cac-0565-486e-96ea-24b96baa2b0b",
+         "object_id_field":"asin",
+         "application":"Chorus","query_attributes":{}}},
+    "aggs":{
+        "attrs.Brand.keyword":{
+            "terms":{
+                "field":"attrs.Brand.keyword",
+                "size":20,
+                "order":{"_count":"desc"}
+            }
+        }
+    }
+}
+        """
+        search_response = Interleave().run_ab(user_query, conf_a, conf_b, k, source, ext)
+        response = flask.Response(json.dumps(search_response), 200)
+
+        return response
 
 
 if __name__ == "__main__":
