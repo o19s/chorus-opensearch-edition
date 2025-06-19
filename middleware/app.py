@@ -413,20 +413,23 @@ def ab_search():
         if do_ab:
             search_response["responses"].append(interleaved)
             logger.info(f"TDI of {conf_a} and {conf_b} returned")
-
-        ubi_query_id = search_response.get("ext", {}).get("ubi", {}).get("query_id")
+            logger.info(search_response)
+        ubi_query_id = search_response['responses'][-1].get("ext", {}).get("ubi", {}).get("query_id")
         # for some responses we are not getting back the ubi query_id..
         if ubi_query_id is not None:
             for response in search_response["responses"]:
                 for hit in response["hits"]["hits"]:
-                    asin = hit["_source"]["asin"][0]
-                    cost = hit["_source"]["cost"]
+                    try:
+                        asin = hit["_source"]["asin"][0]
+                        cost = hit["_source"]["cost"]
 
-                    # Strip out of the sensitive data from what is sent to browser
-                    del hit["_source"]["cost"]
+                        # Strip out of the sensitive data from what is sent to browser
+                        del hit["_source"]["cost"]
 
-                    # Cache cost for product based on QueryId + ASIN
-                    cache[f"{ubi_query_id}-{asin}"] = cost
+                        # Cache cost for product based on QueryId + ASIN
+                        cache[f"{ubi_query_id}-{asin}"] = cost
+                    except Exception as e:
+                        pass
 
         logger.info(f"query id is {ubi_query_id} and user query is {user_query}")
 
