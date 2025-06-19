@@ -79,7 +79,7 @@ class Interleave:
         }, index=SEARCH_CONFIGS_INDEX)
         return conf['hits']['hits'][0]['_source'] if len(conf['hits']['hits']) else {}
     @staticmethod
-    def populate_query(query, config, size=10, source=None, ext={}, aggs={}):
+    def populate_query(query, config, size=10, source=None, ext={}):
         if source is None:
             source = ["title", "description", "asin"]
         query = query.replace('"', '\\"')
@@ -87,16 +87,15 @@ class Interleave:
         body['size'] = size
         body['_source'] = source
         body['ext'] = ext
-        body['aggs'] = aggs
         return body
 
-    def run_ab(self, query, config_a, config_b, size=10, source=None, ext={}, aggs={} ):
+    def run_ab(self, query, config_a, config_b, size=10, source=None, ext={}):
         conf_a = self.get_search_config(config_a)
         self.label_a = config_a
         conf_b = self.get_search_config(config_b)
         self.label_b = config_b
-        q_a = self.populate_query(query, conf_a, size=size, source=source, ext=ext, aggs=aggs)
-        q_b = self.populate_query(query, conf_b, size=size, source=source, ext=ext, aggs=aggs)
+        q_a = self.populate_query(query, conf_a, size=size, source=source, ext=ext)
+        q_b = self.populate_query(query, conf_b, size=size, source=source, ext=ext)
         res_a = self.client.search(body=q_a)
         res_b = self.client.search(body=q_b)
         # TODO: create the final hits list to return in the results list
@@ -176,7 +175,7 @@ if __name__ == '__main__':
         }
     }
     for q in queries:
-        res = interleave.run_ab(q, control, treatment, size=10, source=source, ext=ext, aggs=aggs)
+        res = interleave.run_ab(q, control, treatment, size=10, source=source, ext=ext)
         print(q)
         for item in res['hits']['hits']:
             print(f'{item["search_config"]} --> {item["_id"]}')
