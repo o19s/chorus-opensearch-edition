@@ -45,6 +45,13 @@ services:
       cluster.name: opensearch
       discovery.seed_hosts: opensearch
       bootstrap.memory_lock: true
+      plugins.security.disabled: "true"
+      http.cors.enabled: true
+      # Warning: this is opening it up to all cross domains
+      http.cors.allow-origin: "*"
+      http.cors.allow-methods: OPTIONS,HEAD,GET,POST,PUT,DELETE
+      http.cors.allow-credentials: true
+      http.cors.allow-headers: X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization,test,access-control-allow-headers,x-search-query,X-Search-Id,X-Search-Filters,X-ubi-query-id,X-ubi-store,X-ubi-user-id,X-ubi-session-id,x-search-client,Access-Control-Expose-Headers
       DISABLE_INSTALL_DEMO_CONFIG: true
       DISABLE_SECURITY_PLUGIN: true # disable security plugin only for demo
       OPENSEARCH_INITIAL_ADMIN_PASSWORD: Mysupersecretpassword_123
