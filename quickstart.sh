@@ -28,7 +28,7 @@ shutdown=false
 offline_lab=false
 local_deploy=true
 stop=false
-full_dataset=false
+full_dataset=true
 only_transform=false
 hostname_or_ip=false
 
@@ -83,8 +83,8 @@ do
 	shift
 done
 
-services="opensearch opensearch-dashboards middleware reactivesearch"
-
+#services="opensearch opensearch-dashboards middleware reactivesearch"
+services="opensearch middleware reactivesearch"
 if $offline_lab; then
   services="${services} quepid"
 fi
@@ -346,17 +346,17 @@ curl -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H
 
 echo -e "${MAJOR}Fetching latest Search Result Quality Evaluation Dashboard, sample data and install script...\n${RESET}"
 # Dashboards
-curl -s -o search_dashboard.ndjson https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/search_dashboard.ndjson
+#curl -s -o search_dashboard.ndjson https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/search_dashboard.ndjson
 # Install script
-curl -s -o install_dashboards.sh https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/install_dashboards.sh
+#curl -s -o install_dashboards.sh https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/install_dashboards.sh
 # sample data
-curl -s -o sample_data.ndjson https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/sample_data.ndjson
+#curl -s -o sample_data.ndjson https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/sample_data.ndjson
 # mappings for search quality metrics sample data index
-curl -s -o srw_metrics_mappings.json https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/srw_metrics_mappings.json
+#curl -s -o srw_metrics_mappings.json https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/srw_metrics_mappings.json
 
-echo -e "${MAJOR}Installing Search Result Quality Evaluation Dashboard...\n${RESET}"
-chmod +x install_dashboards.sh
-./install_dashboards.sh http://localhost:9200 http://localhost:5601
+#echo -e "${MAJOR}Installing Search Result Quality Evaluation Dashboard...\n${RESET}"
+#chmod +x install_dashboards.sh
+#./install_dashboards.sh http://localhost:9200 http://localhost:5601
 
 # we start dataprepper as the last service to prevent it from creating the ubi_queries index using the wrong mappings.
 echo -e "${MAJOR}Starting Dataprepper...\n${RESET}"
