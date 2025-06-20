@@ -122,7 +122,7 @@ def multisearch():
       if ubi_query_id_to_cache is not None:
         if user_query is not None:
           user_query_cache[ubi_query_id_to_cache] = user_query
-      logger.warning(request.url)
+
       res = requests.request(
           method          = request.method,
           url             = request.url.replace(request.host_url, f"{OPENSEARCH_ENDPOINT}/").replace('_old', ''),
@@ -140,7 +140,7 @@ def multisearch():
               headers[k] = v
   
       search_response = res.json()
-      #logger.info(search_response)
+
       ubi_query_id = search_response.get("ext", {}).get("ubi", {}).get("query_id")
       # for some reasponse we are not getting back the ubi query_id..  
       if ubi_query_id is not None:
@@ -369,10 +369,10 @@ def ab_search():
                 user_query_cache[ubi_query_id_to_cache] = user_query
         conf_a = last_search.get("ext", {}).get("conf_a", None)
         conf_b = last_search.get("ext", {}).get("conf_b", None)
-        do_ab = conf_a and conf_b
+        do_ab = (len(req_data_array) == 6) and conf_a and conf_b
         # Are we doing an AB test run?
         if do_ab:
-            logger.info(f"Performing TDI of {conf_a} and {conf_b} on {user_query}")
+            logger.info(f"Performing TDI of '{conf_a}' and '{conf_b}' on '{user_query}'")
             k = last_search.get("size")
             source = last_search.get("_source")
             ext = last_search.get("ext", {})
@@ -388,9 +388,14 @@ def ab_search():
             req_data_array = [ strip_keys(x, ['conf_a', 'conf_b']) for x in req_data_array[:-2]]
             req_data = "\n".join(req_data_array) + "\n"
             req_data = req_data.encode('utf-8')
-            logger.info(req_data)
         else:
-            req_data = request.get_data()
+            if conf_a:
+                #still have to strip the conf_* keys
+                req_data_array = [ strip_keys(x, ['conf_a', 'conf_b']) for x in req_data_array]
+                req_data = "\n".join(req_data_array) + "\n"
+                req_data = req_data.encode('utf-8')
+            else:
+                req_data = request.get_data()
         # run the msearch, getting the aggs, if not doing AB, also get the actual query
         res = requests.request(
             method          = request.method,
@@ -409,12 +414,12 @@ def ab_search():
                 headers[k] = v
 
         search_response = res.json()
-        logger.info(search_response)
         if do_ab:
-            search_response["responses"].append(interleaved)
-            logger.info(f"TDI of {conf_a} and {conf_b} returned")
-            logger.info(search_response)
-        ubi_query_id = search_response['responses'][-1].get("ext", {}).get("ubi", {}).get("query_id")
+            if "responses" in search_response:
+                search_response["responses"].append(interleaved)
+            else:
+                search_response["hits"].append(interleaved)
+        ubi_query_id = search_response.get("responses", [{}])[-1].get("ext", {}).get("ubi", {}).get("query_id")
         # for some responses we are not getting back the ubi query_id..
         if ubi_query_id is not None:
             for response in search_response["responses"]:
