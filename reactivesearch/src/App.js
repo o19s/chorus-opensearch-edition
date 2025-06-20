@@ -47,7 +47,7 @@ function addToCart(item) {
     // a "click" for Click Through Rate and other traditional implicit judgement based metrics
     // we are re-purposing add to cart to mean both click and add_to_cart.
     var event = new UbiEvent(APPLICATION, 'click', client_id, session_id, getQueryId(), 
-      new UbiEventAttributes('asin', item.asin, item.title, {}, {ordinal:  item.position}), 
+      new UbiEventAttributes('asin', item.asin, item.title, {search_config: item.algo}, {ordinal:  item.position}),
       item.title + ' (' + item.id + ')');
     
     event.message_type = 'CLICK_THROUGH';
@@ -57,7 +57,7 @@ function addToCart(item) {
     
     // Now track the add_to_cart conversion event.
     var event = new UbiEvent(APPLICATION, 'add_to_cart', client_id, session_id, getQueryId(), 
-      new UbiEventAttributes('asin', item.asin, item.title, {}, {ordinal:  item.position}), 
+      new UbiEventAttributes('asin', item.asin, item.title, {search_config: item.algo}, {ordinal:  item.position}),
       item.title + ' (' + item.id + ')');
     
     event.message_type = 'CONVERSION';
@@ -115,8 +115,9 @@ class App extends Component {
                 console.log(`${entry.target.innerText} is now visible in the viewport!`);
                 const position = parseInt(entry.target.attributes.position.value, 10)
                 const title = entry.target.attributes.title?.value || "";
-                var event = new UbiEvent(APPLICATION, 'impression', client_id, session_id, getQueryId(), 
-                  new UbiEventAttributes('asin', entry.target.attributes.asin.value, title, {}, {ordinal:  position}), 
+                const search_config = entry.target.attributes.algo?.value || null
+                var event = new UbiEvent(APPLICATION, 'impression', client_id, session_id, getQueryId(),
+                  new UbiEventAttributes('asin', entry.target.attributes.asin.value, title, {search_config: search_config}, {ordinal:  position}),
                   'impression made on doc position ' + entry.target.attributes.position.value);
                 event.message_type = 'IMPRESSION';
                 console.log(event);
@@ -443,10 +444,11 @@ class App extends Component {
                       ref={this.handleRef}   
                       position={ index }
                       asin={ item.asin }
-                      title={ item.title }            
+                      title={ item.title }
+                      algo={item.search_config}
                       onClick={
                         function(el) {
-                          addToCart({ ...item, position: index });
+                          addToCart({ ...item, position: index, algo: item.search_config });
                         }
                       }
                     >
