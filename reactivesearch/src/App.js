@@ -199,7 +199,7 @@ class App extends Component {
               onQueryChange={
                 function(prevQuery, nextQuery) {
                   if(nextQuery != prevQuery){
-  
+
                   }
                 }
               }
@@ -216,7 +216,7 @@ class App extends Component {
               showSearch={false}
               react={{
                 and: ["searchbox", "supplier_name"]
-              }}            
+              }}
               style={{ "paddingBottom": "10px", "paddingTop": "10px" }}
               onValueChange={
                 function(arr) {
@@ -237,11 +237,11 @@ class App extends Component {
               onQueryChange={
                 function(prevQuery, nextQuery) {
                   if(nextQuery != prevQuery){
-  
+
                   }
                 }
               }
-  
+
             />
         </div>
         <div style={{ display: "flex", flexDirection: "column", width: "75%" }}>
@@ -291,7 +291,14 @@ class App extends Component {
                 } else {
                   algo = 'keyword';
                 }
-                
+                var config_a = null;
+                var config_b = null;
+                if (algo === 'ab') {
+                    var sc_a = document.getElementById('conf_a');
+                    var config_a = sc_a.value;
+                    var sc_b = document.getElementById('conf_b');
+                    var config_b = sc_b.value;
+                }
                 // getQueryId() is not a blocking operation, and sometimes the onKeyPress
                 // call to create the query_id hasn't finished, so we get back a null.
                 // This is to basically pause long enough till we get a query id.
@@ -314,8 +321,6 @@ class App extends Component {
                 }
                 // Have to add a component to collect the AB config names to enable AB testing
                 let extJson = {
-                  conf_a: "baseline",
-                  conf_b: "baseline with title weight",
                   ubi: {
                     query_id: getQueryId(),
                     user_query: value,
@@ -325,8 +330,30 @@ class App extends Component {
                     query_attributes: {}
                   }
                 };
-                
-                if (algo === "keyword") {
+                if (algo == 'ab') {
+                  let extJ = {
+                    conf_a: config_a,
+                    conf_b: config_b,
+                    ubi: {
+                        query_id: getQueryId(),
+                        user_query: value,
+                        client_id: client_id,
+                        object_id_field: object_id_field,
+                        application: 'Chorus',
+                        query_attributes: {}
+                    }
+                  };
+                  return {
+                    query: {
+                      multi_match: {
+                        query: value,
+                        fields: ["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]
+                      }
+                    },
+                    ext: extJ
+                  }
+                }
+                else if (algo === "keyword") {
                   return {
                     query: {
                       multi_match: {
