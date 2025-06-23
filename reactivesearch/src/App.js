@@ -295,10 +295,8 @@ class App extends Component {
                 var config_a = null;
                 var config_b = null;
                 if (algo === 'ab') {
-                    var sc_a = document.getElementById('conf_a');
-                    var config_a = sc_a.value;
-                    var sc_b = document.getElementById('conf_b');
-                    var config_b = sc_b.value;
+                    config_a = document.getElementById('conf_a').value;
+                    config_b = document.getElementById('conf_b').value;
                 }
                 // getQueryId() is not a blocking operation, and sometimes the onKeyPress
                 // call to create the query_id hasn't finished, so we get back a null.
@@ -327,11 +325,11 @@ class App extends Component {
                     user_query: value,
                     client_id: client_id,
                     object_id_field: object_id_field,
-                    application: 'Chorus',
+                    application: APPLICATION,
                     query_attributes: {}
                   }
                 };
-                if (algo == 'ab') {
+                if (algo === 'ab') {
                   let extJ = {
                     conf_a: config_a,
                     conf_b: config_b,
@@ -340,7 +338,7 @@ class App extends Component {
                         user_query: value,
                         client_id: client_id,
                         object_id_field: object_id_field,
-                        application: 'Chorus',
+                        application: APPLICATION,
                         query_attributes: {}
                     }
                   };
