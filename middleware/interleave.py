@@ -1,3 +1,4 @@
+import logging
 import random
 import json
 from opensearchpy import OpenSearch
@@ -7,6 +8,24 @@ OPENSEARCH_HOST = os.getenv("OPENSEARCH_HOST", "opensearch")
 OPENSEARCH_PORT = os.getenv("OPENSEARCH_PORT", 9200)
 SEARCH_CONFIGS_INDEX = os.getenv("SEARCH_CONFIGS_INDEX", 'search-relevance-search-config')
 UBI_EVENTS_INDEX = os.getenv("UBI_EVENTS_INDEX", 'ubi_events')
+EMPTY_RESULT = {
+    "took": 0,
+    "timed_out": False,
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 0,
+            "relation": "eq"
+        },
+        "max_score": None,
+        "hits": []
+    }
+}
 
 class Interleave:
     def __init__(self):
@@ -15,7 +34,7 @@ class Interleave:
         self.label_a = 'TeamA'
         self.label_b = 'TeamB'
 
-    def interleave(self, list_a, list_b, k):
+    def interleave(self, list_a, list_b, k) -> list:
         ids = []
         hits = []
         rank = 1
@@ -64,24 +83,26 @@ class Interleave:
                 idx_b += 1
         return hits
 
-    def get_list(self, list_a, list_b, k):
+    def get_list(self, list_a, list_b, k) -> list:
         a = list_a['hits']['hits']
         b = list_b['hits']['hits']
         interleaving = self.interleave(a, b, k)
         return interleaving
 
-    def get_search_config(self, name):
+    def get_search_config(self, name) -> dict:
         conf = self.client.search( body = {
             "query": {
                 "match": {"name": name}
             },
             "size": 1
         }, index=SEARCH_CONFIGS_INDEX)
-        return conf['hits']['hits'][0]['_source'] if len(conf['hits']['hits']) else {}
+        return conf['hits']['hits'][0]['_source'] if len(conf['hits']['hits']) else None
     @staticmethod
-    def populate_query(query, config, size=10, source=None, ext={}):
+    def populate_query(query, config, size=10, source=None, ext=None) -> dict:
         if source is None:
             source = ["title", "description", "asin"]
+        if ext is None:
+            ext = {}
         query = query.replace('"', '\\"')
         body = json.loads(config['query'].replace("%SearchText%", query))
         body['size'] = size
@@ -89,22 +110,27 @@ class Interleave:
         body['ext'] = ext
         return body
 
-    def run_ab(self, query, config_a, config_b, size=10, source=None, ext={}):
+    def run_ab(self, query, config_a, config_b, size=10, source=None, ext=None) -> dict:
         conf_a = self.get_search_config(config_a)
         self.label_a = config_a
         conf_b = self.get_search_config(config_b)
         self.label_b = config_b
+        # if either config is bad, return an empty result
+        if not (conf_a and conf_b):
+            if not conf_a:
+                logging.warning(f'{config_a} is not found.')
+            if not conf_b:
+                logging.warning(f'Search {config_b} if not found.')
+            return EMPTY_RESULT
         q_a = self.populate_query(query, conf_a, size=size, source=source, ext=ext)
         q_b = self.populate_query(query, conf_b, size=size, source=source, ext=ext)
         res_a = self.client.search(body=q_a)
         res_b = self.client.search(body=q_b)
-        # TODO: create the final hits list to return in the results list
-        # add the team to the hit (new element).
         result = self.get_list(res_a, res_b, size)
         res_a['hits']['hits'] = result
         return res_a
 
-    def get_events(self, obj_id, query, event_type=None):
+    def get_events(self, obj_id, query, event_type=None) -> dict:
         if event_type:
             evq = {
                 "query": {
@@ -133,11 +159,11 @@ class Interleave:
         results = self.client.search(body=evq, index=UBI_EVENTS_INDEX)
         return results
 
-    def get_clicks(self, obj_id, query):
+    def get_clicks(self, obj_id, query) -> dict:
         results = self.get_events(obj_id, query, 'click')
         return results
 
-    def count_clicks(self, obj_id, query):
+    def count_clicks(self, obj_id, query) -> int:
         results = self.get_clicks(obj_id, query)
         return results['hits']['total']['value']
 
@@ -147,7 +173,7 @@ if __name__ == '__main__':
     queries = ['mouse']
     control = "baseline"
     treatment = "baseline with title weight"
-    ext = {
+    ext1 = {
         "ubi": {
             "query_id": "88a1b9da-0cb8-44b6-b1fa-3e22ce82e790",
             "user_query": "mouse",
@@ -157,25 +183,14 @@ if __name__ == '__main__':
             "query_attributes": {}
         }
     }
-    source = {
+    source1 = {
         "includes": [
             "*"
         ],
         "excludes": []
     }
-    aggs = {
-        "category_filter": {
-            "terms": {
-                "field": "category_filter",
-                "size": 20,
-                "order": {
-                    "_count": "desc"
-                }
-            }
-        }
-    }
     for q in queries:
-        res = interleave.run_ab(q, control, treatment, size=10, source=source, ext=ext)
+        res = interleave.run_ab(q, control, treatment, size=10, source=source1, ext=ext1)
         print(q)
         for item in res['hits']['hits']:
             print(f'{item["search_config"]} --> {item["_id"]}')
