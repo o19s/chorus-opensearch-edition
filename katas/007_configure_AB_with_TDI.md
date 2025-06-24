@@ -60,37 +60,39 @@ for the Dashboard setting.
 
 Additionally, the plugin must be enabled, either in the Dev console or via curl:
 
-`PUT _cluster/settings
+```
+PUT _cluster/settings
 {
   "persistent" : {
     "plugins.search_relevance.workbench_enabled" : true
   }
 }`
-
+```
 Or
-
-`% curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
+```
+curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
  {
    "persistent" : {
     "plugins.search_relevance.workbench_enabled" : true
   }
-}
- '
-`
+}'
+```
 You can initialize example data, including search configurations, using 
 [demo.sh](https://github.com/opensearch-project/search-relevance/blob/main/src/test/scripts/demo.sh)
 from the search-relevance repository. For this kata, only two search configurations are required. They can be installed via curl.
 
 #### Search Configurations
-`curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
+```
+curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
 -H "Content-type: application/json" \
 -d'{
 "name": "baseline",
 "query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title\",\"category\",\"bullets\",\"description\",\"attrs.Brand\",\"attrs.Color\"]}}}",
 "index": "ecommerce"
-}'`
+}'
+```
 
-`
+```
 curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
 -H "Content-type: application/json" \
 -d'{
@@ -98,7 +100,8 @@ curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configur
 "query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title^25\",\"category\",\"bullets\",\"description\",\"attrs.Brand\",\"attrs.Color\"]}}}",
 "index": "ecommerce"
 }'
-`
+```
+
 ## Configuring an AB test
 
 Now that [Chorus](http://localhost:3000/) is up and running, load up the home page.
