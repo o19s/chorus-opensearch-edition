@@ -23,7 +23,7 @@ cd ./katas
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-jupyter notebook Interleave.ipynb
+jupyter notebook 007_Interleave.ipynb
 ```
 Note, Chorus must still be set up.
 
@@ -99,5 +99,16 @@ curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configur
 "index": "ecommerce"
 }'
 `
+## Configuring an AB test
+
+Now that [Chorus](http://localhost:3000/) is up and running, load up the home page.
+On the left hand side, select AB from the Pick your Algo drop down menu:
+
+![Pick AB](images/007_choose_ab.png)
+
+Two text entry boxes will appear. In the first, enter `baseline` and in the second enter
+`baseline with title weight`
+
+![Enter Configs](images/007_enter_configs.png)
 
 Congratulations! You now have Chorus - The OpenSearch Edition configured to run an AB test configuration!
