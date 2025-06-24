@@ -83,8 +83,8 @@ do
 	shift
 done
 
-#services="opensearch opensearch-dashboards middleware reactivesearch"
-services="opensearch middleware reactivesearch"
+services="opensearch opensearch-dashboards middleware reactivesearch"
+
 if $offline_lab; then
   services="${services} quepid"
 fi
@@ -344,7 +344,7 @@ curl -s GET http://localhost:9200/_tasks/$update_docs_task_id\n${RESET}"
 echo -e "${MAJOR}Installing User Behavior Insights Dashboards...\n${RESET}"
 curl -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H "osd-xsrf: true" --form file=@opensearch-dashboards/ubi_dashboard.ndjson > /dev/null
 
-echo -e "${MAJOR}Fetching latest Search Result Quality Evaluation Dashboard, sample data and install script...\n${RESET}"
+#echo -e "${MAJOR}Fetching latest Search Result Quality Evaluation Dashboard, sample data and install script...\n${RESET}"
 # Dashboards
 #curl -s -o search_dashboard.ndjson https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/search_dashboard.ndjson
 # Install script
