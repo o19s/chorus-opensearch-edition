@@ -54,8 +54,50 @@ This will download a copy of the ESCI data set, with judgments, and create a set
 
 ### SRW
 
-The Search Relevance Workbench must be enabled in OpenSearch 3.1. 
-#### Search Configurations
+The Search Relevance Workbench must be enabled in OpenSearch 3.1. See [Search Relevance Tools](https://github.com/opensearch-project/dashboards-search-relevance) 
+for the Dashboard setting.
+![SRW Setting](images/007_SRW_setting.png)
 
+Additionally, the plugin must be enabled, either in the Dev console or via curl:
+
+`PUT _cluster/settings
+{
+  "persistent" : {
+    "plugins.search_relevance.workbench_enabled" : true
+  }
+}`
+
+Or
+
+`% curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
+ {
+   "persistent" : {
+    "plugins.search_relevance.workbench_enabled" : true
+  }
+}
+ '
+`
+You can initialize example data, including search configurations, using 
+[demo.sh](https://github.com/opensearch-project/search-relevance/blob/main/src/test/scripts/demo.sh)
+from the search-relevance repository. For this kata, only two search configurations are required. They can be installed via curl.
+
+#### Search Configurations
+`curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
+-H "Content-type: application/json" \
+-d'{
+"name": "baseline",
+"query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title\",\"category\",\"bullets\",\"description\",\"attrs.Brand\",\"attrs.Color\"]}}}",
+"index": "ecommerce"
+}'`
+
+`
+curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
+-H "Content-type: application/json" \
+-d'{
+"name": "baseline with title weight",
+"query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title^25\",\"category\",\"bullets\",\"description\",\"attrs.Brand\",\"attrs.Color\"]}}}",
+"index": "ecommerce"
+}'
+`
 
 Congratulations! You now have Chorus - The OpenSearch Edition configured to run an AB test configuration!
