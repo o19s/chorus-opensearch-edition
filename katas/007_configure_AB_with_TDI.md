@@ -77,6 +77,8 @@ curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: applicat
   }
 }'
 ```
+`quickstart.sh` executes this step.
+
 You can initialize example data, including search configurations, using 
 [demo.sh](https://github.com/opensearch-project/search-relevance/blob/main/src/test/scripts/demo.sh)
 from the search-relevance repository. For this kata, only two search configurations are required. They can be installed via curl.
@@ -101,7 +103,7 @@ curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configur
 "index": "ecommerce"
 }'
 ```
-
+`quickstart.sh` executes these steps.
 ## Configuring an AB test
 
 Now that [Chorus](http://localhost:3000/) is up and running, load up the home page.
