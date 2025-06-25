@@ -114,4 +114,6 @@ Two text entry boxes will appear. In the first, enter `baseline` and in the seco
 
 ![Enter Configs](images/007_enter_configs.png)
 
+Now, when you enter a query in the search box, both chosen configurations will be executed, with their result lists interleaved.
+
 Congratulations! You now have Chorus - The OpenSearch Edition configured to run an AB test configuration!
