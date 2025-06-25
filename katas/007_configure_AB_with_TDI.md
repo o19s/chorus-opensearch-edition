@@ -49,7 +49,7 @@ Use `quickstart.sh` to run the Chorus setup. It will perform the following tasks
 To create sampled UBI queries and synthetic UBI events, clone the repo:
 [User Behavior Insights](https://github.com/opensearch-project/user-behavior-insights/)
 and use the 
-[UBI Data Geneator](https://github.com/opensearch-project/user-behavior-insights/tree/main/ubi-data-generator).
+[UBI Data Generator](https://github.com/opensearch-project/user-behavior-insights/tree/main/ubi-data-generator).
 This will download a copy of the ESCI data set, with judgments, and create a set of queries and associated UBI events.
 
 ### SRW
