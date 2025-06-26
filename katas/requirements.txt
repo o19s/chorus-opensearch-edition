@@ -2,3 +2,4 @@ jupyter
 requests
 mercury
 pandas
+opensearch-py~=2.8.0
