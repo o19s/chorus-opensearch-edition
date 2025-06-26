@@ -55,6 +55,7 @@ Learn more by following this sequence of Katas:
 1. Fourth Kata: [Build a Basic Dashboard](katas/004_build_a_basic_dashboard.md)
 1. Fifth Kata: [Hybrid Search in OpenSearch](katas/005_1_run_a_hybrid_search.md)
 1. Sixth Kata: [Protecting Sensitive Information while using UBI](katas/006_protecting_sensitive_information.md)
+1. Seventh Kata: [A/B testing with Team Draft Interleaving](katas/007_configure_AB_with_TDI.md)
 
 # Useful Commands for Chorus
 
