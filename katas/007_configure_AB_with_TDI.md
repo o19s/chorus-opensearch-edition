@@ -1,5 +1,11 @@
 # Kata 006: Configuring an AB test with Team Draft Interleaving
+[Team Draft Interleaving](https://dl.acm.org/doi/abs/10.1145/2806416.2806477) is an algorithm for A/B testing that presents a single result list to each user, with the competing search algorithms both represented in the list. This facilitates faster A/B testing, as the user pool is not divided into treatment groups.
 
+This form of A/B testing requires no external orchestration, front-end modification, nor third-party instrumentation.
+
+The Search Relevance Workbench provides us with the competing search algorithms, the search configurations for the A and B arms of the test.
+
+Given the two test arms, the “AB algorithm” submits each search configuration and gathers the result lists for each. Next, the TDI algorithm produces a single merged result list. The result items will be annotated with the name of the search configuration that produced them. UBI events generated from the returned results list have that value included in the event enabling analysis and visualization of the experiment results.
 
 ## Prerequisites
 _WARNING_  This Kata requires Opensearch 3.1 with the UBI and SRW plugins enabled.
@@ -46,11 +52,13 @@ Use `quickstart.sh` to run the Chorus setup. It will perform the following tasks
 
 ### UBI
 
-To create sampled UBI queries and synthetic UBI events, clone the repo:
-[User Behavior Insights](https://github.com/opensearch-project/user-behavior-insights/)
+To create sampled UBI queries and synthetic UBI events, clone the ESCI data repo:
+[ESCI data set](https://github.com/amazon-science/esci-data.git)
+
+and [User Behavior Insights](https://github.com/opensearch-project/user-behavior-insights/)
 and use the 
 [UBI Data Generator](https://github.com/opensearch-project/user-behavior-insights/tree/main/ubi-data-generator).
-This will download a copy of the ESCI data set, with judgments, and create a set of queries and associated UBI events.
+Provide the command line argument for the path to the ESCI data set, with judgments, and create a set of queries and associated UBI events.
 
 ### SRW
 
@@ -79,11 +87,12 @@ curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: applicat
 ```
 `quickstart.sh` executes this step.
 
-You can initialize example data, including search configurations, using 
-[demo.sh](https://github.com/opensearch-project/search-relevance/blob/main/src/test/scripts/demo.sh)
-from the search-relevance repository. For this kata, only two search configurations are required. They can be installed via curl.
-
 #### Search Configurations
+
+See [SRW Search Configs](https://docs.opensearch.org/docs/latest/search-plugins/search-relevance/search-configurations/)
+for how to manually create search configurations.
+ For this kata, only two search configurations are required. They can be installed via curl.
+
 ```
 curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
 -H "Content-type: application/json" \
