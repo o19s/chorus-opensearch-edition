@@ -1,4 +1,4 @@
-# Kata 006: Configuring an AB test with Team Draft Interleaving
+# Kata 007: Configuring an AB test with Team Draft Interleaving
 [Team Draft Interleaving](https://dl.acm.org/doi/abs/10.1145/2806416.2806477) is an algorithm for A/B testing that presents a single result list to each user, with the competing search algorithms both represented in the list. This facilitates faster A/B testing, as the user pool is not divided into treatment groups.
 
 This form of A/B testing requires no external orchestration, front-end modification, nor third-party instrumentation.
