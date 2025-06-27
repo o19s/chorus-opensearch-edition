@@ -34,7 +34,12 @@ jupyter notebook 007_Interleave.ipynb
 Note, Chorus must still be set up.
 
 ### Quick Start
-Use `quickstart.sh` to run the Chorus setup. It will perform the following tasks:
+Use `quickstart.sh` to run the Chorus setup. 
+To explore Team Draft Interleaving we recommend running the quickstart.sh script with the full data set option:
+
+```% ./quickstart.sh --full-dataset```
+
+It will perform the following tasks:
 * Create and start the docker containers for
   * OpenSearch 3.1
   * OpenSearch 3.1 dashboards
@@ -44,10 +49,12 @@ Use `quickstart.sh` to run the Chorus setup. It will perform the following tasks
 * Download and transform the ESCI product data set
 * Update the ML plugin and install a model group for neural search
 * Create the ingestion pipeline to use that model
-* Index the product data
+* Index the full product data set
 * Create the neural and hybrid search pipelines
 * Update the index with embeddings
 * Install the UBI dashboard
+* Install the TDI dashboard
+* Create two Search Relevance Workbench Search Configurations
 * Create and start the dataprepper docker container
 
 ### UBI
@@ -68,18 +75,12 @@ python ubi_data_generator.py --esci-dataset ../../esci-data/shopping_queries_dat
 The Search Relevance Workbench must be enabled in OpenSearch 3.1. See [Search Relevance Tools](https://github.com/opensearch-project/dashboards-search-relevance) 
 for the Dashboard setting.
 ![SRW Setting](images/007_SRW_setting.png)
+This step must be performed manually.
 
-Additionally, the plugin must be enabled, either in the Dev console or via curl:
+Additionally, the plugin must be enabled. This is done automatically.
 
-```
-PUT _cluster/settings
-{
-  "persistent" : {
-    "plugins.search_relevance.workbench_enabled" : true
-  }
-}`
-```
-Or
+`quickstart.sh` executes the following curl command.
+
 ```
 curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
  {
@@ -88,14 +89,14 @@ curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: applicat
   }
 }'
 ```
-`quickstart.sh` executes this step.
+
 
 #### Search Configurations
 
 See [SRW Search Configs](https://docs.opensearch.org/docs/latest/search-plugins/search-relevance/search-configurations/)
-for how to manually create search configurations.
- For this kata, only two search configurations are required. They can be installed via curl.
+for how to manually create search configurations.  For this kata, only two search configurations are required.
 
+`quickstart.sh` executes the following curl commands.
 ```
 curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
 -H "Content-type: application/json" \
@@ -115,7 +116,7 @@ curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configur
 "index": "ecommerce"
 }'
 ```
-`quickstart.sh` executes these steps.
+
 ## Configuring an AB test
 
 Now that [Chorus](http://localhost:3000/) is up and running, load up the home page.
@@ -130,4 +131,11 @@ Two text entry boxes will appear. In the first, enter `baseline` and in the seco
 
 Now, when you enter a query in the search box, both chosen configurations will be executed, with their result lists interleaved.
 
+## Visualizing an A/B test.
+
+If you just can't wait for the results to accumulate, you can use the synthetic UBI events generated to view a week-long AB test of TeamA vs TeamB in the TDI Dashboard.
+
+![Relative Lift of CTR](images/TDI_Dashboard_1.png)
+
+![CTR, Clicks and Impressions over Time](images/TDI_Dashboard_2.png)
 Congratulations! You now have Chorus - The OpenSearch Edition configured to run an AB test configuration!
