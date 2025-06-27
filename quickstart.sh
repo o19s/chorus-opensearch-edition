@@ -28,7 +28,7 @@ shutdown=false
 offline_lab=false
 local_deploy=true
 stop=false
-full_dataset=true
+full_dataset=false
 only_transform=false
 hostname_or_ip=false
 
