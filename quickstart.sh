@@ -344,6 +344,9 @@ curl -s GET http://localhost:9200/_tasks/$update_docs_task_id\n${RESET}"
 echo -e "${MAJOR}Installing User Behavior Insights Dashboards...\n${RESET}"
 curl -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H "osd-xsrf: true" --form file=@opensearch-dashboards/ubi_dashboard.ndjson > /dev/null
 
+echo -e "${MAJOR}Installing Team Draft Interleaving Dashboards...\n${RESET}"
+curl -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H "osd-xsrf: true" --form file=@opensearch-dashboards/tdi_dashboard.ndjson > /dev/null
+
 ## configure the SRW search configurations
 echo -e "${MAJOR}Installing Search Relevance Workbench search configurations...\n${RESET}"
 curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
