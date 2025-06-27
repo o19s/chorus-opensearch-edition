@@ -344,6 +344,9 @@ curl -s GET http://localhost:9200/_tasks/$update_docs_task_id\n${RESET}"
 echo -e "${MAJOR}Installing User Behavior Insights Dashboards...\n${RESET}"
 curl -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H "osd-xsrf: true" --form file=@opensearch-dashboards/ubi_dashboard.ndjson > /dev/null
 
+echo -e "${MAJOR}Installing Team Draft Interleaving Dashboards...\n${RESET}"
+curl -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H "osd-xsrf: true" --form file=@opensearch-dashboards/tdi_dashboard.ndjson > /dev/null
+
 echo -e "${MAJOR}Fetching latest Search Result Quality Evaluation Dashboard, sample data and install script...\n${RESET}"
 # Dashboards
 curl -s -o search_dashboard.ndjson https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/search_dashboard.ndjson
@@ -357,7 +360,30 @@ curl -s -o srw_metrics_mappings.json https://raw.githubusercontent.com/o19s/open
 echo -e "${MAJOR}Installing Search Result Quality Evaluation Dashboard...\n${RESET}"
 chmod +x install_dashboards.sh
 ./install_dashboards.sh http://localhost:9200 http://localhost:5601
+## configure the SRW search configurations
+echo -e "${MAJOR}Installing Search Relevance Workbench search configurations...\n${RESET}"
+curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
+ {
+   "persistent" : {
+    "plugins.search_relevance.workbench_enabled" : true
+  }
+}'
 
+curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
+-H "Content-type: application/json" \
+-d'{
+"name": "baseline",
+"query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title\",\"category\",\"bullets\",\"description\",\"attrs.Brand\",\"attrs.Color\"]}}}",
+"index": "ecommerce"
+}'
+
+curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
+-H "Content-type: application/json" \
+-d'{
+"name": "baseline with title weight",
+"query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title^25\",\"category\",\"bullets\",\"description\",\"attrs.Brand\",\"attrs.Color\"]}}}",
+"index": "ecommerce"
+}'
 # we start dataprepper as the last service to prevent it from creating the ubi_queries index using the wrong mappings.
 echo -e "${MAJOR}Starting Dataprepper...\n${RESET}"
 docker compose up -d --build dataprepper

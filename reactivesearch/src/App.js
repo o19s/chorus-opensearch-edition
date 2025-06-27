@@ -47,7 +47,7 @@ function addToCart(item) {
     // a "click" for Click Through Rate and other traditional implicit judgement based metrics
     // we are re-purposing add to cart to mean both click and add_to_cart.
     var event = new UbiEvent(APPLICATION, 'click', client_id, session_id, getQueryId(), 
-      new UbiEventAttributes('asin', item.asin, item.title, {}, {ordinal:  item.position}), 
+      new UbiEventAttributes('asin', item.asin, item.title, {search_config: item.algo}, {ordinal:  item.position}),
       item.title + ' (' + item.id + ')');
     
     event.message_type = 'CLICK_THROUGH';
@@ -57,7 +57,7 @@ function addToCart(item) {
     
     // Now track the add_to_cart conversion event.
     var event = new UbiEvent(APPLICATION, 'add_to_cart', client_id, session_id, getQueryId(), 
-      new UbiEventAttributes('asin', item.asin, item.title, {}, {ordinal:  item.position}), 
+      new UbiEventAttributes('asin', item.asin, item.title, {search_config: item.algo}, {ordinal:  item.position}),
       item.title + ' (' + item.id + ')');
     
     event.message_type = 'CONVERSION';
@@ -115,8 +115,9 @@ class App extends Component {
                 console.log(`${entry.target.innerText} is now visible in the viewport!`);
                 const position = parseInt(entry.target.attributes.position.value, 10)
                 const title = entry.target.attributes.title?.value || "";
-                var event = new UbiEvent(APPLICATION, 'impression', client_id, session_id, getQueryId(), 
-                  new UbiEventAttributes('asin', entry.target.attributes.asin.value, title, {}, {ordinal:  position}), 
+                const search_config = entry.target.attributes.algo?.value || null
+                var event = new UbiEvent(APPLICATION, 'impression', client_id, session_id, getQueryId(),
+                  new UbiEventAttributes('asin', entry.target.attributes.asin.value, title, {search_config: search_config}, {ordinal:  position}),
                   'impression made on doc position ' + entry.target.attributes.position.value);
                 event.message_type = 'IMPRESSION';
                 console.log(event);
@@ -199,7 +200,7 @@ class App extends Component {
               onQueryChange={
                 function(prevQuery, nextQuery) {
                   if(nextQuery != prevQuery){
-  
+
                   }
                 }
               }
@@ -216,7 +217,7 @@ class App extends Component {
               showSearch={false}
               react={{
                 and: ["searchbox", "supplier_name"]
-              }}            
+              }}
               style={{ "paddingBottom": "10px", "paddingTop": "10px" }}
               onValueChange={
                 function(arr) {
@@ -237,11 +238,11 @@ class App extends Component {
               onQueryChange={
                 function(prevQuery, nextQuery) {
                   if(nextQuery != prevQuery){
-  
+
                   }
                 }
               }
-  
+
             />
         </div>
         <div style={{ display: "flex", flexDirection: "column", width: "75%" }}>
@@ -291,7 +292,12 @@ class App extends Component {
                 } else {
                   algo = 'keyword';
                 }
-                
+                var config_a = null;
+                var config_b = null;
+                if (algo === 'ab') {
+                    config_a = document.getElementById('conf_a').value;
+                    config_b = document.getElementById('conf_b').value;
+                }
                 // getQueryId() is not a blocking operation, and sometimes the onKeyPress
                 // call to create the query_id hasn't finished, so we get back a null.
                 // This is to basically pause long enough till we get a query id.
@@ -312,18 +318,41 @@ class App extends Component {
                 const extJsonDisabledUBI = {
             
                 }
+                // Have to add a component to collect the AB config names to enable AB testing
                 let extJson = {
                   ubi: {
                     query_id: getQueryId(),
                     user_query: value,
                     client_id: client_id,
                     object_id_field: object_id_field,
-                    application: 'Chorus',
+                    application: APPLICATION,
                     query_attributes: {}
                   }
                 };
-                
-                if (algo === "keyword") {
+                if (algo === 'ab') {
+                  let extJ = {
+                    conf_a: config_a,
+                    conf_b: config_b,
+                    ubi: {
+                        query_id: getQueryId(),
+                        user_query: value,
+                        client_id: client_id,
+                        object_id_field: object_id_field,
+                        application: APPLICATION,
+                        query_attributes: {}
+                    }
+                  };
+                  return {
+                    query: {
+                      multi_match: {
+                        query: value,
+                        fields: ["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]
+                      }
+                    },
+                    ext: extJ
+                  }
+                }
+                else if (algo === "keyword") {
                   return {
                     query: {
                       multi_match: {
@@ -407,16 +436,18 @@ class App extends Component {
                     <ResultCard.Description>
                       {item.price + " $ | "}
                       {item.attrs.Brand ? item.attrs.Brand : ""}
+                      {item.search_config ?" algo:" + item.search_config : ""}
                     </ResultCard.Description>
                     <button 
                       style={{ fontSize:"14px", position:"relative" }}       
                       ref={this.handleRef}   
                       position={ index }
                       asin={ item.asin }
-                      title={ item.title }            
+                      title={ item.title }
+                      algo={item.search_config}
                       onClick={
                         function(el) {
-                          addToCart({ ...item, position: index });
+                          addToCart({ ...item, position: index, algo: item.search_config });
                         }
                       }
                     >
