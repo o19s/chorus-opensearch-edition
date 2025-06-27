@@ -436,6 +436,7 @@ class App extends Component {
                     <ResultCard.Description>
                       {item.price + " $ | "}
                       {item.attrs.Brand ? item.attrs.Brand : ""}
+                      {item.search_config ?" algo:" + item.search_config : ""}
                     </ResultCard.Description>
                     <button 
                       style={{ fontSize:"14px", position:"relative" }}       
