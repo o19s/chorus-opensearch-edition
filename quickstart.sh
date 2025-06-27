@@ -347,6 +347,19 @@ curl -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H
 echo -e "${MAJOR}Installing Team Draft Interleaving Dashboards...\n${RESET}"
 curl -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H "osd-xsrf: true" --form file=@opensearch-dashboards/tdi_dashboard.ndjson > /dev/null
 
+echo -e "${MAJOR}Fetching latest Search Result Quality Evaluation Dashboard, sample data and install script...\n${RESET}"
+# Dashboards
+curl -s -o search_dashboard.ndjson https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/search_dashboard.ndjson
+# Install script
+curl -s -o install_dashboards.sh https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/install_dashboards.sh
+# sample data
+curl -s -o sample_data.ndjson https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/sample_data.ndjson
+# mappings for search quality metrics sample data index
+curl -s -o srw_metrics_mappings.json https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/srw_metrics_mappings.json
+
+echo -e "${MAJOR}Installing Search Result Quality Evaluation Dashboard...\n${RESET}"
+chmod +x install_dashboards.sh
+./install_dashboards.sh http://localhost:9200 http://localhost:5601
 ## configure the SRW search configurations
 echo -e "${MAJOR}Installing Search Relevance Workbench search configurations...\n${RESET}"
 curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
