@@ -77,7 +77,9 @@ for the Dashboard setting.
 ![SRW Setting](images/007_SRW_setting.png)
 This step must be performed manually.
 
-Additionally, the plugin must be enabled. This is done automatically.
+Additionally, the plugin must be enabled.
+
+The following API calls are all handled in the `quickstart.sh` for you and mainly included for your reference in case you want to follow along with the steps manually.
 
 `quickstart.sh` executes the following curl command.
 
