@@ -60,6 +60,9 @@ and use the
 [UBI Data Generator](https://github.com/opensearch-project/user-behavior-insights/tree/main/ubi-data-generator).
 Provide the command line argument for the path to the ESCI data set, with judgments, and create a set of queries and associated UBI events.
 
+```
+python ubi_data_generator.py --esci-dataset ../../esci-data/shopping_queries_dataset --num-unique-queries 1000 --num-query-events 100000 --generate-opensearch --datetime-start=2025/06/20 --time-period-days=7
+```
 ### SRW
 
 The Search Relevance Workbench must be enabled in OpenSearch 3.1. See [Search Relevance Tools](https://github.com/opensearch-project/dashboards-search-relevance) 
