@@ -1,4 +1,4 @@
-# Kata 006: Configuring an AB test with Team Draft Interleaving
+# Kata 007: Configuring an AB test with Team Draft Interleaving
 [Team Draft Interleaving](https://dl.acm.org/doi/abs/10.1145/2806416.2806477) is an algorithm for A/B testing that presents a single result list to each user, with the competing search algorithms both represented in the list. This facilitates faster A/B testing, as the user pool is not divided into treatment groups.
 
 This form of A/B testing requires no external orchestration, front-end modification, nor third-party instrumentation.
@@ -132,6 +132,19 @@ Two text entry boxes will appear. In the first, enter `baseline` and in the seco
 ![Enter Configs](images/007_enter_configs.png)
 
 Now, when you enter a query in the search box, both chosen configurations will be executed, with their result lists interleaved.
+
+Now, when you enter a query in the search box, both chosen configurations will be executed, with their result lists interleaved. As shown below, the query spiderman produces a total of 5 results. Inspecting the items, you can see that the algorithm interleaving began with configuration B.
+1. baseline with title weight
+1. baseline
+1. baseline with title weight
+1. baseline
+1. baseline
+
+![Search Results -- spiderman](images/spiderman.png)
+
+Running the query a second time may yield baseline as the first item.
+
+![Search Results 2 -- spiderman](images/spiderman%202.png)
 
 ## Visualizing an A/B test.
 
