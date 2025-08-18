@@ -31,6 +31,7 @@ stop=false
 full_dataset=false
 only_transform=false
 hostname_or_ip=false
+srw=false
 
 while [ ! $# -eq 0 ]
 do
@@ -41,7 +42,8 @@ do
 	    echo -e "Use the option --stop to stop the Docker containers."
 	    echo -e "Use the option --online-deployment | -online to update configuration to run on chorus-opensearch-edition.dev.o19s.com environment."
 	    echo -e "Use the option --full-dataset | -full to index the whole data set. This takes some time depending on your hardware."
-			echo -e "Use the option --only-transform to download and convert the esci dataset only"
+		echo -e "Use the option --only-transform to download and convert the esci dataset only"
+		echo -e "Use the option --search-relevance-workbench | -srw to create query sets, search configurations & judgment lists"
 	    exit
 	    ;;
 		--with-offline-lab | -lab)
@@ -64,11 +66,11 @@ do
 	    full_dataset=true
 	    echo -e "${MAJOR}Indexing whole data set\n${RESET}"
 	    ;;
-  	--only-transform)
-      only_transform=true
-      echo -e "${MAJOR}Only transforming the data set\n${RESET}"
-      ;;					
-    --hostname_or_ip | -host)
+		--only-transform)
+        only_transform=true
+        echo -e "${MAJOR}Only transforming the data set\n${RESET}"
+        ;;
+        --hostname_or_ip | -host)
 	    if [ -n "$2" ] && [[ "$2" != -* ]]; then
           hostname_or_ip=true
 	        HOST=$2
@@ -79,6 +81,9 @@ do
 	        exit 1
 	    fi
 	    ;;
+		--search-relevance-workbench | -srw)
+        srw=true
+        ;;
 	esac
 	shift
 done
@@ -241,7 +246,7 @@ curl -s -X PUT "http://localhost:9200/_ingest/pipeline/embeddings-pipeline" \
 
 echo -e "${MAJOR}Setting up User Behavior Insights indexes...\n${RESET}"
 curl -s -X POST "http://localhost:9200/_plugins/ubi/initialize"
-  
+
 echo -e "${MAJOR}Creating ecommerce index, defining its mapping & settings\n${RESET}"
 curl -s -X PUT "http://localhost:9200/ecommerce" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
 echo -e "\n"
@@ -325,7 +330,7 @@ curl -s -X PUT "http://localhost:9200/_search/pipeline/hybrid-search-pipeline" \
         }
       }
     }
-  ]    
+  ]
   }"
 
 if $offline_lab; then
@@ -360,30 +365,13 @@ curl -s -o srw_metrics_mappings.json https://raw.githubusercontent.com/o19s/open
 echo -e "${MAJOR}Installing Search Result Quality Evaluation Dashboard...\n${RESET}"
 chmod +x install_dashboards.sh
 ./install_dashboards.sh http://localhost:9200 http://localhost:5601
+
 ## configure the SRW search configurations
-echo -e "${MAJOR}Installing Search Relevance Workbench search configurations...\n${RESET}"
-curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
- {
-   "persistent" : {
-    "plugins.search_relevance.workbench_enabled" : true
-  }
-}'
+if $srw; then
+    echo -e "${MAJOR}Creating Search Relevance entities...\n${RESET}"
+    ./search_relevance.sh
+fi
 
-curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
--H "Content-type: application/json" \
--d'{
-"name": "baseline",
-"query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title\",\"category\",\"bullets\",\"description\",\"attrs.Brand\",\"attrs.Color\"]}}}",
-"index": "ecommerce"
-}'
-
-curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
--H "Content-type: application/json" \
--d'{
-"name": "baseline with title weight",
-"query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title^25\",\"category\",\"bullets\",\"description\",\"attrs.Brand\",\"attrs.Color\"]}}}",
-"index": "ecommerce"
-}'
 # we start dataprepper as the last service to prevent it from creating the ubi_queries index using the wrong mappings.
 echo -e "${MAJOR}Starting Dataprepper...\n${RESET}"
 docker compose up -d --build dataprepper

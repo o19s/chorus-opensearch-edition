@@ -301,14 +301,28 @@ echo
 echo
 echo BEGIN HYBRID OPTIMIZER DEMO
 echo
+echo Retrieving model_id
+MODEL_ID=$(curl -XPOST "http://localhost:9200/_plugins/_ml/models/_search" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "match_all": {}
+  },
+  "size": 1000
+}
+' | jq -r '.hits.hits[0]._source.model_id')
+
+# Check if the variable is set and print it
+if [ -n "$MODEL_ID" ]; then
+    echo "Successfully extracted model_id: $MODEL_ID"
+else
+    echo "Failed to extract model_id."
+    exit 1
+fi
+
 echo Creating Hybrid Query to be Optimized
-exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
+curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
 -H "Content-type: application/json" \
--d'{
-      "name": "hybrid_query_1",
-      "query": "{\"query\":{\"hybrid\":{\"queries\":[{\"match\":{\"title\":\"%SearchText%\"}},{\"match\":{\"category\":\"%SearchText%\"}}]}}}",
-      "index": "ecommerce"
-}'
+-d"{\"name\":\"hybrid_search_query\",\"query\":\"{\\\"query\\\":{\\\"hybrid\\\":{\\\"queries\\\":[{\\\"multi_match\\\":{\\\"query\\\":\\\"%SearchText%\\\",\\\"fields\\\":[\\\"id\\\",\\\"title\\\",\\\"category\\\",\\\"bullets\\\",\\\"description\\\",\\\"attrs.Brand\\\",\\\"attrs.Color\\\"]}},{\\\"neural\\\":{\\\"title_embedding\\\":{\\\"query_text\\\":\\\"%SearchText%\\\",\\\"k\\\":100,\\\"model_id\\\":\\\"$MODEL_ID\\\"}}}]}},\\\"size\\\":10,\\\"_source\\\":[\\\"id\\\",\\\"title\\\",\\\"category\\\",\\\"brand\\\",\\\"image\\\"]}\",\"searchPipeline\":\"hybrid-search-pipeline\",\"index\":\"ecommerce\"}"
 
 SC_HYBRID=`jq -r '.search_configuration_id' < RES`
 
