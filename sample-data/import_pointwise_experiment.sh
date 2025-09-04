@@ -2,8 +2,9 @@
 # 
 # You must update the values below to match entities in SRW already: 
 # 
-# querySetId should be ESCI Queries
-# searchConfigurationList should point to a "External Search Configuration", leave placeholders for required values
+# querySetId should be the one that is named 'TVs'.
+# searchConfigurationList should point to one you created, maybe called "External Search Configuration", 
+#   use placeholders for any required values.
 # judgmentList should be ESCI Judgements.  Do a find and replace as it shows up multiple levels.
 # 
 # curl -s -X POST "localhost:9200/_plugins/_search_relevance/experiments" \
@@ -11,19 +12,19 @@
 # -d @../data-esci/esci_us_external_experiment.json
 
 
-curl -s -X POST "localhost:9200/_plugins/_search_relevance/experiments" \
+curl -s -X POST "http://chorus-opensearch-edition.dev.o19s.com:9200/_plugins/_search_relevance/experiments" \
 -H "Content-type: application/json" \
 -d'{
- 	"querySetId": "9dfe82d7-b50a-4131-aa2b-8245e58e6cbf",
- 	"searchConfigurationList": ["cc02de51-465a-4085-a922-5460d9541063"],
-  "judgmentList": ["b7fbf853-b81b-4cba-9b11-9f4a50935ec7"],
+ 	"querySetId": "8a6e2531-20f1-485a-b5ea-3fe11aa97a2e",
+ 	"searchConfigurationList": ["11b19f9e-09e4-4548-b60d-ebed1e44fbac"],
+  "judgmentList": ["d4f2fc28-9a8c-497e-925b-1d9e64fd0599"],
  	"type": "POINTWISE_EVALUATION",
   "size": 10,
   "evaluationResultList": [
     {
       "searchText": "led tv",
       "judgmentIds": [
-        "b7fbf853-b81b-4cba-9b11-9f4a50935ec7"
+        "d4f2fc28-9a8c-497e-925b-1d9e64fd0599"
       ],
       "documentIds": [
         "B079VXT54Z",
@@ -63,7 +64,7 @@ curl -s -X POST "localhost:9200/_plugins/_search_relevance/experiments" \
     {
       "searchText": "tv",
       "judgmentIds": [
-        "b7fbf853-b81b-4cba-9b11-9f4a50935ec7"
+        "d4f2fc28-9a8c-497e-925b-1d9e64fd0599"
       ],
       "documentIds": [
         "B07GPN3MRY",
