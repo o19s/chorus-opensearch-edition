@@ -177,7 +177,7 @@ class App extends Component {
             componentId="algopicker" />
             <MultiList
               componentId="supplier_name"
-              dataField="attrs.Brand.keyword"
+              dataField="brand"
               title="Filter by Brands"
               size={20}
               showSearch={false}
@@ -253,7 +253,7 @@ class App extends Component {
             componentId="searchbox"
             placeholder="Search for products, brands or ASIN"
             autosuggest={false}
-            dataField={["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]}
+            dataField={["id", "title", "category", "bullet_points", "description", "brand", "color"]}
             debounce={300}
             onKeyPress={
               function(value) {
@@ -346,7 +346,7 @@ class App extends Component {
                     query: {
                       multi_match: {
                         query: value,
-                        fields: ["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]
+                        fields: ["id", "title", "category", "bullet_points", "description", "brand", "color"]
                       }
                     },
                     ext: extJ
@@ -357,7 +357,7 @@ class App extends Component {
                     query: {
                       multi_match: {
                         query: value,
-                        fields: ["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]
+                        fields: ["id", "title", "category", "bullet_points", "description", "brand", "color"]
                       }
                     },
                     ext: extJson
@@ -412,7 +412,7 @@ class App extends Component {
             componentId="results"
             dataField="title"
             size={20}
-            excludeFields={["title_embedding", "reviews", "description", "bullets"]}
+            excludeFields={["title_embedding", "reviews", "description", "bullet_points"]}
             pagination={true}
             react={{
               and: ["searchbox", "supplier_name", "product_type"]
@@ -435,7 +435,7 @@ class App extends Component {
                     />
                     <ResultCard.Description>
                       {item.price + " $ | "}
-                      {item.attrs.Brand ? item.attrs.Brand : ""}
+                      {item.brand ? item.brand : ""}
                       {item.search_config ?" algo:" + item.search_config : ""}
                     </ResultCard.Description>
                     <button 

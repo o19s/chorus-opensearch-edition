@@ -6,7 +6,7 @@
   "id_field": "asin",
   "k": 10,
   "threshold": 1.0,
-  "query": "{\"query\": {\"multi_match\": {\"query\": \"%SearchText%\", \"fields\": [\"id\", \"title\", \"category\", \"bullets\", \"description\", \"attrs.Brand\", \"attrs.Color\"] }}}",
+  "query": "{\"query\": {\"multi_match\": {\"query\": \"%SearchText%\", \"fields\": [\"id\", \"title\", \"category\", \"bullet_points\", \"description\", \"brand\", \"color\"] }}}",
   "not_used_query": "{\"query\": {\"match\": {\"description\": \"%SearchText%\"}}}",
   "application": "my-app",
   "search_config": "my-config"

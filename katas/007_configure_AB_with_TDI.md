@@ -104,7 +104,7 @@ curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configur
 -H "Content-type: application/json" \
 -d'{
 "name": "baseline",
-"query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title\",\"category\",\"bullets\",\"description\",\"attrs.Brand\",\"attrs.Color\"]}}}",
+"query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title\",\"category\",\"bullet_points\",\"description\",\"brand\",\"color\"]}}}",
 "index": "ecommerce"
 }'
 ```
@@ -114,7 +114,7 @@ curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configur
 -H "Content-type: application/json" \
 -d'{
 "name": "baseline with title weight",
-"query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title^25\",\"category\",\"bullets\",\"description\",\"attrs.Brand\",\"attrs.Color\"]}}}",
+"query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title^25\",\"category\",\"bullet_points\",\"description\",\"brand\",\"color\"]}}}",
 "index": "ecommerce"
 }'
 ```

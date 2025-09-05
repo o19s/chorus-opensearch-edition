@@ -115,24 +115,24 @@ if $shutdown; then
   exit
 fi
 
-echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"
-if [ ! -f ./esci.json.zst ]; then
-  echo -e "${MINOR}Downloading the sample product data\n${RESET}"
-  wget https://esci-s.s3.amazonaws.com/esci.json.zst
-fi
+#echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"
+#if [ ! -f ./esci.json.zst ]; then
+#  echo -e "${MINOR}Downloading the sample product data\n${RESET}"
+#  wget https://esci-s.s3.amazonaws.com/esci.json.zst
+#fi
 
-if [ ! -f ./transformed_esci_1.json ]; then
-  echo -e "${MINOR}Transforming the sample product data into JSON format, please give it a few minutes!\n${RESET}"
-  docker run -v "$(pwd)":/app -w /app python:3 bash -c "pip install -r requirements.txt && python3 ./opensearch/transform_data.py"
-fi
+#if [ ! -f ./transformed_esci_1.json ]; then
+#  echo -e "${MINOR}Transforming the sample product data into JSON format, please give it a few minutes!\n${RESET}"
+#  docker run -v "$(pwd)":/app -w /app python:3 bash -c "pip install -r requirements.txt && python3 ./opensearch/transform_data.py"
+#fi
 
-if $only_transform; then
-  echo -e "${MINOR}Done transforming sample product data and quitting.\n${RESET}"
-  exit
-fi
+#if $only_transform; then
+#  echo -e "${MINOR}Done transforming sample product data and quitting.\n${RESET}"
+#  exit
+#fi
 
 
-docker compose up -d --build ${services}
+docker compose up -d --build ${services} 
 
 echo -e "${MAJOR}Waiting for OpenSearch to start up and be online.${RESET}"
 ./opensearch/wait-for-os.sh # Wait for OpenSearch to be online
@@ -256,30 +256,20 @@ echo -e "${MAJOR}Indexing the product data, please wait...\n${RESET}"
 OPENSEARCH_URL="http://localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items"
 CONTENT_TYPE="Content-Type: application/json"
 
-# Loop through each JSON file with the prefix "transformed_esci_"
-for file in transformed_esci_*.json; do
-    if [[ -f "$file" ]]; then
 
-        if [[ "$file" == "transformed_esci_11.json" && "$full_dataset" == "false" ]]; then
-            echo "Indexing subset of full data set, exiting loop. Run quickstart.sh with --full-dataset option to index whole data set."
-            break
-        fi
 
-        echo "Processing $file..."
+echo "Processing ./sample-data/esci_us_opensearch_shrunk.ndjson"
 
-        # Send the file to OpenSearch using curl
-        curl -X POST "$OPENSEARCH_URL" -H "$CONTENT_TYPE" --data-binary @"$file"
+# Send the file to OpenSearch using curl
+curl -X POST "$OPENSEARCH_URL" -H "$CONTENT_TYPE" --data-binary @./sample-data/esci_us_opensearch_shrunk.ndjson
 
-        # Check the response code to see if the request was successful
-        if [[ $? -ne 0 ]]; then
-            echo "Failed to send $file"
-        else
-            echo "$file successfully sent to OpenSearch"
-        fi
-    else
-        echo "No files found with the prefix 'transformed_esci_'"
-    fi
-done
+# Check the response code to see if the request was successful
+if [[ $? -ne 0 ]]; then
+    echo "Failed to send $file"
+else
+    echo "$file successfully sent to OpenSearch"
+fi
+
 
 echo -e "${MAJOR}Creating pipelines for neural search and hybrid search\n${RESET}"
 curl -s -X PUT "http://localhost:9200/_search/pipeline/neural-search-pipeline" \
@@ -374,6 +364,6 @@ fi
 
 # we start dataprepper as the last service to prevent it from creating the ubi_queries index using the wrong mappings.
 echo -e "${MAJOR}Starting Dataprepper...\n${RESET}"
-docker compose up -d --build dataprepper
+docker compose up -d --build dataprepper --remove-orphans
 
 echo -e "${MAJOR}Welcome to Chorus OpenSearch Edition!${RESET}"

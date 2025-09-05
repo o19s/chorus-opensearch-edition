@@ -54,7 +54,7 @@
           "parameters": {}
         }
       },
-      "bullets": {
+      "bullet_points": {
         "type": "text",
         "analyzer": "english_stemmed"
       },
