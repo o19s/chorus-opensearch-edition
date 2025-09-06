@@ -258,10 +258,10 @@ CONTENT_TYPE="Content-Type: application/json"
 
 
 
-echo "Processing ./sample-data/esci_us_opensearch_shrunk.ndjson"
+echo "Processing ./sample-data/esci_us_ecommerce_shrunk.ndjson"
 
 # Send the file to OpenSearch using curl
-curl -X POST "$OPENSEARCH_URL" -H "$CONTENT_TYPE" --data-binary @./sample-data/esci_us_opensearch_shrunk.ndjson
+curl -X POST "$OPENSEARCH_URL" -H "$CONTENT_TYPE" --data-binary @./sample-data/esci_us_ecommerce_shrunk.ndjson
 
 # Check the response code to see if the request was successful
 if [[ $? -ne 0 ]]; then
