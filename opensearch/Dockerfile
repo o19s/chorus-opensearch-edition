@@ -3,7 +3,8 @@ FROM  opensearchproject/opensearch:3.2.0
 
 
 
-# Use our custom search-relevance plugin w/ import capablity.  (https://github.com/opensearch-project/search-relevance/pull/120)
+# Use our custom search-relevance plugin w/ import capability.  (https://github.com/opensearch-project/search-relevance/pull/120)
+# Generate it in the search-relevance project by running gradle's buildPlugin task.
 # We appear to have to deal with a plugin-security.policy (needed for ml-commons maybe) that is preventing this step from working.
 RUN /usr/share/opensearch/bin/opensearch-plugin remove opensearch-search-relevance
 
