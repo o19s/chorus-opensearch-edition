@@ -76,7 +76,8 @@ services:
       retries: 50
 
   opensearch-dashboards:
-    build: ./opensearch-dashboards/.
+    image: opensearch-dashboards-updated
+    #build: ./opensearch-dashboards/.
     container_name: opensearch-dashboards
     ports:
       - 5601:5601
