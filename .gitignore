@@ -1,16 +1,13 @@
 build/
 .idea/
 .vscode/
-transformed_esci_*.json
 *.bu
 *.DS_Store
-.*.json
 katas/.venv
 katas/.ipynb_checkpoints
 katas/celerybeat-schedule.db
 katas/django-errors.log
 venv/
 __pycache__/
-esci.json.zst
-sample.json.gz
+
 reactivesearch/node_modules
