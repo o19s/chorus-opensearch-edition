@@ -114,14 +114,14 @@ if $shutdown; then
 fi
 
 echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"
-if [ ! -f ./esci.json.zst ]; then
+if [ ! -f ./build/esci.json.zst ]; then
   echo -e "${MINOR}Downloading the sample product data\n${RESET}"
-  wget https://esci-s.s3.amazonaws.com/esci.json.zst
+  wget -P ./build https://esci-s.s3.amazonaws.com/esci.json.zst
 fi
 
-if [ ! -f ./transformed_esci_1.json ]; then
+if [ ! -f ./build/transformed_esci_1.json ]; then
   echo -e "${MINOR}Transforming the sample product data into JSON format, please give it a few minutes!\n${RESET}"
-  docker run -v "$(pwd)":/app -w /app python:3 bash -c "pip install -r requirements.txt && python3 ./opensearch/transform_data.py"
+  docker run -v "$(pwd)":/app -w /app python:3 bash -c "pip install -r requirements.txt && python3 ./opensearch/transform_data.py ./build/esci.json.zst"
 fi
 
 if $only_transform; then
@@ -255,10 +255,10 @@ OPENSEARCH_URL="http://localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-
 CONTENT_TYPE="Content-Type: application/json"
 
 # Loop through each JSON file with the prefix "transformed_esci_"
-for file in transformed_esci_*.json; do
+for file in build/transformed_esci_*.json; do
     if [[ -f "$file" ]]; then
 
-        if [[ "$file" == "transformed_esci_11.json" && "$full_dataset" == "false" ]]; then
+        if [[ "$file" == "build/transformed_esci_11.json" && "$full_dataset" == "false" ]]; then
             echo "Indexing subset of full data set, exiting loop. Run quickstart.sh with --full-dataset option to index whole data set."
             break
         fi
@@ -275,7 +275,7 @@ for file in transformed_esci_*.json; do
             echo "$file successfully sent to OpenSearch"
         fi
     else
-        echo "No files found with the prefix 'transformed_esci_'"
+        echo "No files found with the prefix 'build/transformed_esci_'"
     fi
 done
 
