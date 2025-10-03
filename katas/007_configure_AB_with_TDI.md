@@ -8,7 +8,7 @@ The Search Relevance Workbench provides us with the competing search algorithms,
 Given the two test arms, the “AB algorithm” submits each search configuration and gathers the result lists for each. Next, the TDI algorithm produces a single merged result list. The result items will be annotated with the name of the search configuration that produced them. UBI events generated from the returned results list have that value included in the event enabling analysis and visualization of the experiment results.
 
 ## Prerequisites
-_WARNING_  This Kata requires Opensearch 3.1 with the UBI and SRW plugins enabled.
+_WARNING_  This Kata requires Opensearch 3.2 or newer which comes with SRW and UBI plugins standard.
 
 ### Optional Jupyter notebook setup
 As with kata 005_1, you can optionally use a jupyter notebook to interact with the data.
@@ -37,7 +37,7 @@ Note, Chorus must still be set up.
 Use `quickstart.sh` to run the Chorus setup. 
 To explore Team Draft Interleaving we recommend running the quickstart.sh script with the full data set option:
 
-```% ./quickstart.sh --full-dataset```
+```% ./quickstart.sh --search-relevance-workbench --full-dataset```
 
 It will perform the following tasks:
 * Create and start the docker containers for
@@ -72,25 +72,7 @@ python ubi_data_generator.py --esci-dataset ../../esci-data/shopping_queries_dat
 ```
 ### SRW
 
-The Search Relevance Workbench must be enabled in OpenSearch 3.1. See [Search Relevance Tools](https://github.com/opensearch-project/dashboards-search-relevance) 
-for the Dashboard setting.
-![SRW Setting](images/007_SRW_setting.png)
-This step must be performed manually.
-
-Additionally, the plugin must be enabled.
-
-The following API calls are all handled in the `quickstart.sh` for you and mainly included for your reference in case you want to follow along with the steps manually.
-
-`quickstart.sh` executes the following curl command.
-
-```
-curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
- {
-   "persistent" : {
-    "plugins.search_relevance.workbench_enabled" : true
-  }
-}'
-```
+The following API calls are all handled in the `search-relevance.sh` script called by `quickstart.sh` for you and mainly included for your reference in case you want to follow along with the steps manually.
 
 
 #### Search Configurations
@@ -98,7 +80,7 @@ curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: applicat
 See [SRW Search Configs](https://docs.opensearch.org/docs/latest/search-plugins/search-relevance/search-configurations/)
 for how to manually create search configurations.  For this kata, only two search configurations are required.
 
-`quickstart.sh` executes the following curl commands.
+`search-relevance.sh` executes the following curl commands.
 ```
 curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
 -H "Content-type: application/json" \
