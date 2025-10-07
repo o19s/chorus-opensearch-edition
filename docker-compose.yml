@@ -95,7 +95,7 @@ services:
 
   quepid:
     container_name: quepid
-    image: o19s/quepid:7.15.1
+    image: o19s/quepid:8.3.0
     ports:
       - 4000:3000
     environment:
@@ -103,7 +103,6 @@ services:
       - RACK_ENV=production
       - RAILS_ENV=production
       - DATABASE_URL=mysql2://root:password@mysql:3306/quepid
-      - REDIS_URL=redis://redis:6379/1
       - FORCE_SSL=false
       - MAX_THREADS=2
       - WEB_CONCURRENCY=2
@@ -119,12 +118,6 @@ services:
       - SIGNUP_ENABLED=true
     links:
       - mysql
-      - redis
 
-  redis:
-    container_name: quepid_redis
-    image: redis:7.0.11-alpine
-    ports:
-      - 6379:6379
 volumes:
   opensearch-data:
