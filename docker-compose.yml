@@ -95,7 +95,7 @@ services:
 
   quepid:
     container_name: quepid
-    image: o19s/quepid:8.3.0
+    image: o19s/quepid:8.3.5
     ports:
       - 4000:3000
     environment:
