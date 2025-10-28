@@ -1,4 +1,4 @@
-FROM  opensearchproject/opensearch:3.3.0
+FROM  opensearchproject/opensearch:3.3.1
 #FROM opensearchstaging/opensearch:3.3.0
 
 # Install the OTel plugin.
