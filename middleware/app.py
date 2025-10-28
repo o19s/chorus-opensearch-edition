@@ -318,27 +318,21 @@ def ab_search():
             req_data = "\n".join(req_data_array) + "\n"
             req_data = req_data.encode('utf-8')
         elif do_agentic:
+            # Need to look up search configuration with the name 'agentic'
             logger.info(f"Looking up 'agentic' search configuration. '{conf_a}' on '{user_query}'")
-            # Need to look up 
-            
+                        
             search_configuration = Interleave().get_search_config(conf_a)
-            logger.info(f"Found ${search_configuration}")
             
             query = user_query.replace('"', '\\"')
             body = json.loads(search_configuration['query'].replace("%SearchText%", query))
-            
-            
-          
+                                  
             req_data_array = req_data_array[:-1] 
             req_data = "\n".join(req_data_array) + "\n"
             req_data = req_data.encode('utf-8')
             req_data_array.append(json.dumps(body))
-            req_data_array = [ strip_keys(x, ['conf_a', 'conf_b']) for x in req_data_array]
+            req_data_array = [ strip_keys(x, ['conf_a']) for x in req_data_array]
             req_data = "\n".join(req_data_array) + "\n"
             req_data = req_data.encode('utf-8')
-            
-            
-            #q_a = Interleave().populate_query(query, conf_a, size=size, source=source, ext=ext)df
             
         else:
             if conf_a:
