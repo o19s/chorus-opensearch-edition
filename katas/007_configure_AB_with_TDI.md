@@ -37,7 +37,7 @@ Note, Chorus must still be set up.
 Use `quickstart.sh` to run the Chorus setup. 
 To explore Team Draft Interleaving we recommend running the quickstart.sh script with the full data set option:
 
-```% ./quickstart.sh --search-relevance-workbench --full-dataset```
+```% ./quickstart.sh --full-dataset```
 
 It will perform the following tasks:
 * Create and start the docker containers for
@@ -72,7 +72,7 @@ python ubi_data_generator.py --esci-dataset ../../esci-data/shopping_queries_dat
 ```
 ### SRW
 
-The following API calls are all handled in the `search-relevance.sh` script called by `quickstart.sh` for you and mainly included for your reference in case you want to follow along with the steps manually.
+The following API calls are handled for you in the `search-relevance.sh` script called by `quickstart.sh` and mainly included for your reference in case you want to follow along with the steps manually.
 
 
 #### Search Configurations
