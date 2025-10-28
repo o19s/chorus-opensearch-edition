@@ -350,3 +350,16 @@ echo Experiment id: $EX_HO
 echo
 echo Show HYBRID OPTIMIZER Experiment
 exe curl -s -X GET "http://localhost:9200/_plugins/_search_relevance/experiments/$EX_HO"
+
+
+echo
+echo Set up baseline Agentic controlled Search Configuration
+exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
+-H "Content-type: application/json" \
+-d'{
+      "name": "agentic",
+      "query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title\",\"category\",\"bullets\",\"description\",\"attrs.Brand\",\"attrs.Color\"]}}}",
+      "index": "ecommerce"
+}'
+
+SC_AGENTIC=`jq -r '.search_configuration_id' < build/RES`
