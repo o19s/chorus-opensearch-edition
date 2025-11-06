@@ -5,7 +5,7 @@
 # It will clear out any existing indexes as part of running it.
 
 # Helper script for capturing return values from curl commands
-exe() { (set -x ; "$@") | jq | tee RES; echo; }
+exe() { (set -x ; "$@") | jq | tee build/RES; echo; }
 
 
 echo Deleting UBI indexes
@@ -62,7 +62,7 @@ exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_conf
       "index": "ecommerce"
 }'
 
-SC_BASELINE=`jq -r '.search_configuration_id' < RES`
+SC_BASELINE=`jq -r '.search_configuration_id' < build/RES`
 
 exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
 -H "Content-type: application/json" \
@@ -72,7 +72,7 @@ exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_conf
       "index": "ecommerce"
 }'
 
-SC_CHALLENGER=`jq -r '.search_configuration_id' < RES`
+SC_CHALLENGER=`jq -r '.search_configuration_id' < build/RES`
 
 echo
 echo List search configurations
@@ -102,7 +102,7 @@ exe curl -s -X POST "http://localhost:9200/_plugins/_search_relevance/query_sets
    	"querySetSize": 20
 }'
 
-QUERY_SET_UBI=`jq -r '.query_set_id' < RES`
+QUERY_SET_UBI=`jq -r '.query_set_id' < build/RES`
 
 sleep 2
 
@@ -121,7 +121,7 @@ exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/query_sets"
     ]
 }'
 
-QUERY_SET_MANUAL=`jq -r '.query_set_id' < RES`
+QUERY_SET_MANUAL=`jq -r '.query_set_id' < build/RES`
 
 echo
 echo Upload ESCI Query Set
@@ -132,7 +132,7 @@ exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/query_sets"
 
 
 
-QUERY_SET_ESCI=`jq -r '.query_set_id' < RES`
+QUERY_SET_ESCI=`jq -r '.query_set_id' < build/RES`
 
 echo
 echo List Query Sets
@@ -159,7 +159,7 @@ exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/judgments" 
    	"type": "UBI_JUDGMENT"
   }'
 
-UBI_JUDGMENT_LIST_ID=`jq -r '.judgment_id' < RES`
+UBI_JUDGMENT_LIST_ID=`jq -r '.judgment_id' < build/RES`
 
 # wait for judgments to be created in the background
 sleep 2
@@ -226,7 +226,7 @@ exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/judgments" 
     ]
 }'
 
-IMPORTED_JUDGMENT_LIST_ID=`jq -r '.judgment_id' < RES`
+IMPORTED_JUDGMENT_LIST_ID=`jq -r '.judgment_id' < build/RES`
 
 echo
 echo Upload ESCI Judgments
@@ -237,7 +237,7 @@ exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/judgments" 
 
 
 
-ESCI_JUDGMENT_LIST_ID=`jq -r '.judgment_id' < RES`
+ESCI_JUDGMENT_LIST_ID=`jq -r '.judgment_id' < build/RES`
 
 echo
 echo Create PAIRWISE Experiment
@@ -251,7 +251,7 @@ exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/experiments
    }"
 
 
-EX_PAIRWISE=`jq -r '.experiment_id' < RES`
+EX_PAIRWISE=`jq -r '.experiment_id' < build/RES`
 
 echo
 echo Experiment id: $EX_PAIRWISE
@@ -273,7 +273,7 @@ exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/experiments
    	\"type\": \"POINTWISE_EVALUATION\"
    }"
 
-EX_POINTWISE=`jq -r '.experiment_id' < RES`
+EX_POINTWISE=`jq -r '.experiment_id' < build/RES`
 
 echo
 echo Experiment id: $EX_POINTWISE
@@ -324,7 +324,7 @@ curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configur
 -H "Content-type: application/json" \
 -d"{\"name\":\"hybrid_search_query\",\"query\":\"{\\\"query\\\":{\\\"hybrid\\\":{\\\"queries\\\":[{\\\"multi_match\\\":{\\\"query\\\":\\\"%SearchText%\\\",\\\"fields\\\":[\\\"id\\\",\\\"title\\\",\\\"category\\\",\\\"bullets\\\",\\\"description\\\",\\\"attrs.Brand\\\",\\\"attrs.Color\\\"]}},{\\\"neural\\\":{\\\"title_embedding\\\":{\\\"query_text\\\":\\\"%SearchText%\\\",\\\"k\\\":100,\\\"model_id\\\":\\\"$MODEL_ID\\\"}}}]}},\\\"size\\\":10,\\\"_source\\\":[\\\"id\\\",\\\"title\\\",\\\"category\\\",\\\"brand\\\",\\\"image\\\"]}\",\"searchPipeline\":\"hybrid-search-pipeline\",\"index\":\"ecommerce\"}"
 
-SC_HYBRID=`jq -r '.search_configuration_id' < RES`
+SC_HYBRID=`jq -r '.search_configuration_id' < build/RES`
 
 echo
 echo Hybrid search config id: $SC_HYBRID
@@ -342,7 +342,7 @@ exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/experiments
    	\"type\": \"HYBRID_OPTIMIZER\"
   }"
 
-EX_HO=`jq -r '.experiment_id' < RES`
+EX_HO=`jq -r '.experiment_id' < build/RES`
 
 echo
 echo Experiment id: $EX_HO
@@ -350,3 +350,16 @@ echo Experiment id: $EX_HO
 echo
 echo Show HYBRID OPTIMIZER Experiment
 exe curl -s -X GET "http://localhost:9200/_plugins/_search_relevance/experiments/$EX_HO"
+
+
+echo
+echo Set up baseline Agentic controlled Search Configuration
+exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
+-H "Content-type: application/json" \
+-d'{
+      "name": "agentic",
+      "query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title\",\"category\",\"bullets\",\"description\",\"attrs.Brand\",\"attrs.Color\"]}}}",
+      "index": "ecommerce"
+}'
+
+SC_AGENTIC=`jq -r '.search_configuration_id' < build/RES`
