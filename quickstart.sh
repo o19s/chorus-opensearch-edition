@@ -24,6 +24,7 @@ if ! [ -x "$(command -v wget)" ]; then
 fi
 
 observability=false
+reset=false
 shutdown=false
 offline_lab=false
 local_deploy=true
@@ -38,6 +39,7 @@ do
 		--help | -h)
 	    echo -e "Use the option --with-offline-lab | -lab to include Quepid service in Chorus."
 	    echo -e "Use the option --shutdown | -s to shutdown and remove the Docker containers and data."
+	    echo -e "Use the option --reset | -r to DELETE existing data and indices."
 	    echo -e "Use the option --stop to stop the Docker containers."
 	    echo -e "Use the option --online-deployment | -online to update configuration to run on chorus-opensearch-edition.dev.o19s.com environment."
 	    echo -e "Use the option --full-dataset | -full to index the whole data set. This takes some time depending on your hardware."
@@ -45,31 +47,35 @@ do
 		
 	    exit
 	    ;;
-		--with-offline-lab | -lab)
+	  --with-offline-lab | -lab)
 	    offline_lab=true
 	    echo -e "${MAJOR}Running Chorus with offline lab environment enabled\n${RESET}"
 	    ;;
-		--shutdown | -s)
+   	--shutdown | -s)
 	    shutdown=true
 	    echo -e "${MAJOR}Shutting down Chorus\n${RESET}"
 	    ;;
-		--stop)
+	  --reset | -r)
+	    reset=true
+	    echo -e "${MAJOR}RESETTING ALL DATA IN Chorus\n${RESET}"
+	    ;;					
+	  --stop)
 	    stop=true
 	    echo -e "${MAJOR}Stopping Chorus\n${RESET}"
 	    ;;
-		--online-deployment | -online)
+	  --online-deployment | -online)
 	    local_deploy=false
 	    echo -e "${MAJOR}Configuring Chorus for chorus-opensearch-edition.dev.o19s.com environment\n${RESET}"
 	    ;;
-		--full-dataset | -full)
+	  --full-dataset | -full)
 	    full_dataset=true
 	    echo -e "${MAJOR}Indexing whole data set\n${RESET}"
 	    ;;
-		--only-transform)
+	  --only-transform)
         only_transform=true
         echo -e "${MAJOR}Only transforming the data set\n${RESET}"
         ;;
-        --hostname_or_ip | -host)
+    --hostname_or_ip | -host)
 	    if [ -n "$2" ] && [[ "$2" != -* ]]; then
           hostname_or_ip=true
 	        HOST=$2
@@ -135,6 +141,21 @@ docker compose up -d --build ${services}
 echo -e "${MAJOR}Waiting for OpenSearch to start up and be online.${RESET}"
 ./opensearch/wait-for-os.sh # Wait for OpenSearch to be online
 
+if $reset; then
+  echo -e "${MAJOR}RESETTING ALL EXISTING DATA.${RESET}"
+  echo -e "${MINOR}Deleting UBI indexes.\n${RESET}"
+  (curl -s -X DELETE "http://localhost:9200/ubi_queries" > /dev/null) || true
+  (curl -s -X DELETE "http://localhost:9200/ubi_events" > /dev/null) || true
+  
+  echo -e "${MINOR}Deleting queryset, search config, judgment and experiment indexes\n${RESET}"
+  (curl -s -X DELETE "http://localhost:9200/search-relevance-search-config" > /dev/null) || true
+  (curl -s -X DELETE "http://localhost:9200/search-relevance-queryset" > /dev/null) || true
+  (curl -s -X DELETE "http://localhost:9200/search-relevance-judgment" > /dev/null) || true
+  (curl -s -X DELETE "http://localhost:9200/.plugins-search-relevance-experiment" > /dev/null) || true
+  (curl -s -X DELETE "http://localhost:9200/search-relevance-evaluation-result" > /dev/null) || true
+  (curl -s -X DELETE "http://localhost:9200/search-relevance-experiment-variant" > /dev/null) || true
+fi
+
 echo -e "${MAJOR}Configuring the ML Commons plugin.${RESET}"
 curl -s -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: application/json' --data-binary '{
   "persistent": {
@@ -148,19 +169,46 @@ curl -s -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: appli
     }
 }'
 
-echo -e "${MAJOR}Registering a model group.${RESET}"
-response=$(curl -s -X POST "http://localhost:9200/_plugins/_ml/model_groups/_register" \
+# Search for existing model groups with the name "neural_search_model_group"
+search_response=$(curl -s -X POST "http://localhost:9200/_plugins/_ml/model_groups/_search" \
   -H 'Content-Type: application/json' \
   --data-binary '{
-    "name": "neural_search_model_group",
-    "description": "A model group for neural search models"
+    "query": {
+      "match": {
+        "name": "neural_search_model_group"
+      }
+    }
   }')
 
-# Extract the model_group_id from the JSON response
-model_group_id=$(echo "$response" | jq -r '.model_group_id')
+# Check if we found any model groups
+total_hits=$(echo "$search_response" | jq -r '.hits.total.value // 0')
 
-# Use the extracted model_group_id
-echo "Created Model Group with id: $model_group_id"
+if [[ "$total_hits" -gt 0 ]]; then
+  # Model group exists, extract its ID
+  model_group_id=$(echo "$search_response" | jq -r '.hits.hits[0]._id')
+  echo "Found existing Model Group with id: $model_group_id"
+else
+  # Model group doesn't exist, register it
+  echo -e "${MAJOR}Registering a new model group.${RESET}"
+  response=$(curl -s -X POST "http://localhost:9200/_plugins/_ml/model_groups/_register" \
+    -H 'Content-Type: application/json' \
+    --data-binary '{
+      "name": "neural_search_model_group",
+      "description": "A model group for neural search models"
+    }')
+  
+  # Extract the model_group_id from the JSON response
+  model_group_id=$(echo "$response" | jq -r '.model_group_id')
+  
+  # Check if registration was successful
+  if [[ "$model_group_id" == "null" ]] || [[ -z "$model_group_id" ]]; then
+    echo "${ERROR}Failed to register model group. Response: $response${RESET}"
+    exit 1
+  fi
+  
+  echo "Created Model Group with id: $model_group_id"
+fi
+
 
 echo -e "${MAJOR}Registering a model in the model group.${RESET}"
 response=$(curl -s -X POST "http://localhost:9200/_plugins/_ml/models/_register" \

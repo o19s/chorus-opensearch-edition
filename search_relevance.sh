@@ -7,11 +7,6 @@
 # Helper script for capturing return values from curl commands
 exe() { (set -x ; "$@") | jq | tee build/RES; echo; }
 
-
-echo Deleting UBI indexes
-(curl -s -X DELETE "http://localhost:9200/ubi_queries" > /dev/null) || true
-(curl -s -X DELETE "http://localhost:9200/ubi_events" > /dev/null) || true
-
 echo Creating UBI indexes using mappings
 curl -s -X POST "http://localhost:9200/_plugins/ubi/initialize"
 
@@ -42,14 +37,6 @@ NUMBER_OF_EVENTS=$(curl -s -XGET "http://localhost:9200/ubi_events/_search" \
 
 echo
 echo "Indexed UBI data: $NUMBER_OF_QUERIES queries and $NUMBER_OF_EVENTS events"
-
-echo Deleting queryset, search config, judgment and experiment indexes
-(curl -s -X DELETE "http://localhost:9200/search-relevance-search-config" > /dev/null) || true
-(curl -s -X DELETE "http://localhost:9200/search-relevance-queryset" > /dev/null) || true
-(curl -s -X DELETE "http://localhost:9200/search-relevance-judgment" > /dev/null) || true
-(curl -s -X DELETE "http://localhost:9200/.plugins-search-relevance-experiment" > /dev/null) || true
-(curl -s -X DELETE "http://localhost:9200/search-relevance-evaluation-result" > /dev/null) || true
-(curl -s -X DELETE "http://localhost:9200/search-relevance-experiment-variant" > /dev/null) || true
 
 sleep 2
 echo Create search configs
