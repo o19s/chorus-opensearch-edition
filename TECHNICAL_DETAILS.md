@@ -1,4 +1,4 @@
-#Security
+# Security
 
 **We have disabled security in OpenSearch for now.**
 

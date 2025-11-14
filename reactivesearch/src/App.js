@@ -4,9 +4,7 @@ import {
   DataSearch,
   MultiList,
   ReactiveList,
-  SingleRange,
   ResultCard,
-  SingleList
 } from "@appbaseio/reactivesearch";
 import AlgoPicker from './custom/AlgoPicker';
 import ShoppingCartButton from './custom/ShoppingCartButton';
@@ -113,15 +111,18 @@ class App extends Component {
         entries.forEach(entry => {
             if (entry.isIntersecting && getQueryId() ) {
                 console.log(`${entry.target.innerText} is now visible in the viewport!`);
-                const position = parseInt(entry.target.attributes.position.value, 10)
+                const position = entry.target.attributes.position ? parseInt(entry.target.attributes.position.value, 10) : 0;
                 const title = entry.target.attributes.title?.value || "";
-                const search_config = entry.target.attributes.algo?.value || null
-                var event = new UbiEvent(APPLICATION, 'impression', client_id, session_id, getQueryId(),
-                  new UbiEventAttributes('asin', entry.target.attributes.asin.value, title, {search_config: search_config}, {ordinal:  position}),
-                  'impression made on doc position ' + entry.target.attributes.position.value);
-                event.message_type = 'IMPRESSION';
-                console.log(event);
-                ubiClient.trackEvent(event);
+                const search_config = entry.target.attributes.algo?.value || null;
+                const asin = entry.target.attributes.asin?.value || "";
+                if (asin) {
+                  var event = new UbiEvent(APPLICATION, 'impression', client_id, session_id, getQueryId(),
+                    new UbiEventAttributes('asin', asin, title, {search_config: search_config}, {ordinal:  position}),
+                    'impression made on doc position ' + position);
+                  event.message_type = 'IMPRESSION';
+                  console.log(event);
+                  ubiClient.trackEvent(event);
+                }
                 // Optionally unobserve the button after visibility
                 this.observer.unobserve(entry.target);
             }
@@ -174,10 +175,12 @@ class App extends Component {
         >
           <AlgoPicker
             title="Pick your Algo"
-            componentId="algopicker" />
+            componentId="algopicker"
+            eventServer={event_server}
+            />
             <MultiList
               componentId="supplier_name"
-              dataField="brand"
+              dataField="attrs.Brand.keyword"
               title="Filter by Brands"
               size={20}
               showSearch={false}
@@ -253,7 +256,7 @@ class App extends Component {
             componentId="searchbox"
             placeholder="Search for products, brands or ASIN"
             autosuggest={false}
-            dataField={["id", "title", "category", "bullet_points", "description", "brand", "color"]}
+            dataField={["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]}
             debounce={300}
             onKeyPress={
               function(value) {
@@ -297,6 +300,11 @@ class App extends Component {
                 if (algo === 'ab') {
                     config_a = document.getElementById('conf_a').value;
                     config_b = document.getElementById('conf_b').value;
+                } else if (algo === 'other') {
+                    var otherConfigElement = document.getElementById('other_config');
+                    if (otherConfigElement) {
+                        config_a = otherConfigElement.value;
+                    }
                 }
                 // getQueryId() is not a blocking operation, and sometimes the onKeyPress
                 // call to create the query_id hasn't finished, so we get back a null.
@@ -329,51 +337,43 @@ class App extends Component {
                     query_attributes: {}
                   }
                 };
-                if (algo === 'ab') {
-                  let extJ = {
-                    conf_a: config_a,
-                    conf_b: config_b,
-                    ubi: {
-                        query_id: getQueryId(),
-                        user_query: value,
-                        client_id: client_id,
-                        object_id_field: object_id_field,
-                        application: APPLICATION,
-                        query_attributes: {}
+                
+                // Common query structure for config-based searches
+                const commonQuery = {
+                  query: {
+                    multi_match: {
+                      query: value,
+                      fields: ["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]
                     }
-                  };
+                  }
+                };
+                
+                if (algo === 'ab') {
                   return {
-                    query: {
-                      multi_match: {
-                        query: value,
-                        fields: ["id", "title", "category", "bullet_points", "description", "brand", "color"]
-                      }
-                    },
-                    ext: extJ
+                    ...commonQuery,
+                    ext: {
+                      ...extJson,
+                      conf_a: config_a,
+                      conf_b: config_b
+                    }
                   }
                 }
-                else if (algo === 'agentic') {
-                  let extJ = {
-                    //conf_a: config_a,
-                    //conf_b: config_b,
-                    conf_a: "agentic",
-                    ubi: {
-                        query_id: getQueryId(),
-                        user_query: value,
-                        client_id: client_id,
-                        object_id_field: object_id_field,
-                        application: APPLICATION,
-                        query_attributes: {}
-                    }
-                  };
+                else if (algo === 'art_controlled') {
                   return {
-                    query: {
-                      multi_match: {
-                        query: value,
-                        fields: ["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]
-                      }
-                    },
-                    ext: extJ
+                    ...commonQuery,
+                    ext: {
+                      ...extJson,
+                      conf_a: "art_controlled"
+                    }
+                  }
+                }
+                else if (algo === 'other') {
+                  return {
+                    ...commonQuery,
+                    ext: {
+                      ...extJson,
+                      conf_a: config_a
+                    }
                   }
                 }                
                 else if (algo === "keyword") {
@@ -381,7 +381,7 @@ class App extends Component {
                     query: {
                       multi_match: {
                         query: value,
-                        fields: ["id", "title", "category", "bullet_points", "description", "brand", "color"]
+                        fields: ["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]
                       }
                     },
                     ext: extJson
@@ -436,7 +436,7 @@ class App extends Component {
             componentId="results"
             dataField="title"
             size={20}
-            excludeFields={["title_embedding", "reviews", "description", "bullet_points"]}
+            excludeFields={["title_embedding", "reviews", "description", "bullets"]}
             pagination={true}
             react={{
               and: ["searchbox", "supplier_name", "product_type"]
@@ -459,16 +459,16 @@ class App extends Component {
                     />
                     <ResultCard.Description>
                       {item.price + " $ | "}
-                      {item.brand ? item.brand : ""}
+                      {item.attrs && item.attrs.Brand ? item.attrs.Brand : ""}
                       {item.search_config ?" algo:" + item.search_config : ""}
                     </ResultCard.Description>
                     <button 
                       style={{ fontSize:"14px", position:"relative" }}       
                       ref={this.handleRef}   
                       position={ index }
-                      asin={ item.asin }
-                      title={ item.title }
-                      algo={item.search_config}
+                      asin={ item.asin || "" }
+                      title={ item.title || "" }
+                      algo={item.search_config || ""}
                       onClick={
                         function(el) {
                           addToCart({ ...item, position: index, algo: item.search_config });
