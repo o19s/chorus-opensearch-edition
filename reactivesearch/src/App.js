@@ -113,15 +113,18 @@ class App extends Component {
         entries.forEach(entry => {
             if (entry.isIntersecting && getQueryId() ) {
                 console.log(`${entry.target.innerText} is now visible in the viewport!`);
-                const position = parseInt(entry.target.attributes.position.value, 10)
+                const position = entry.target.attributes.position ? parseInt(entry.target.attributes.position.value, 10) : 0;
                 const title = entry.target.attributes.title?.value || "";
-                const search_config = entry.target.attributes.algo?.value || null
-                var event = new UbiEvent(APPLICATION, 'impression', client_id, session_id, getQueryId(),
-                  new UbiEventAttributes('asin', entry.target.attributes.asin.value, title, {search_config: search_config}, {ordinal:  position}),
-                  'impression made on doc position ' + entry.target.attributes.position.value);
-                event.message_type = 'IMPRESSION';
-                console.log(event);
-                ubiClient.trackEvent(event);
+                const search_config = entry.target.attributes.algo?.value || null;
+                const asin = entry.target.attributes.asin?.value || "";
+                if (asin) {
+                  var event = new UbiEvent(APPLICATION, 'impression', client_id, session_id, getQueryId(),
+                    new UbiEventAttributes('asin', asin, title, {search_config: search_config}, {ordinal:  position}),
+                    'impression made on doc position ' + position);
+                  event.message_type = 'IMPRESSION';
+                  console.log(event);
+                  ubiClient.trackEvent(event);
+                }
                 // Optionally unobserve the button after visibility
                 this.observer.unobserve(entry.target);
             }
@@ -458,16 +461,16 @@ class App extends Component {
                     />
                     <ResultCard.Description>
                       {item.price + " $ | "}
-                      {item.attrs.Brand ? item.attrs.Brand : ""}
+                      {item.attrs && item.attrs.Brand ? item.attrs.Brand : ""}
                       {item.search_config ?" algo:" + item.search_config : ""}
                     </ResultCard.Description>
                     <button 
                       style={{ fontSize:"14px", position:"relative" }}       
                       ref={this.handleRef}   
                       position={ index }
-                      asin={ item.asin }
-                      title={ item.title }
-                      algo={item.search_config}
+                      asin={ item.asin || "" }
+                      title={ item.title || "" }
+                      algo={item.search_config || ""}
                       onClick={
                         function(el) {
                           addToCart({ ...item, position: index, algo: item.search_config });
