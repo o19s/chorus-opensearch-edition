@@ -174,7 +174,9 @@ class App extends Component {
         >
           <AlgoPicker
             title="Pick your Algo"
-            componentId="algopicker" />
+            componentId="algopicker"
+            eventServer={event_server}
+            />
             <MultiList
               componentId="supplier_name"
               dataField="attrs.Brand.keyword"
@@ -297,6 +299,11 @@ class App extends Component {
                 if (algo === 'ab') {
                     config_a = document.getElementById('conf_a').value;
                     config_b = document.getElementById('conf_b').value;
+                } else if (algo === 'other') {
+                    var otherConfigElement = document.getElementById('other_config');
+                    if (otherConfigElement) {
+                        config_a = otherConfigElement.value;
+                    }
                 }
                 // getQueryId() is not a blocking operation, and sometimes the onKeyPress
                 // call to create the query_id hasn't finished, so we get back a null.
@@ -329,51 +336,43 @@ class App extends Component {
                     query_attributes: {}
                   }
                 };
-                if (algo === 'ab') {
-                  let extJ = {
-                    conf_a: config_a,
-                    conf_b: config_b,
-                    ubi: {
-                        query_id: getQueryId(),
-                        user_query: value,
-                        client_id: client_id,
-                        object_id_field: object_id_field,
-                        application: APPLICATION,
-                        query_attributes: {}
+                
+                // Common query structure for config-based searches
+                const commonQuery = {
+                  query: {
+                    multi_match: {
+                      query: value,
+                      fields: ["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]
                     }
-                  };
+                  }
+                };
+                
+                if (algo === 'ab') {
                   return {
-                    query: {
-                      multi_match: {
-                        query: value,
-                        fields: ["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]
-                      }
-                    },
-                    ext: extJ
+                    ...commonQuery,
+                    ext: {
+                      ...extJson,
+                      conf_a: config_a,
+                      conf_b: config_b
+                    }
                   }
                 }
                 else if (algo === 'agentic') {
-                  let extJ = {
-                    //conf_a: config_a,
-                    //conf_b: config_b,
-                    conf_a: "agentic",
-                    ubi: {
-                        query_id: getQueryId(),
-                        user_query: value,
-                        client_id: client_id,
-                        object_id_field: object_id_field,
-                        application: APPLICATION,
-                        query_attributes: {}
-                    }
-                  };
                   return {
-                    query: {
-                      multi_match: {
-                        query: value,
-                        fields: ["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]
-                      }
-                    },
-                    ext: extJ
+                    ...commonQuery,
+                    ext: {
+                      ...extJson,
+                      conf_a: "agentic"
+                    }
+                  }
+                }
+                else if (algo === 'other') {
+                  return {
+                    ...commonQuery,
+                    ext: {
+                      ...extJson,
+                      conf_a: config_a
+                    }
                   }
                 }                
                 else if (algo === "keyword") {
