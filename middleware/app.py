@@ -391,8 +391,8 @@ def ab_search():
         conf_a = last_search.get("ext", {}).get("conf_a", None)
         conf_b = last_search.get("ext", {}).get("conf_b", None)
         do_ab = (len(req_data_array) == 6) and conf_a and conf_b
-        do_agentic = (conf_a == "agentic")
-        do_other_config = conf_a and not do_ab and not do_agentic
+        do_art_controlled = (conf_a == "art_controlled")
+        do_other_config = conf_a and not do_ab and not do_art_controlled
         logger.info(f"Got conf_a value '{conf_a}' and '{conf_b}' on '{user_query}'")
         # Are we doing an AB test run?
         if do_ab:
@@ -412,9 +412,9 @@ def ab_search():
             req_data_array = [ strip_keys(x, ['conf_a', 'conf_b']) for x in req_data_array[:-2]]
             req_data = "\n".join(req_data_array) + "\n"
             req_data = req_data.encode('utf-8')
-        elif do_agentic or do_other_config:
-            # Look up search configuration by name (either "agentic" or custom config)
-            config_type = "agentic" if do_agentic else "other config"
+        elif do_art_controlled or do_other_config:
+            # Look up search configuration by name (either "art_controlled" or custom config)
+            config_type = "art_controlled" if do_art_controlled else "other config"
             logger.info(f"Looking up search configuration '{conf_a}' for '{config_type}' option on '{user_query}'")
             
             search_configuration = Interleave().get_search_config(conf_a)

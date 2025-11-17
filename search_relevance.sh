@@ -357,9 +357,9 @@ echo Set up baseline ART controlled Search Configuration
 exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
 -H "Content-type: application/json" \
 -d'{
-      "name": "agentic",
+      "name": "art_controlled",
       "query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title\",\"category\",\"bullets\",\"description\",\"attrs.Brand\",\"attrs.Color\"]}}}",
       "index": "ecommerce"
 }'
 
-SC_AGENTIC=`jq -r '.search_configuration_id' < build/RES`
+SC_ART_CONTROLLED=`jq -r '.search_configuration_id' < build/RES`

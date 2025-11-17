@@ -4,9 +4,7 @@ import {
   DataSearch,
   MultiList,
   ReactiveList,
-  SingleRange,
   ResultCard,
-  SingleList
 } from "@appbaseio/reactivesearch";
 import AlgoPicker from './custom/AlgoPicker';
 import ShoppingCartButton from './custom/ShoppingCartButton';
@@ -360,12 +358,12 @@ class App extends Component {
                     }
                   }
                 }
-                else if (algo === 'agentic') {
+                else if (algo === 'art_controlled') {
                   return {
                     ...commonQuery,
                     ext: {
                       ...extJson,
-                      conf_a: "agentic"
+                      conf_a: "art_controlled"
                     }
                   }
                 }

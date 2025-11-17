@@ -104,7 +104,7 @@ class AlgoPicker extends Component {
           <option value="neural">Neural</option>
           <option value="hybrid">Hybrid</option>
           <option value="ab">AB</option>
-          <option value="agentic">ART Controlled</option>
+          <option value="art_controlled">ART Controlled</option>
           <option value="other">Other Config</option>
         </select>
         {this.state.showTextBox && (
