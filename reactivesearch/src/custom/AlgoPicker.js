@@ -5,16 +5,14 @@ import { getClassName } from "@appbaseio/reactivecore/lib/utils/helper";
 
 class AlgoPicker extends Component {
   state = {
-    algo: "keyword",
-    selectedValue: "keyword",
+    selectedAlgo: "keyword",
     showTextBox: false,
     conf_a: undefined,
     conf_b: undefined,
   };
   onChangeValue = (event) => {
     this.setState({
-      algo: event.target.value,
-      selectedValue: event.target.value,
+      selectedAlgo: event.target.value,
       showTextBox: event.target.value === "ab",
     });
     console.log(this);
@@ -41,7 +39,7 @@ class AlgoPicker extends Component {
           </Title>
         )}
         <select
-          value={this.state.selectedValue}
+          value={this.state.selectedAlgo}
           onChange={this.onChangeValue}
           style={{ display: "flex", flexDirection: "column" }}
           id="algopicker"
