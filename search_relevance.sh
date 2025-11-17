@@ -353,7 +353,7 @@ exe curl -s -X GET "http://localhost:9200/_plugins/_search_relevance/experiments
 
 
 echo
-echo Set up baseline Agentic controlled Search Configuration
+echo Set up baseline ART controlled Search Configuration
 exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
 -H "Content-type: application/json" \
 -d'{

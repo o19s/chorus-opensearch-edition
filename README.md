@@ -149,7 +149,7 @@ Of course, contributions are very welcome to improve Chorus - The OpenSearch Edi
 
 
 # Demo Script
-Here is a reasonable script for demonstrating the power of UBI in Cjhorus.
+Here is a reasonable script for demonstrating the power of UBI in Chorus.
 
 1. Open up Firefox and put web inspector on the right.
 1. Filter logs to ONLY **Logs**, disable all the other options so you only see our events.
