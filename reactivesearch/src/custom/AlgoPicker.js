@@ -44,6 +44,7 @@ class AlgoPicker extends Component {
           <option checked={this.state.selectedValue === "neural"} value="neural">Neural</option>
           <option checked={this.state.selectedValue === "hybrid"} value="hybrid">Hybrid</option>
           <option checked={this.state.selectedValue === "ab"} value="ab">AB</option>
+          <option checked={this.state.selectedValue === "agentic"} value="agentic">Agentic Controlled</option>
         </select>
         {this.state.showTextBox && (<><label> Configuration A: <input type="text" name="Search Config A" id="conf_a" value={this.state.conf_a} onChange={this.onChangeConfA}/></label><br />
         <label> Configuration B: <input type="text" name="Search Config B" id="conf_b" value={this.state.conf_b} onChange={this.onChangeConfB}/></label></>)}

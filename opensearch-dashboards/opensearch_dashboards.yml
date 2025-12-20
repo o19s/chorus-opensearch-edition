@@ -2,3 +2,8 @@
 server.name: opensearch-dashboards
 server.host: "0.0.0.0"
 #opensearch.hosts: http://localhost:9200
+# 
+# 3.3 toggles that I was alerted to on startup
+#data_source.enabled: true
+#workspace.enabled: true
+#explore.enabled: true

@@ -31,7 +31,6 @@ stop=false
 full_dataset=false
 only_transform=false
 hostname_or_ip=false
-srw=false
 
 while [ ! $# -eq 0 ]
 do
@@ -42,8 +41,8 @@ do
 	    echo -e "Use the option --stop to stop the Docker containers."
 	    echo -e "Use the option --online-deployment | -online to update configuration to run on chorus-opensearch-edition.dev.o19s.com environment."
 	    echo -e "Use the option --full-dataset | -full to index the whole data set. This takes some time depending on your hardware."
-		echo -e "Use the option --only-transform to download and convert the esci dataset only"
-		echo -e "Use the option --search-relevance-workbench | -srw to create query sets, search configurations & judgment lists"
+		  echo -e "Use the option --only-transform to download and convert the esci dataset only"
+		
 	    exit
 	    ;;
 		--with-offline-lab | -lab)
@@ -81,9 +80,6 @@ do
 	        exit 1
 	    fi
 	    ;;
-		--search-relevance-workbench | -srw)
-        srw=true
-        ;;
 	esac
 	shift
 done
@@ -93,6 +89,8 @@ services="opensearch opensearch-dashboards middleware reactivesearch"
 if $offline_lab; then
   services="${services} quepid"
 fi
+
+mkdir -p build
 
 if ! $local_deploy; then
   echo -e "${MAJOR}Updating configuration files for online deploy${RESET}"
@@ -115,21 +113,12 @@ if $shutdown; then
   exit
 fi
 
-#echo -e "${MAJOR}Prepping Data for Ingestion\n${RESET}"
-#if [ ! -f ./esci.json.zst ]; then
-#  echo -e "${MINOR}Downloading the sample product data\n${RESET}"
-#  wget https://esci-s.s3.amazonaws.com/esci.json.zst
-#fi
+# Using pre-prepared sample data instead of downloading and transforming
+echo -e "${MAJOR}Using pre-prepared sample data for quicker startup\n${RESET}"
 
-#if [ ! -f ./transformed_esci_1.json ]; then
-#  echo -e "${MINOR}Transforming the sample product data into JSON format, please give it a few minutes!\n${RESET}"
-#  docker run -v "$(pwd)":/app -w /app python:3 bash -c "pip install -r requirements.txt && python3 ./opensearch/transform_data.py"
-#fi
-
-#if $only_transform; then
-#  echo -e "${MINOR}Done transforming sample product data and quitting.\n${RESET}"
-#  exit
-#fi
+if $only_transform; then
+  echo -e "${MINOR}Only transform option not applicable with pre-prepared data, continuing with full setup.\n${RESET}"
+fi
 
 
 docker compose up -d --build ${services} 
@@ -256,8 +245,7 @@ echo -e "${MAJOR}Indexing the product data, please wait...\n${RESET}"
 OPENSEARCH_URL="http://localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items"
 CONTENT_TYPE="Content-Type: application/json"
 
-
-
+# Using pre-prepared shrunk sample data for faster indexing
 echo "Processing ./sample-data/esci_us_ecommerce_shrunk.ndjson"
 
 # Send the file to OpenSearch using curl
@@ -265,11 +253,10 @@ curl -X POST "$OPENSEARCH_URL" -H "$CONTENT_TYPE" --data-binary @./sample-data/e
 
 # Check the response code to see if the request was successful
 if [[ $? -ne 0 ]]; then
-    echo "Failed to send $file"
+    echo "Failed to send sample data file"
 else
-    echo "$file successfully sent to OpenSearch"
+    echo "Sample data file successfully sent to OpenSearch"
 fi
-
 
 echo -e "${MAJOR}Creating pipelines for neural search and hybrid search\n${RESET}"
 curl -s -X PUT "http://localhost:9200/_search/pipeline/neural-search-pipeline" \
@@ -343,24 +330,24 @@ echo -e "${MAJOR}Installing Team Draft Interleaving Dashboards...\n${RESET}"
 curl -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H "osd-xsrf: true" --form file=@opensearch-dashboards/tdi_dashboard.ndjson > /dev/null
 
 echo -e "${MAJOR}Fetching latest Search Result Quality Evaluation Dashboard, sample data and install script...\n${RESET}"
+
 # Dashboards
-curl -s -o search_dashboard.ndjson https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/search_dashboard.ndjson
+curl -s -o build/search_dashboard.ndjson https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/search_dashboard.ndjson
 # Install script
-curl -s -o install_dashboards.sh https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/install_dashboards.sh
+curl -s -o build/install_dashboards.sh https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/install_dashboards.sh
 # sample data
-curl -s -o sample_data.ndjson https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/sample_data.ndjson
+curl -s -o build/sample_data.ndjson https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/sample_data.ndjson
 # mappings for search quality metrics sample data index
-curl -s -o srw_metrics_mappings.json https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/srw_metrics_mappings.json
+curl -s -o build/srw_metrics_mappings.json https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/srw_metrics_mappings.json
 
 echo -e "${MAJOR}Installing Search Result Quality Evaluation Dashboard...\n${RESET}"
-chmod +x install_dashboards.sh
-./install_dashboards.sh http://localhost:9200 http://localhost:5601
+chmod +x build/install_dashboards.sh
+./build/install_dashboards.sh http://localhost:9200 http://localhost:5601
 
 ## configure the SRW search configurations
-if $srw; then
-    echo -e "${MAJOR}Creating Search Relevance entities...\n${RESET}"
-    ./search_relevance.sh
-fi
+echo -e "${MAJOR}Creating Search Relevance entities...\n${RESET}"
+./search_relevance.sh
+
 
 # we start dataprepper as the last service to prevent it from creating the ubi_queries index using the wrong mappings.
 echo -e "${MAJOR}Starting Dataprepper...\n${RESET}"

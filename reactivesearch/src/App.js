@@ -352,6 +352,30 @@ class App extends Component {
                     ext: extJ
                   }
                 }
+                else if (algo === 'agentic') {
+                  let extJ = {
+                    //conf_a: config_a,
+                    //conf_b: config_b,
+                    conf_a: "agentic",
+                    ubi: {
+                        query_id: getQueryId(),
+                        user_query: value,
+                        client_id: client_id,
+                        object_id_field: object_id_field,
+                        application: APPLICATION,
+                        query_attributes: {}
+                    }
+                  };
+                  return {
+                    query: {
+                      multi_match: {
+                        query: value,
+                        fields: ["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]
+                      }
+                    },
+                    ext: extJ
+                  }
+                }                
                 else if (algo === "keyword") {
                   return {
                     query: {

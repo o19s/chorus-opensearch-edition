@@ -6,7 +6,7 @@ from tqdm import tqdm
 # Input and output file settings
 n = len(sys.argv)
 fIn = 'esci.json.zst' if n <= 1 else sys.argv[1]
-outfile_prefix = 'transformed_esci_'
+outfile_prefix = 'build/transformed_esci_'
 
 # Batch size and index name
 batch_size = 10000
