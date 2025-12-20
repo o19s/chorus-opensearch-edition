@@ -1,0 +1,629 @@
+{
+  "name": "Hybrid Optimizer Demo",
+  "status": "COMPLETED",
+  "type": "IMPORT_JUDGMENT",
+  "metadata": {},
+  "judgmentRatings": [
+    {
+      "query": "pokemon",
+      "ratings": [
+        { "docId": "B07DMFDC6W", "rating": "3" },
+        { "docId": "B07DMB257X", "rating": "3" },
+        { "docId": "B01LZNQMC9", "rating": "3" },
+        { "docId": "B07Z24F858", "rating": "2" },
+        { "docId": "B07X3QDJJZ", "rating": "3" },
+        { "docId": "B0778S68FS", "rating": "2" },
+        { "docId": "B018DP2M3Q", "rating": "3" },
+        { "docId": "B01M1VMURA", "rating": "3" },
+        { "docId": "B07CVRB5ZL", "rating": "2" },
+        { "docId": "B01JHGRP0K", "rating": "3" },
+        { "docId": "B07RL8X87L", "rating": "3" },
+        { "docId": "B07PRCNWZ6", "rating": "3" },
+        { "docId": "B07YQNJZ66", "rating": "3" }
+      ]
+    },
+    {
+      "query": "return policy",
+      "ratings": [
+        { "docId": "B00EVIORN8", "rating": "1" },
+        { "docId": "B01MSWT7H7", "rating": "2" },
+        { "docId": "B08CZBSNLT", "rating": "2" },
+        { "docId": "B07C165VY2", "rating": "2" },
+        { "docId": "B079GBLFD8", "rating": "2" },
+        { "docId": "B0813VD13X", "rating": "1" },
+        { "docId": "B00A5VGMIS", "rating": "2" },
+        { "docId": "B08GSG8C41", "rating": "1" },
+        { "docId": "B07RQW1VY3", "rating": "1" },
+        { "docId": "B07G88XKSC", "rating": "3" },
+        { "docId": "B00SQSOTOQ", "rating": "0" },
+        { "docId": "B01ALHAIWG", "rating": "0" },
+        { "docId": "B07QB9PG13", "rating": "0" },
+        { "docId": "B001PBKJH2", "rating": "0" },
+        { "docId": "B07T944N4P", "rating": "0" },
+        { "docId": "B07WGQW9QB", "rating": "0" }
+      ]
+    },
+    {
+      "query": "hotel style waffle iron",
+      "ratings": [
+        { "docId": "B000ILEMAU", "rating": "1" },
+        { "docId": "B00T6YT6D8", "rating": "1" },
+        { "docId": "B07SC2XSV7", "rating": "0" },
+        { "docId": "B00MVWGUS6", "rating": "2" },
+        { "docId": "B07PRXGZYK", "rating": "0" },
+        { "docId": "B00EQT6EBU", "rating": "2" },
+        { "docId": "B00BFCZRSC", "rating": "2" },
+        { "docId": "B06XSQ9BJL", "rating": "2" },
+        { "docId": "B07TFC61SV", "rating": "0" },
+        { "docId": "B01M1IJ3O0", "rating": "1" },
+        { "docId": "B07Z9Z9BVX", "rating": "1" },
+        { "docId": "B001ELJO0G", "rating": "0" }
+      ]
+    },
+    {
+      "query": "cool artsy avant garde ring for goth girl",
+      "ratings": [
+        { "docId": "B07TSVDTQS", "rating": "1" },
+        { "docId": "B07VRNXW2G", "rating": "2" },
+        { "docId": "B008LT5AZ2", "rating": "0" },
+        { "docId": "B07XS869V8", "rating": "0" },
+        { "docId": "B07YBH1GB9", "rating": "0" },
+        { "docId": "B07YBJ1B3N", "rating": "0" },
+        { "docId": "B085G5BKSK", "rating": "0" },
+        { "docId": "B07XRCH722", "rating": "0" },
+        { "docId": "B07YBJ3X6H", "rating": "0" },
+        { "docId": "B00LORNPU0", "rating": "0" },
+        { "docId": "B00Y9OKK26", "rating": "0" },
+        { "docId": "B07GTSRND3", "rating": "0" },
+        { "docId": "B07VF4PRW5", "rating": "1" },
+        { "docId": "B008NVNAD2", "rating": "0" },
+        { "docId": "B07478T5NF", "rating": "0" },
+        { "docId": "B07W467YZV", "rating": "1" },
+        { "docId": "B07MXCVXSB", "rating": "1" }
+      ]
+    },
+    {
+      "query": "friends",
+      "ratings": [
+        { "docId": "B010R38VC8", "rating": "1" },
+        { "docId": "B07J6FDHR9", "rating": "1" },
+        { "docId": "B085XXNLD2", "rating": "2" },
+        { "docId": "B0794TLDLD", "rating": "3" },
+        { "docId": "B01N4PD1JK", "rating": "2" },
+        { "docId": "B003OZ3BPE", "rating": "1" },
+        { "docId": "B07DFDFZ4G", "rating": "3" },
+        { "docId": "B07JYP61ZV", "rating": "1" },
+        { "docId": "B07NRT5BHY", "rating": "2" },
+        { "docId": "B09H48HQQB", "rating": "1" },
+        { "docId": "B07P7X1FH2", "rating": "2" },
+        { "docId": "B08NH9TQS3", "rating": "2" },
+        { "docId": "B08F25XZR1", "rating": "2" },
+        { "docId": "B000AB0SWO", "rating": "0" },
+        { "docId": "B07Y3ZFNNF", "rating": "2" },
+        { "docId": "B00006I9MG", "rating": "0" }
+      ]
+    },
+    {
+      "query": "rose scented body lotion",
+      "ratings": [
+        { "docId": "B07QT7WLZN", "rating": "2" },
+        { "docId": "B01FX43MS4", "rating": "1" },
+        { "docId": "B07C5HVQSL", "rating": "3" },
+        { "docId": "B08BXB2CCX", "rating": "2" },
+        { "docId": "B00A7INXD6", "rating": "2" },
+        { "docId": "B078XM8JBW", "rating": "1" },
+        { "docId": "B07ZZGFS7B", "rating": "1" },
+        { "docId": "B07JBMXWJ4", "rating": "1" },
+        { "docId": "B01MR36GKT", "rating": "1" },
+        { "docId": "B00FGWGMW2", "rating": "0" },
+        { "docId": "B075ZHVVM2", "rating": "0" },
+        { "docId": "B07Q3PTKST", "rating": "1" },
+        { "docId": "B07YGZ9XBV", "rating": "1" },
+        { "docId": "B0855N5KMF", "rating": "1" }
+      ]
+    },
+    {
+      "query": "hat",
+      "ratings": [
+        { "docId": "B06XC53V1S", "rating": "3" },
+        { "docId": "B01MXUXAZ1", "rating": "3" },
+        { "docId": "B06XYZ46Q3", "rating": "3" },
+        { "docId": "B01N4OSAG0", "rating": "3" },
+        { "docId": "B01LZ3AHRB", "rating": "3" },
+        { "docId": "B07RTGY2HH", "rating": "3" },
+        { "docId": "B00M6P918O", "rating": "3" },
+        { "docId": "B071LQXZVK", "rating": "3" },
+        { "docId": "B00UGGSDQG", "rating": "3" },
+        { "docId": "B01K8O2QOA", "rating": "3" },
+        { "docId": "B00EILGKXI", "rating": "3" },
+        { "docId": "B078TXB523", "rating": "3" },
+        { "docId": "B07KW68JMN", "rating": "3" },
+        { "docId": "B07T6D3C4P", "rating": "3" },
+        { "docId": "B00H6KT634", "rating": "3" }
+      ]
+    },
+    {
+      "query": "christmas gift for MIL",
+      "ratings": [
+        { "docId": "B06XX721LP", "rating": "0" },
+        { "docId": "B01KNIA40Y", "rating": "0" },
+        { "docId": "B077S1VCPF", "rating": "0" },
+        { "docId": "B00AOKH428", "rating": "0" },
+        { "docId": "B00LG07MS6", "rating": "0" },
+        { "docId": "B001Q8ZFRS", "rating": "1" },
+        { "docId": "B081P8KCDF", "rating": "2" },
+        { "docId": "B01MCYRHKZ", "rating": "1" },
+        { "docId": "B06XQ4C3JC", "rating": "0" },
+        { "docId": "B083GK343P", "rating": "0" },
+        { "docId": "B06XY6DFCY", "rating": "2" },
+        { "docId": "B015DTI1OY", "rating": "2" },
+        { "docId": "B07B9W637X", "rating": "1" },
+        { "docId": "B07F22B5L8", "rating": "2" },
+        { "docId": "B07KT14PT3", "rating": "1" },
+        { "docId": "B082QF3KLF", "rating": "2" },
+        { "docId": "B085CBNQ1J", "rating": "2" }
+      ]
+    },
+    {
+      "query": "gift for wife",
+      "ratings": [
+        { "docId": "B07H12X2BZ", "rating": "3" },
+        { "docId": "B088MK7HLV", "rating": "3" },
+        { "docId": "B07YKGNVM6", "rating": "3" },
+        { "docId": "B098F96S9R", "rating": "3" },
+        { "docId": "B08FC67M4V", "rating": "2" },
+        { "docId": "B086LB2MDQ", "rating": "3" },
+        { "docId": "B08BFG1VDH", "rating": "2" },
+        { "docId": "B01M0ENE84", "rating": "2" },
+        { "docId": "B07T57HJJT", "rating": "2" },
+        { "docId": "B07JYP61ZV", "rating": "2" },
+        { "docId": "B08274TXP6", "rating": "3" },
+        { "docId": "B08DRCJFZ1", "rating": "3" },
+        { "docId": "B095NPC19P", "rating": "2" },
+        { "docId": "B083QYSFNC", "rating": "2" },
+        { "docId": "B08WX17HZD", "rating": "2" },
+        { "docId": "B07B9W637X", "rating": "1" },
+        { "docId": "B015DTI1OY", "rating": "3" }
+      ]
+    },
+    {
+      "query": "wondering",
+      "ratings": [
+        { "docId": "B077XYHRVS", "rating": "1" },
+        { "docId": "B07YRX58KM", "rating": "1" },
+        { "docId": "B0168IXNFQ", "rating": "1" },
+        { "docId": "B07RNC2FPX", "rating": "1" },
+        { "docId": "B016QU4WE2", "rating": "1" },
+        { "docId": "B01CYKCU4M", "rating": "1" },
+        { "docId": "B07PXKYX5M", "rating": "1" },
+        { "docId": "B00CRYJZ7Q", "rating": "1" },
+        { "docId": "B07RYWPCG8", "rating": "1" },
+        { "docId": "B07V5S8F25", "rating": "1" },
+        { "docId": "B000001E7T", "rating": "0" },
+        { "docId": "B00WVF0QXI", "rating": "0" },
+        { "docId": "B081WSC15G", "rating": "0" },
+        { "docId": "B00005LL02", "rating": "0" }
+      ]
+    },
+    {
+      "query": "wireless charger",
+      "ratings": [
+        { "docId": "B07H93NYC5", "rating": "3" },
+        { "docId": "B07YXSNSTT", "rating": "3" },
+        { "docId": "B07H4J5Y1P", "rating": "3" },
+        { "docId": "B082LV8387", "rating": "1" },
+        { "docId": "B095LHL2G5", "rating": "3" },
+        { "docId": "B098PT719W", "rating": "3" },
+        { "docId": "B07XFLQQP6", "rating": "1" },
+        { "docId": "B07XLFYN6S", "rating": "2" },
+        { "docId": "B06Y3V63KL", "rating": "3" },
+        { "docId": "B07S7QHLNX", "rating": "3" },
+        { "docId": "B07PBCKXP7", "rating": "1" },
+        { "docId": "B07YDFZWT8", "rating": "0" },
+        { "docId": "B07WWL7YC7", "rating": "2" },
+        { "docId": "B00LFZUZQI", "rating": "1" }
+      ]
+    },
+    {
+      "query": "3 year old boy birthday gift",
+      "ratings": [
+        { "docId": "B08CXB53F3", "rating": "3" },
+        { "docId": "B08345YDXJ", "rating": "2" },
+        { "docId": "B08TZYR815", "rating": "3" },
+        { "docId": "B09BFCD1BM", "rating": "2" },
+        { "docId": "B07GC2TJLR", "rating": "3" },
+        { "docId": "B08ZN9JX31", "rating": "3" },
+        { "docId": "B0833V36QJ", "rating": "1" },
+        { "docId": "B083HNSJRP", "rating": "3" },
+        { "docId": "B086GTGCCP", "rating": "3" },
+        { "docId": "B075Y1CRFJ", "rating": "3" },
+        { "docId": "B07VX8T11X", "rating": "3" },
+        { "docId": "B07VVZ4QVR", "rating": "3" },
+        { "docId": "B072X7CYH4", "rating": "1" }
+      ]
+    },
+    {
+      "query": "shoelaces",
+      "ratings": [
+        { "docId": "B07TXNLPG3", "rating": "3" },
+        { "docId": "B075LFJPP2", "rating": "3" },
+        { "docId": "B01MQCJ5IO", "rating": "3" },
+        { "docId": "B01N2T3IG9", "rating": "3" },
+        { "docId": "B07BHLWYX8", "rating": "1" },
+        { "docId": "B072HRYWRY", "rating": "1" },
+        { "docId": "B08BJVHF4S", "rating": "1" },
+        { "docId": "B07DS26YK3", "rating": "1" },
+        { "docId": "B07WLZPL3R", "rating": "1" },
+        { "docId": "B07HF1GTYN", "rating": "0" },
+        { "docId": "B07PDND8DG", "rating": "0" },
+        { "docId": "B01BUQYGJS", "rating": "0" },
+        { "docId": "B01DZNIQUO", "rating": "0" }
+      ]
+    },
+    {
+      "query": "home",
+      "ratings": [
+        { "docId": "B088GPRP9V", "rating": "2" },
+        { "docId": "B06XHFCYMY", "rating": "2" },
+        { "docId": "B07T8BGRWS", "rating": "1" },
+        { "docId": "B083Q782R5", "rating": "2" },
+        { "docId": "B089P1DC52", "rating": "2" },
+        { "docId": "B07479HHF8", "rating": "2" },
+        { "docId": "B07RHQCS6Q", "rating": "1" },
+        { "docId": "B07WFTJYC9", "rating": "2" },
+        { "docId": "B007IX3KDG", "rating": "2" },
+        { "docId": "B00499RX3K", "rating": "2" },
+        { "docId": "B083W3R8WS", "rating": "2" },
+        { "docId": "B01LYVK2PT", "rating": "2" },
+        { "docId": "B086SNZHZG", "rating": "1" },
+        { "docId": "B01BFD9A5G", "rating": "1" },
+        { "docId": "B09C2Y156Z", "rating": "2" },
+        { "docId": "B07DPRWV11", "rating": "2" }
+      ]
+    },
+    {
+      "query": "samsung fridge water filter",
+      "ratings": [
+        { "docId": "B08HL7TW61", "rating": "0" },
+        { "docId": "B06W9L5HQ1", "rating": "3" },
+        { "docId": "B010DF2NZ6", "rating": "0" },
+        { "docId": "B01N3LBPYA", "rating": "0" },
+        { "docId": "B08FSBQCX5", "rating": "1" },
+        { "docId": "B08LKT5TFY", "rating": "0" },
+        { "docId": "B07PY7SKLX", "rating": "1" },
+        { "docId": "B06WVDVDXB", "rating": "0" },
+        { "docId": "B08VDC2YDG", "rating": "0" },
+        { "docId": "B084SQDJ4T", "rating": "0" },
+        { "docId": "B00E37TQUQ", "rating": "1" },
+        { "docId": "B01MDP07CZ", "rating": "0" },
+        { "docId": "B0744CCXQM", "rating": "0" }
+      ]
+    },
+    {
+      "query": "movie",
+      "ratings": [
+        { "docId": "B081C9BQKQ", "rating": "1" },
+        { "docId": "B07PYK2LSY", "rating": "2" },
+        { "docId": "B00007FOJ1", "rating": "2" },
+        { "docId": "B07GSYVVXG", "rating": "3" },
+        { "docId": "B07MQBH4MS", "rating": "2" },
+        { "docId": "B07P524JYG", "rating": "2" },
+        { "docId": "B07VV4PNTV", "rating": "1" },
+        { "docId": "B076MRTDYB", "rating": "2" },
+        { "docId": "B01KOQ9ALE", "rating": "2" },
+        { "docId": "B07T275WY7", "rating": "1" },
+        { "docId": "B085DKXY95", "rating": "1" },
+        { "docId": "B000UE40ZW", "rating": "2" },
+        { "docId": "B00000K3D4", "rating": "3" },
+        { "docId": "B00006I9MG", "rating": "0" },
+        { "docId": "B018WQBNY0", "rating": "2" },
+        { "docId": "B085HP9FG7", "rating": "3" }
+      ]
+    },
+    {
+      "query": "silicon spatula",
+      "ratings": [
+        { "docId": "B08BJ2RWR5", "rating": "2" },
+        { "docId": "B078HXTVSK", "rating": "2" },
+        { "docId": "B08M99FB52", "rating": "3" },
+        { "docId": "B07MXQDV65", "rating": "1" },
+        { "docId": "B07Y81S5Q3", "rating": "3" },
+        { "docId": "B0833NHDYK", "rating": "3" },
+        { "docId": "B07XVNH794", "rating": "3" },
+        { "docId": "B07NS8B99L", "rating": "1" },
+        { "docId": "B075FT6QTY", "rating": "1" },
+        { "docId": "B07TLNT4KH", "rating": "3" },
+        { "docId": "B07931J2BG", "rating": "3" },
+        { "docId": "B001QTVT4K", "rating": "3" },
+        { "docId": "B01MV7EHEQ", "rating": "3" },
+        { "docId": "B0093HWGOO", "rating": "1" }
+      ]
+    },
+    {
+      "query": "women holiday cocktail dress",
+      "ratings": [
+        { "docId": "B07MXCVXSB", "rating": "1" },
+        { "docId": "B004G0EIIK", "rating": "1" },
+        { "docId": "B086S6D1GJ", "rating": "2" },
+        { "docId": "B01I2AQ3C8", "rating": "1" },
+        { "docId": "B0861FDNQZ", "rating": "2" },
+        { "docId": "B077QK7789", "rating": "0" },
+        { "docId": "B01M0ENE84", "rating": "0" },
+        { "docId": "B07G5RY3WZ", "rating": "1" },
+        { "docId": "B07QTF326M", "rating": "0" },
+        { "docId": "B07H81BXCS", "rating": "0" },
+        { "docId": "B01M3XK9MR", "rating": "1" },
+        { "docId": "B07GSS8N5X", "rating": "1" },
+        { "docId": "B0047DSSB4", "rating": "0" },
+        { "docId": "B07J9ZHF52", "rating": "1" }
+      ]
+    },
+    {
+      "query": "silicone flat spatula",
+      "ratings": [
+        { "docId": "B01B912VM8", "rating": "2" },
+        { "docId": "B07Y81S5Q3", "rating": "3" },
+        { "docId": "B0833NHDYK", "rating": "3" },
+        { "docId": "B08M99FB52", "rating": "2" },
+        { "docId": "B07931J2BG", "rating": "2" },
+        { "docId": "B07TLNT4KH", "rating": "3" },
+        { "docId": "B075FT6QTY", "rating": "1" },
+        { "docId": "B07MXQDV65", "rating": "1" },
+        { "docId": "B001QTVT4K", "rating": "2" },
+        { "docId": "B08292LY5S", "rating": "2" },
+        { "docId": "B08BJ2RWR5", "rating": "2" }
+      ]
+    },
+    {
+      "query": "keyboard wireless white",
+      "ratings": [
+        { "docId": "B01LXKPV9D", "rating": "2" },
+        { "docId": "B07N44BL8T", "rating": "1" },
+        { "docId": "B088WV74FS", "rating": "3" },
+        { "docId": "B07DFBKYT5", "rating": "2" },
+        { "docId": "B0929L5L8S", "rating": "1" },
+        { "docId": "B077D29D6T", "rating": "1" },
+        { "docId": "B07XXRNS5R", "rating": "1" },
+        { "docId": "B07D2BG6R5", "rating": "2" },
+        { "docId": "B08B64HXNY", "rating": "2" },
+        { "docId": "B087BXP7VX", "rating": "2" },
+        { "docId": "B06XY2558L", "rating": "1" },
+        { "docId": "B077ZX9KJ7", "rating": "2" },
+        { "docId": "B085RMD5TP", "rating": "2" },
+        { "docId": "B078218YBY", "rating": "1" },
+        { "docId": "B07FLKYRFB", "rating": "2" }
+      ]
+    },
+    {
+      "query": "oxo spatula",
+      "ratings": [
+        { "docId": "B001QTVT4K", "rating": "3" },
+        { "docId": "B07XLV3659", "rating": "0" },
+        { "docId": "B00004OCIW", "rating": "1" },
+        { "docId": "B003M8GMUY", "rating": "0" },
+        { "docId": "B015CQZKLU", "rating": "0" },
+        { "docId": "B07G4K2NMR", "rating": "0" },
+        { "docId": "B07MXQDV65", "rating": "2" },
+        { "docId": "B07GTHXKF3", "rating": "0" },
+        { "docId": "B07Y81S5Q3", "rating": "2" },
+        { "docId": "B0833NHDYK", "rating": "2" },
+        { "docId": "B07TLNT4KH", "rating": "2" },
+        { "docId": "B07XVNH794", "rating": "1" },
+        { "docId": "B0093HWGOO", "rating": "2" }
+      ]
+    },
+    {
+      "query": "kids tylenol",
+      "ratings": [
+        { "docId": "B00004OCLR", "rating": "0" },
+        { "docId": "B086H2VSJX", "rating": "0" },
+        { "docId": "B07QHXLD4J", "rating": "0" },
+        { "docId": "B071RXGXL9", "rating": "0" },
+        { "docId": "B07QHXLVD9", "rating": "0" },
+        { "docId": "B0852799GM", "rating": "0" },
+        { "docId": "B07TSHNRGW", "rating": "0" },
+        { "docId": "B010E2AX1E", "rating": "0" },
+        { "docId": "B07T9CBX2H", "rating": "0" },
+        { "docId": "B07HNTP4VH", "rating": "0" },
+        { "docId": "B08HLF3RXZ", "rating": "0" },
+        { "docId": "B07G6MSLBJ", "rating": "0" },
+        { "docId": "B07D9BJ6RR", "rating": "0" },
+        { "docId": "B07MBNX7PH", "rating": "0" },
+        { "docId": "B07CF413BX", "rating": "0" },
+        { "docId": "B07B3YQ664", "rating": "0" },
+        { "docId": "B07DFNJ675", "rating": "0" },
+        { "docId": "B07S79MJRS", "rating": "0" }
+      ]
+    },
+    {
+      "query": "gift for eight year old",
+      "ratings": [
+        { "docId": "B07YXM4F4M", "rating": "0" },
+        { "docId": "B07K9R5VKJ", "rating": "0" },
+        { "docId": "B09BFCD1BM", "rating": "0" },
+        { "docId": "B00AJ3JWCK", "rating": "1" },
+        { "docId": "B07R3K3GG2", "rating": "3" },
+        { "docId": "B083HNSJRP", "rating": "2" },
+        { "docId": "B08ZN9JX31", "rating": "2" },
+        { "docId": "B087X5L17B", "rating": "3" },
+        { "docId": "B098MGNSSS", "rating": "0" },
+        { "docId": "B07X3WF49J", "rating": "2" },
+        { "docId": "B095LF377Q", "rating": "2" },
+        { "docId": "B07TXFS13R", "rating": "3" },
+        { "docId": "B081M1RR9Y", "rating": "2" },
+        { "docId": "B08HZF6V5X", "rating": "3" }
+      ]
+    },
+    {
+      "query": "paint",
+      "ratings": [
+        { "docId": "B009U5BD8E", "rating": "3" },
+        { "docId": "B07FXZB5PN", "rating": "3" },
+        { "docId": "B07RLQMPGD", "rating": "3" },
+        { "docId": "B08BRZKLFQ", "rating": "3" },
+        { "docId": "B07SRFWCWY", "rating": "3" },
+        { "docId": "B01LC9SHGQ", "rating": "3" },
+        { "docId": "B07SX9WKFJ", "rating": "3" },
+        { "docId": "B07VY9ZC82", "rating": "3" },
+        { "docId": "B00HQ5MNW0", "rating": "3" },
+        { "docId": "B0868H3L6P", "rating": "3" },
+        { "docId": "B001JPH5S0", "rating": "3" },
+        { "docId": "B0026SSW8G", "rating": "3" },
+        { "docId": "B07L6QYTD6", "rating": "3" }
+      ]
+    },
+    {
+      "query": "picture frame 10x12",
+      "ratings": [
+        { "docId": "B08MCQMQJQ", "rating": "3" },
+        { "docId": "B07YJ1LCHB", "rating": "0" },
+        { "docId": "B08L3LYVRR", "rating": "1" },
+        { "docId": "B07RWVH52J", "rating": "1" },
+        { "docId": "B07X8NL9ML", "rating": "1" },
+        { "docId": "B0925X445H", "rating": "1" },
+        { "docId": "B08T6L8Z97", "rating": "1" },
+        { "docId": "B08TWLJ674", "rating": "0" },
+        { "docId": "B087K1CH8X", "rating": "1" },
+        { "docId": "B01EGOSXG8", "rating": "1" },
+        { "docId": "B079LC6XCD", "rating": "1" },
+        { "docId": "B0874XXSJP", "rating": "1" },
+        { "docId": "B07Z4PVDSC", "rating": "1" },
+        { "docId": "B08CB2JYNN", "rating": "1" },
+        { "docId": "B075LKFZJQ", "rating": "1" }
+      ]
+    },
+    {
+      "query": "laptop accessories",
+      "ratings": [
+        { "docId": "B075ZGJSL1", "rating": "3" },
+        { "docId": "B07P75NDMB", "rating": "3" },
+        { "docId": "B07KN5JP3H", "rating": "3" },
+        { "docId": "B07XBL3LR4", "rating": "3" },
+        { "docId": "B07BRY4SM8", "rating": "2" },
+        { "docId": "B07N6JSN4N", "rating": "3" },
+        { "docId": "B075Y6Y9H5", "rating": "2" },
+        { "docId": "B076YX2LML", "rating": "3" },
+        { "docId": "B07QCXBPRH", "rating": "3" },
+        { "docId": "B071V5VQL7", "rating": "3" },
+        { "docId": "B07T541PXC", "rating": "3" },
+        { "docId": "B07WBYCTNX", "rating": "3" },
+        { "docId": "B07PPZGY5R", "rating": "2" },
+        { "docId": "B07YF1RWYV", "rating": "2" },
+        { "docId": "B08NPV31BR", "rating": "2" }
+      ]
+    },
+    {
+      "query": "tv",
+      "ratings": [
+        { "docId": "B00QOQU95K", "rating": "2" },
+        { "docId": "B08718Q168", "rating": "2" },
+        { "docId": "B07176GBXQ", "rating": "3" },
+        { "docId": "B01N1SSOUC", "rating": "3" },
+        { "docId": "B01B5RF470", "rating": "2" },
+        { "docId": "B01N2V3VZ9", "rating": "2" },
+        { "docId": "B07GPN3MRY", "rating": "2" },
+        { "docId": "B07W7RP985", "rating": "2" },
+        { "docId": "B01MR3ZMOY", "rating": "2" },
+        { "docId": "B07XJJKRM7", "rating": "3" },
+        { "docId": "B07RZXVGHH", "rating": "3" },
+        { "docId": "B07WHDNPKV", "rating": "3" },
+        { "docId": "B01LY0FCQO", "rating": "3" },
+        { "docId": "B07MXBCQCF", "rating": "3" },
+        { "docId": "B00HYSG07I", "rating": "3" },
+        { "docId": "B01HE1IVNA", "rating": "3" }
+      ]
+    },
+    {
+      "query": "television",
+      "ratings": [
+        { "docId": "B06XGHGPCG", "rating": "2" },
+        { "docId": "B07DFDFZ4G", "rating": "1" },
+        { "docId": "B017NBP28I", "rating": "1" },
+        { "docId": "B07S1YNJS4", "rating": "3" },
+        { "docId": "B01M34GDVV", "rating": "2" },
+        { "docId": "B082Z5VWJG", "rating": "2" },
+        { "docId": "B00TR7EWGA", "rating": "2" },
+        { "docId": "B01E9O0QVU", "rating": "1" },
+        { "docId": "B07CN4MTJC", "rating": "1" },
+        { "docId": "B07LDNGY38", "rating": "1" },
+        { "docId": "B07WHDNPKV", "rating": "2" },
+        { "docId": "B01LY0FCQO", "rating": "3" },
+        { "docId": "B07RZXVGHH", "rating": "2" },
+        { "docId": "B00HYSG07I", "rating": "2" },
+        { "docId": "B07MXBCQCF", "rating": "3" },
+        { "docId": "B084YQX5Q6", "rating": "2" }
+      ]
+    },
+    {
+      "query": "batteries",
+      "ratings": [
+        { "docId": "B01GSLWX7C", "rating": "2" },
+        { "docId": "B078WLYNFT", "rating": "2" },
+        { "docId": "B08594HCR5", "rating": "2" },
+        { "docId": "B00FR3WSOQ", "rating": "2" },
+        { "docId": "B07K3RZ18F", "rating": "3" },
+        { "docId": "B07SR8D37N", "rating": "3" },
+        { "docId": "B086GBGHY6", "rating": "3" },
+        { "docId": "B004YG7LA8", "rating": "2" },
+        { "docId": "B000CQBIAI", "rating": "2" },
+        { "docId": "B000Y85T7W", "rating": "2" },
+        { "docId": "B0015YLNIS", "rating": "3" },
+        { "docId": "B00008MOQ5", "rating": "3" },
+        { "docId": "B00IA8M42G", "rating": "3" },
+        { "docId": "B06XXCL589", "rating": "1" }
+      ]
+    },
+    {
+      "query": "othoking bamboo charging station",
+      "ratings": [
+        { "docId": "B07XLFYN6S", "rating": "3" },
+        { "docId": "B095LHL2G5", "rating": "0" },
+        { "docId": "B003X1R29K", "rating": "0" },
+        { "docId": "B018F3WEXO", "rating": "1" },
+        { "docId": "B098PT719W", "rating": "0" },
+        { "docId": "B0976MM5HS", "rating": "1" },
+        { "docId": "B07Y8DJ36Z", "rating": "0" },
+        { "docId": "B01MYNE2BM", "rating": "0" },
+        { "docId": "B08HVZL61C", "rating": "0" },
+        { "docId": "B0835GJQ6H", "rating": "0" },
+        { "docId": "B0079GH6K0", "rating": "0" },
+        { "docId": "B01HKKBBSM", "rating": "0" },
+        { "docId": "B00LFZUZQI", "rating": "0" }
+      ]
+    },
+    {
+      "query": "hd tv",
+      "ratings": [
+        { "docId": "B07W7RP985", "rating": "1" },
+        { "docId": "B0813ZXWB3", "rating": "2" },
+        { "docId": "B01LZ6FZAA", "rating": "1" },
+        { "docId": "B07DGCJ3KY", "rating": "3" },
+        { "docId": "B07S1YNJS4", "rating": "3" },
+        { "docId": "B07T73MJVD", "rating": "2" },
+        { "docId": "B08P5JFXPG", "rating": "2" },
+        { "docId": "B07D2738DN", "rating": "2" },
+        { "docId": "B07MXBCQCF", "rating": "3" },
+        { "docId": "B00AICFOF6", "rating": "1" },
+        { "docId": "B07RZXVGHH", "rating": "2" },
+        { "docId": "B084TSNVRJ", "rating": "2" },
+        { "docId": "B01MATMIU4", "rating": "2" },
+        { "docId": "B07FZC283C", "rating": "1" }
+      ]
+    },
+    {
+      "query": "hikingsocks",
+      "ratings": [
+        { "docId": "B085Q4H8ZW", "rating": "0" },
+        { "docId": "B07RGMRPQZ", "rating": "0" },
+        { "docId": "B01DNGELIO", "rating": "0" },
+        { "docId": "B07Z8R4NGK", "rating": "1" },
+        { "docId": "B07GSXT38X", "rating": "0" },
+        { "docId": "B09CFZ9VXV", "rating": "1" },
+        { "docId": "B010DBTNNK", "rating": "1" },
+        { "docId": "B07JZXMF53", "rating": "0" },
+        { "docId": "B082P542PH", "rating": "1" },
+        { "docId": "B07NS46WJD", "rating": "0" }
+      ]
+    }
+  ]
+}

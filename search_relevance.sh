@@ -363,3 +363,13 @@ exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_conf
 }'
 
 SC_AGENTIC=`jq -r '.search_configuration_id' < build/RES`
+
+echo
+echo Setting up HYBRID OPTIMIZER DEMO DATA
+exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/judgments" \
+-H "Content-type: application/json" \
+--data-binary @sample-data/hybrid_optimizer_demo_judgments.json
+
+exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/query_sets" \
+-H "Content-type: application/json" \
+--data-binary @sample-data/hybrid_optimizer_demo_queries.json
