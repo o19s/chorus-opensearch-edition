@@ -28,8 +28,8 @@ shutdown=false
 offline_lab=false
 local_deploy=true
 stop=false
-full_dataset=false
-only_transform=false
+
+
 hostname_or_ip=false
 
 while [ ! $# -eq 0 ]
@@ -40,8 +40,8 @@ do
 	    echo -e "Use the option --shutdown | -s to shutdown and remove the Docker containers and data."
 	    echo -e "Use the option --stop to stop the Docker containers."
 	    echo -e "Use the option --online-deployment | -online to update configuration to run on chorus-opensearch-edition.dev.o19s.com environment."
-	    echo -e "Use the option --full-dataset | -full to index the whole data set. This takes some time depending on your hardware."
-		  echo -e "Use the option --only-transform to download and convert the esci dataset only"
+
+
 		
 	    exit
 	    ;;
@@ -61,14 +61,8 @@ do
 	    local_deploy=false
 	    echo -e "${MAJOR}Configuring Chorus for chorus-opensearch-edition.dev.o19s.com environment\n${RESET}"
 	    ;;
-		--full-dataset | -full)
-	    full_dataset=true
-	    echo -e "${MAJOR}Indexing whole data set\n${RESET}"
-	    ;;
-		--only-transform)
-        only_transform=true
-        echo -e "${MAJOR}Only transforming the data set\n${RESET}"
-        ;;
+
+
         --hostname_or_ip | -host)
 	    if [ -n "$2" ] && [[ "$2" != -* ]]; then
           hostname_or_ip=true
@@ -116,9 +110,7 @@ fi
 # Using pre-prepared sample data instead of downloading and transforming
 echo -e "${MAJOR}Using pre-prepared sample data for quicker startup\n${RESET}"
 
-if $only_transform; then
-  echo -e "${MINOR}Only transform option not applicable with pre-prepared data, continuing with full setup.\n${RESET}"
-fi
+
 
 
 docker compose up -d --build ${services} 
