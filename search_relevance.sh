@@ -58,7 +58,7 @@ exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_conf
 -H "Content-type: application/json" \
 -d'{
       "name": "baseline",
-      "query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title\",\"category\",\"bullets\",\"description\",\"attrs.Brand\",\"attrs.Color\"]}}}",
+      "query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title\",\"category\",\"bullet_points\",\"description\",\"brand\",\"color\"]}}}",
       "index": "ecommerce"
 }'
 
@@ -68,7 +68,7 @@ exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_conf
 -H "Content-type: application/json" \
 -d'{
       "name": "baseline with title weight",
-      "query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title^25\",\"category\",\"bullets\",\"description\",\"attrs.Brand\",\"attrs.Color\"]}}}",
+      "query": "{\"query\":{\"multi_match\":{\"query\":\"%SearchText%\",\"fields\":[\"id\",\"title^25\",\"category\",\"bullet_points\",\"description\",\"brand\",\"color\"]}}}",
       "index": "ecommerce"
 }'
 
@@ -244,7 +244,7 @@ echo Create PAIRWISE Experiment
 exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/experiments" \
 -H "Content-type: application/json" \
 -d"{
-   	\"querySetId\": \"$QUERY_SET_MANUAL\",
+   	\"querySetId\": \"$QUERY_SET_ESCI\",
    	\"searchConfigurationList\": [\"$SC_BASELINE\", \"$SC_CHALLENGER\"],
    	\"size\": 10,
    	\"type\": \"PAIRWISE_COMPARISON\"
@@ -266,9 +266,9 @@ echo Create POINTWISE Experiment
 exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/experiments" \
 -H "Content-type: application/json" \
 -d"{
-   	\"querySetId\": \"$QUERY_SET_MANUAL\",
+   	\"querySetId\": \"$QUERY_SET_ESCI\",
    	\"searchConfigurationList\": [\"$SC_BASELINE\"],
-    \"judgmentList\": [\"$IMPORTED_JUDGMENT_LIST_ID\"],
+    \"judgmentList\": [\"$ESCI_JUDGMENT_LIST_ID\"],
    	\"size\": 8,
    	\"type\": \"POINTWISE_EVALUATION\"
    }"
@@ -322,7 +322,7 @@ fi
 echo Creating Hybrid Query to be Optimized
 curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_configurations" \
 -H "Content-type: application/json" \
--d"{\"name\":\"hybrid_search_query\",\"query\":\"{\\\"query\\\":{\\\"hybrid\\\":{\\\"queries\\\":[{\\\"multi_match\\\":{\\\"query\\\":\\\"%SearchText%\\\",\\\"fields\\\":[\\\"id\\\",\\\"title\\\",\\\"category\\\",\\\"bullets\\\",\\\"description\\\",\\\"attrs.Brand\\\",\\\"attrs.Color\\\"]}},{\\\"neural\\\":{\\\"title_embedding\\\":{\\\"query_text\\\":\\\"%SearchText%\\\",\\\"k\\\":100,\\\"model_id\\\":\\\"$MODEL_ID\\\"}}}]}},\\\"size\\\":10,\\\"_source\\\":[\\\"id\\\",\\\"title\\\",\\\"category\\\",\\\"brand\\\",\\\"image\\\"]}\",\"searchPipeline\":\"hybrid-search-pipeline\",\"index\":\"ecommerce\"}"
+-d"{\"name\":\"hybrid_search_query\",\"query\":\"{\\\"query\\\":{\\\"hybrid\\\":{\\\"queries\\\":[{\\\"multi_match\\\":{\\\"query\\\":\\\"%SearchText%\\\",\\\"fields\\\":[\\\"id\\\",\\\"title\\\",\\\"category\\\",\\\"bullet_points\\\",\\\"description\\\",\\\"brand\\\",\\\"color\\\"]}},{\\\"neural\\\":{\\\"title_embedding\\\":{\\\"query_text\\\":\\\"%SearchText%\\\",\\\"k\\\":100,\\\"model_id\\\":\\\"$MODEL_ID\\\"}}}]}},\\\"size\\\":10,\\\"_source\\\":[\\\"id\\\",\\\"title\\\",\\\"category\\\",\\\"brand\\\",\\\"image\\\"]}\",\"searchPipeline\":\"hybrid-search-pipeline\",\"index\":\"ecommerce\"}"
 
 SC_HYBRID=`jq -r '.search_configuration_id' < build/RES`
 
