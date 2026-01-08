@@ -8,13 +8,32 @@ MAJOR='\033[0;34m[QUICKSTART] '
 MINOR='\033[0;37m[QUICKSTART]    '
 RESET='\033[0m' # No Color
 
-# Set up logging to both terminal and log file
-mkdir -p logs
-LOG_FILE="logs/quickstart-$(date +%Y%m%d-%H%M%S).log"
-exec > >(tee -a "$LOG_FILE")
-exec 2>&1
-
 export DOCKER_SCAN_SUGGEST=false
+
+observability=false
+shutdown=false
+offline_lab=false
+local_deploy=true
+stop=false
+log_to_file=false
+
+hostname_or_ip=false
+
+# Check for --log flag early so we can set up logging before other output
+for arg in "$@"; do
+  if [[ "$arg" == "--log" ]] || [[ "$arg" == "-l" ]]; then
+    log_to_file=true
+    break
+  fi
+done
+
+# Set up logging to file if requested (before dependency checks so errors are logged)
+if $log_to_file; then
+  mkdir -p logs
+  LOG_FILE="logs/quickstart-$(date +%Y%m%d-%H%M%S).log"
+  exec > >(tee -a "$LOG_FILE")
+  exec 2>&1
+fi
 
 if ! [ -x "$(command -v curl)" ]; then
   echo "${ERROR}Error: curl is not installed.${RESET}" >&2
@@ -29,15 +48,6 @@ if ! [ -x "$(command -v wget)" ]; then
   exit 1
 fi
 
-observability=false
-shutdown=false
-offline_lab=false
-local_deploy=true
-stop=false
-
-
-hostname_or_ip=false
-
 while [ ! $# -eq 0 ]
 do
 	case "$1" in
@@ -46,6 +56,7 @@ do
 	    echo -e "Use the option --shutdown | -s to shutdown and remove the Docker containers and data."
 	    echo -e "Use the option --stop to stop the Docker containers."
 	    echo -e "Use the option --online-deployment | -online to update configuration to run on chorus-opensearch-edition.dev.o19s.com environment."
+	    echo -e "Use the option --log | -l to enable logging to a file in the logs directory."
 
 
 		
@@ -66,6 +77,10 @@ do
 		--online-deployment | -online)
 	    local_deploy=false
 	    echo -e "${MAJOR}Configuring Chorus for chorus-opensearch-edition.dev.o19s.com environment\n${RESET}"
+	    ;;
+		--log | -l)
+	    log_to_file=true
+	    echo -e "${MAJOR}Logging to file enabled\n${RESET}"
 	    ;;
 
 
