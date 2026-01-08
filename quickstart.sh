@@ -8,6 +8,12 @@ MAJOR='\033[0;34m[QUICKSTART] '
 MINOR='\033[0;37m[QUICKSTART]    '
 RESET='\033[0m' # No Color
 
+# Set up logging to both terminal and log file
+mkdir -p logs
+LOG_FILE="logs/quickstart-$(date +%Y%m%d-%H%M%S).log"
+exec > >(tee -a "$LOG_FILE")
+exec 2>&1
+
 export DOCKER_SCAN_SUGGEST=false
 
 if ! [ -x "$(command -v curl)" ]; then
@@ -139,11 +145,33 @@ response=$(curl -s -X POST "http://localhost:9200/_plugins/_ml/model_groups/_reg
     "description": "A model group for neural search models"
   }')
 
-# Extract the model_group_id from the JSON response
-model_group_id=$(echo "$response" | jq -r '.model_group_id')
+# Try to extract the model_group_id from the response
+model_group_id=$(echo "$response" | jq -r '.model_group_id // empty' 2>/dev/null)
 
-# Use the extracted model_group_id
-echo "Created Model Group with id: $model_group_id"
+# If creation succeeded, use it; otherwise search for existing one
+if [ -n "$model_group_id" ] && [ "$model_group_id" != "null" ]; then
+  echo "Created Model Group with id: $model_group_id"
+else
+  response=$(curl -s -X POST "http://localhost:9200/_plugins/_ml/model_groups/_search" \
+    -H 'Content-Type: application/json' \
+    --data-binary '{
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "terms": {
+                "name": [
+                  "neural_search_model_group"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }')
+  model_group_id=$(echo "$response" | jq -r '.hits.hits[0]._id // empty' 2>/dev/null)
+  echo "Using existing Model Group with id: $model_group_id"
+fi
 
 echo -e "${MAJOR}Registering a model in the model group.${RESET}"
 response=$(curl -s -X POST "http://localhost:9200/_plugins/_ml/models/_register" \
