@@ -4,7 +4,7 @@ import uuid
 import logging
 import flask
 import requests
-from flask import Flask, request, Response
+from flask import Flask, request
 from flask_cors import CORS
 from opensearchpy import OpenSearch
 from opentelemetry import trace
@@ -263,6 +263,101 @@ def dump_user_query_cache():
   response = flask.jsonify(user_query_cache=user_query_cache)
   return response
 
+@app.route('/search_configurations', methods=["GET", "OPTIONS"])
+def search_configurations():
+    """
+    Returns a list of available search configurations from OpenSearch.
+    Uses the Search Relevance Workbench plugin API to get all available configs.
+    Returns an error if the plugin API fails.
+    """
+    # Handle CORS preflight requests
+    if request.method == "OPTIONS":
+        response = flask.jsonify(status=200, mimetype="application/json")
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "Authorization, Content-Type")
+        response.headers.add("Access-Control-Request-Method", "GET")
+        return response
+    else:
+        try:
+            # Use the Search Relevance Workbench plugin API endpoint
+            plugin_url = f"{OPENSEARCH_ENDPOINT}/_plugins/_search_relevance/search_configurations"
+            
+            # Request configs sorted by timestamp (descending) to get most recent first
+            plugin_request_body = json.dumps({
+                "sort": {
+                    "timestamp": {
+                        "order": "desc"
+                    }
+                },
+                "size": 100 # TODO: make this dynamic
+            })
+            
+            res = requests.get(
+                plugin_url,
+                headers={"Content-Type": "application/json"},
+                data=plugin_request_body
+            )
+            
+            if res.status_code != 200:
+                error_msg = f"Failed to fetch search configurations from plugin API: HTTP {res.status_code} - {res.text}"
+                logger.error(error_msg)
+                response = flask.jsonify(configs=[], error=error_msg)
+                response.headers.add("Access-Control-Allow-Origin", "*")
+                return response
+            
+            plugin_response = res.json()
+            logger.info(f"Plugin API response: {plugin_response}")
+            
+            configs = []
+            
+            # Extract config names from the plugin response
+            # Plugin API returns standard OpenSearch search format: hits.hits[]._source.name
+            if isinstance(plugin_response, dict) and 'hits' in plugin_response:
+                configs_list = plugin_response['hits'].get('hits', [])
+                
+                # Extract names from the list
+                for config in configs_list:
+                    if isinstance(config, dict):
+                        config_name = config.get('_source', {}).get('name')
+                        if config_name:
+                            configs.append(config_name)
+            else:
+                error_msg = f"Unexpected response format from plugin API: expected dict with 'hits', got {type(plugin_response)}"
+                logger.error(error_msg)
+                response = flask.jsonify(configs=[], error=error_msg)
+                response.headers.add("Access-Control-Allow-Origin", "*")
+                return response
+            
+            if not configs:
+                error_msg = "No search configurations found in plugin API response"
+                logger.warning(error_msg)
+                response = flask.jsonify(configs=[], error=error_msg)
+                response.headers.add("Access-Control-Allow-Origin", "*")
+                return response
+            
+            # Remove duplicates and sort alphabetically
+            configs = sorted(list(set(configs)))
+            
+            logger.info(f"Found {len(configs)} search configurations: {configs}")
+            
+            response = flask.jsonify(configs=configs)
+            response.headers.add("Access-Control-Allow-Origin", "*")
+            response.headers.add("Access-Control-Allow-Headers", "Authorization, Content-Type")
+            return response
+            
+        except requests.exceptions.RequestException as e:
+            error_msg = f"Failed to connect to Search Relevance Workbench plugin API: {str(e)}"
+            logger.error(error_msg, exc_info=True)
+            response = flask.jsonify(configs=[], error=error_msg)
+            response.headers.add("Access-Control-Allow-Origin", "*")
+            return response
+        except Exception as e:
+            error_msg = f"Error fetching search configurations: {str(e)}"
+            logger.error(error_msg, exc_info=True)
+            response = flask.jsonify(configs=[], error=error_msg)
+            response.headers.add("Access-Control-Allow-Origin", "*")
+            return response
+
 def strip_keys(json_rep: str, keys: list) -> str:
     dict_value = json.loads(json_rep)
     for key in keys:
@@ -297,11 +392,38 @@ def ab_search():
         conf_a = last_search.get("ext", {}).get("conf_a", None)
         conf_b = last_search.get("ext", {}).get("conf_b", None)
         do_ab = (len(req_data_array) == 6) and conf_a and conf_b
-        do_agentic = (conf_a == "agentic")
+        do_art_controlled = (conf_a == "art_controlled")
+        do_other_config = conf_a and not do_ab and not do_art_controlled
         logger.info(f"Got conf_a value '{conf_a}' and '{conf_b}' on '{user_query}'")
         # Are we doing an AB test run?
         if do_ab:
             logger.info(f"Performing TDI of '{conf_a}' and '{conf_b}' on '{user_query}'")
+            
+            # Check if both configurations exist before proceeding
+            interleave = Interleave()
+            conf_a_obj = interleave.get_search_config(conf_a)
+            conf_b_obj = interleave.get_search_config(conf_b)
+            
+            missing_configs = []
+            if not conf_a_obj:
+                missing_configs.append(conf_a)
+            if not conf_b_obj:
+                missing_configs.append(conf_b)
+            
+            if missing_configs:
+                # Return error if any configuration is missing
+                configs_str = "', '".join(missing_configs)
+                error_msg = f"Search configuration(s) '{configs_str}' not found."
+                logger.error(error_msg)
+                response = flask.jsonify(
+                    error=error_msg,
+                    missing_configs=missing_configs
+                )
+                response.status_code = 404
+                response.headers.add("Access-Control-Allow-Origin", "*")
+                response.headers.add("Access-Control-Allow-Headers", "Authorization, Content-Type")
+                return response
+            
             k = last_search.get("size")
             source = last_search.get("_source")
             ext = last_search.get("ext", {})
@@ -311,29 +433,43 @@ def ab_search():
                 del ext['conf_b']
             except:
                 pass
-            interleaved = Interleave().run_ab(user_query, conf_a, conf_b, k, source, ext)
+            interleaved = interleave.run_ab(user_query, conf_a, conf_b, k, source, ext)
             #update the req_data to drop the final two items and end with a newline character
             # have to strip out the conf_* parameters
             req_data_array = [ strip_keys(x, ['conf_a', 'conf_b']) for x in req_data_array[:-2]]
             req_data = "\n".join(req_data_array) + "\n"
             req_data = req_data.encode('utf-8')
-        elif do_agentic:
-            # Need to look up search configuration with the name 'agentic'
-            logger.info(f"Looking up 'agentic' search configuration. '{conf_a}' on '{user_query}'")
-                        
+        elif do_art_controlled or do_other_config:
+            # Look up search configuration by name (either "art_controlled" or custom config)
+            config_type = "art_controlled" if do_art_controlled else "other config"
+            logger.info(f"Looking up search configuration '{conf_a}' for '{config_type}' option on '{user_query}'")
+            
             search_configuration = Interleave().get_search_config(conf_a)
             
-            query = user_query.replace('"', '\\"')
-            body = json.loads(search_configuration['query'].replace("%SearchText%", query))
-                                  
-            req_data_array = req_data_array[:-1] 
-            req_data = "\n".join(req_data_array) + "\n"
-            req_data = req_data.encode('utf-8')
-            req_data_array.append(json.dumps(body))
-            req_data_array = [ strip_keys(x, ['conf_a']) for x in req_data_array]
-            req_data = "\n".join(req_data_array) + "\n"
-            req_data = req_data.encode('utf-8')
-            
+            if search_configuration:
+                query = user_query.replace('"', '\\"')
+                body = json.loads(search_configuration['query'].replace("%SearchText%", query))
+                                      
+                req_data_array = req_data_array[:-1] 
+                req_data = "\n".join(req_data_array) + "\n"
+                req_data = req_data.encode('utf-8')
+                req_data_array.append(json.dumps(body))
+                req_data_array = [ strip_keys(x, ['conf_a']) for x in req_data_array]
+                req_data = "\n".join(req_data_array) + "\n"
+                req_data = req_data.encode('utf-8')
+            else:
+                # Search configuration not found - return error instead of falling back to default query
+                # This ensures users are aware when a requested configuration is unavailable
+                error_msg = f"Search configuration '{conf_a}' not found."
+                logger.error(error_msg)
+                response = flask.jsonify(
+                    error=error_msg,
+                    config_name=conf_a
+                )
+                response.status_code = 404
+                response.headers.add("Access-Control-Allow-Origin", "*")
+                response.headers.add("Access-Control-Allow-Headers", "Authorization, Content-Type")
+                return response
         else:
             if conf_a:
                 #still have to strip the conf_* keys

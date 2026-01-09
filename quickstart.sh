@@ -10,6 +10,31 @@ RESET='\033[0m' # No Color
 
 export DOCKER_SCAN_SUGGEST=false
 
+observability=false
+shutdown=false
+offline_lab=false
+local_deploy=true
+stop=false
+log_to_file=false
+
+hostname_or_ip=false
+
+# Check for --log flag early so we can set up logging before other output
+for arg in "$@"; do
+  if [[ "$arg" == "--log" ]] || [[ "$arg" == "-l" ]]; then
+    log_to_file=true
+    break
+  fi
+done
+
+# Set up logging to file if requested (before dependency checks so errors are logged)
+if $log_to_file; then
+  mkdir -p logs
+  LOG_FILE="logs/quickstart-$(date +%Y%m%d-%H%M%S).log"
+  exec > >(tee -a "$LOG_FILE")
+  exec 2>&1
+fi
+
 if ! [ -x "$(command -v curl)" ]; then
   echo "${ERROR}Error: curl is not installed.${RESET}" >&2
   exit 1
@@ -23,15 +48,6 @@ if ! [ -x "$(command -v wget)" ]; then
   exit 1
 fi
 
-observability=false
-shutdown=false
-offline_lab=false
-local_deploy=true
-stop=false
-
-
-hostname_or_ip=false
-
 while [ ! $# -eq 0 ]
 do
 	case "$1" in
@@ -40,6 +56,7 @@ do
 	    echo -e "Use the option --shutdown | -s to shutdown and remove the Docker containers and data."
 	    echo -e "Use the option --stop to stop the Docker containers."
 	    echo -e "Use the option --online-deployment | -online to update configuration to run on chorus-opensearch-edition.dev.o19s.com environment."
+	    echo -e "Use the option --log | -l to enable logging to a file in the logs directory."
 
 
 		
@@ -60,6 +77,10 @@ do
 		--online-deployment | -online)
 	    local_deploy=false
 	    echo -e "${MAJOR}Configuring Chorus for chorus-opensearch-edition.dev.o19s.com environment\n${RESET}"
+	    ;;
+		--log | -l)
+	    log_to_file=true
+	    echo -e "${MAJOR}Logging to file enabled\n${RESET}"
 	    ;;
 
 
@@ -139,11 +160,33 @@ response=$(curl -s -X POST "http://localhost:9200/_plugins/_ml/model_groups/_reg
     "description": "A model group for neural search models"
   }')
 
-# Extract the model_group_id from the JSON response
-model_group_id=$(echo "$response" | jq -r '.model_group_id')
+# Try to extract the model_group_id from the response
+model_group_id=$(echo "$response" | jq -r '.model_group_id // empty' 2>/dev/null)
 
-# Use the extracted model_group_id
-echo "Created Model Group with id: $model_group_id"
+# If creation succeeded, use it; otherwise search for existing one
+if [ -n "$model_group_id" ] && [ "$model_group_id" != "null" ]; then
+  echo "Created Model Group with id: $model_group_id"
+else
+  response=$(curl -s -X POST "http://localhost:9200/_plugins/_ml/model_groups/_search" \
+    -H 'Content-Type: application/json' \
+    --data-binary '{
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "terms": {
+                "name": [
+                  "neural_search_model_group"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }')
+  model_group_id=$(echo "$response" | jq -r '.hits.hits[0]._id // empty' 2>/dev/null)
+  echo "Using existing Model Group with id: $model_group_id"
+fi
 
 echo -e "${MAJOR}Registering a model in the model group.${RESET}"
 response=$(curl -s -X POST "http://localhost:9200/_plugins/_ml/models/_register" \
