@@ -4,7 +4,7 @@ import uuid
 import logging
 import flask
 import requests
-from flask import Flask, request, Response
+from flask import Flask, request
 from flask_cors import CORS
 from opensearchpy import OpenSearch
 from opentelemetry import trace
@@ -342,6 +342,7 @@ def search_configurations():
             
             response = flask.jsonify(configs=configs)
             response.headers.add("Access-Control-Allow-Origin", "*")
+            response.headers.add("Access-Control-Allow-Headers", "Authorization, Content-Type")
             return response
             
         except requests.exceptions.RequestException as e:
@@ -397,6 +398,32 @@ def ab_search():
         # Are we doing an AB test run?
         if do_ab:
             logger.info(f"Performing TDI of '{conf_a}' and '{conf_b}' on '{user_query}'")
+            
+            # Check if both configurations exist before proceeding
+            interleave = Interleave()
+            conf_a_obj = interleave.get_search_config(conf_a)
+            conf_b_obj = interleave.get_search_config(conf_b)
+            
+            missing_configs = []
+            if not conf_a_obj:
+                missing_configs.append(conf_a)
+            if not conf_b_obj:
+                missing_configs.append(conf_b)
+            
+            if missing_configs:
+                # Return error if any configuration is missing
+                configs_str = "', '".join(missing_configs)
+                error_msg = f"Search configuration(s) '{configs_str}' not found."
+                logger.error(error_msg)
+                response = flask.jsonify(
+                    error=error_msg,
+                    missing_configs=missing_configs
+                )
+                response.status_code = 404
+                response.headers.add("Access-Control-Allow-Origin", "*")
+                response.headers.add("Access-Control-Allow-Headers", "Authorization, Content-Type")
+                return response
+            
             k = last_search.get("size")
             source = last_search.get("_source")
             ext = last_search.get("ext", {})
@@ -406,7 +433,7 @@ def ab_search():
                 del ext['conf_b']
             except:
                 pass
-            interleaved = Interleave().run_ab(user_query, conf_a, conf_b, k, source, ext)
+            interleaved = interleave.run_ab(user_query, conf_a, conf_b, k, source, ext)
             #update the req_data to drop the final two items and end with a newline character
             # have to strip out the conf_* parameters
             req_data_array = [ strip_keys(x, ['conf_a', 'conf_b']) for x in req_data_array[:-2]]
@@ -431,11 +458,18 @@ def ab_search():
                 req_data = "\n".join(req_data_array) + "\n"
                 req_data = req_data.encode('utf-8')
             else:
-                logger.warning(f"Search configuration '{conf_a}' not found. Falling back to default query.")
-                # If config not found, strip conf_a and proceed with default query
-                req_data_array = [ strip_keys(x, ['conf_a']) for x in req_data_array]
-                req_data = "\n".join(req_data_array) + "\n"
-                req_data = req_data.encode('utf-8')
+                # Search configuration not found - return error instead of falling back to default query
+                # This ensures users are aware when a requested configuration is unavailable
+                error_msg = f"Search configuration '{conf_a}' not found."
+                logger.error(error_msg)
+                response = flask.jsonify(
+                    error=error_msg,
+                    config_name=conf_a
+                )
+                response.status_code = 404
+                response.headers.add("Access-Control-Allow-Origin", "*")
+                response.headers.add("Access-Control-Allow-Headers", "Authorization, Content-Type")
+                return response
         else:
             if conf_a:
                 #still have to strip the conf_* keys

@@ -105,6 +105,12 @@ function generateGuid() {
 };
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      searchError: null,
+    };
+  }
 
   componentDidMount() {
     this.observer = new IntersectionObserver((entries) => {
@@ -136,6 +142,33 @@ class App extends Component {
            this.observer.observe(node); // Observe the node when it is mounted
        }
    };
+
+  /**
+   * Handles search errors from the ReactiveSearch API.
+   * Extracts error messages from various error response formats and displays them to the user.
+   * 
+   * @param {Error|Object} error - The error object from ReactiveSearch, may contain response data
+   */
+  handleSearchError = (error) => {
+    // Extract error message from the error response
+    let errorMessage = "An error occurred during search";
+    
+    if (error && error.response) {
+      // Check if it's a 404 error with our custom error format
+      if (error.response.status === 404 && error.response.data) {
+        errorMessage = error.response.data.error || errorMessage;
+      } else if (error.response.data && error.response.data.error) {
+        errorMessage = error.response.data.error;
+      } else {
+        errorMessage = error.response.statusText || errorMessage;
+      }
+    } else if (error && error.message) {
+      errorMessage = error.message;
+    }
+    
+    console.error("Search error:", error);
+    this.setState({ searchError: errorMessage });
+  };
   
 
   render(){
@@ -148,6 +181,7 @@ class App extends Component {
       enableAppbase={false}
       recordAnalytics={true}
       searchStateHeader={true}
+      onError={this.handleSearchError}
     >
       <div style={{ height: "200px", width: "100%"}}>
         <img style={{ height: "100%", class: "center"  }} src={chorusLogo} />
@@ -268,7 +302,12 @@ class App extends Component {
               }
             }
             onValueChange={
-              function (value) {
+              (value) => {
+                // Clear any previous search errors when starting a new search
+                if (this.state.searchError) {
+                  this.setState({ searchError: null });
+                }
+                
                 // If you do not have the UBI plugin enabled in your search engine, then you need
                 // to track the query request yourself.
                 // const query = new UbiQueryRequest(APPLICATION, client_id, query_id, value, "_id", {});
@@ -432,6 +471,35 @@ class App extends Component {
               }
             }
           />
+          {this.state.searchError && (
+            <div
+              style={{
+                padding: "15px",
+                margin: "10px",
+                backgroundColor: "#fee",
+                border: "1px solid #fcc",
+                borderRadius: "4px",
+                color: "#c33",
+                textAlign: "center",
+              }}
+            >
+              <strong>Search Error:</strong> {this.state.searchError}
+              <button
+                onClick={() => this.setState({ searchError: null })}
+                style={{
+                  marginLeft: "10px",
+                  padding: "5px 10px",
+                  backgroundColor: "#c33",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "3px",
+                  cursor: "pointer",
+                }}
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
           <ReactiveList
             componentId="results"
             dataField="title"
@@ -442,9 +510,50 @@ class App extends Component {
               and: ["searchbox", "supplier_name", "product_type"]
             }}
             style={{ textAlign: "center" }}
-            render={({ data }) => (
-              <ReactiveList.ResultCardsWrapper>
-                {data.map((item, index) => (
+            renderError={(error) => {
+              // Extract error message from various error formats
+              let errorMessage = "Unknown error";
+              
+              if (typeof error === "string") {
+                errorMessage = error;
+              } else if (error && error.message) {
+                errorMessage = error.message;
+              } else if (error && error.response) {
+                if (error.response.data && error.response.data.error) {
+                  errorMessage = error.response.data.error;
+                } else if (error.response.statusText) {
+                  errorMessage = error.response.statusText;
+                }
+              } else if (error && typeof error === "object") {
+                // If error is an object, try to extract a meaningful message
+                errorMessage = JSON.stringify(error);
+              }
+              
+              return (
+                <div
+                  style={{
+                    padding: "20px",
+                    textAlign: "center",
+                    color: "#c33",
+                  }}
+                >
+                  <strong>Error loading results:</strong> {errorMessage}
+                </div>
+              );
+            }}
+            render={({ data }) => {
+              // Ensure data is an array before mapping
+              if (!data || !Array.isArray(data)) {
+                return (
+                  <div style={{ padding: "20px", textAlign: "center", color: "#c33" }}>
+                    <strong>Error:</strong> Invalid data format received
+                  </div>
+                );
+              }
+              
+              return (
+                <ReactiveList.ResultCardsWrapper>
+                  {data.map((item, index) => (
                   <ResultCard key={item._id}>
                     <ResultCard.Image
                       style={{
@@ -478,9 +587,10 @@ class App extends Component {
                       Add to <span style={{fontSize:24 }}> 🛒 </span><span> | rank: {index}</span>
                     </button>
                   </ResultCard>
-                ))}
-              </ReactiveList.ResultCardsWrapper>
-            )}
+                  ))}
+                </ReactiveList.ResultCardsWrapper>
+              );
+            }}
           />
         </div>
       </div>
