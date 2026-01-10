@@ -214,7 +214,7 @@ class App extends Component {
             />
             <MultiList
               componentId="supplier_name"
-              dataField="attrs.Brand.keyword"
+              dataField="Brand.keyword"
               title="Filter by Brands"
               size={20}
               showSearch={false}
@@ -290,7 +290,7 @@ class App extends Component {
             componentId="searchbox"
             placeholder="Search for products, brands or ASIN"
             autosuggest={false}
-            dataField={["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]}
+            dataField={["id", "title", "category", "bullets", "description", "Brand", "Color"]}
             debounce={300}
             onKeyPress={
               function(value) {
@@ -382,7 +382,7 @@ class App extends Component {
                   query: {
                     multi_match: {
                       query: value,
-                      fields: ["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]
+                      fields: ["id", "title", "category", "bullets", "description", "Brand", "Color"]
                     }
                   }
                 };
@@ -420,7 +420,7 @@ class App extends Component {
                     query: {
                       multi_match: {
                         query: value,
-                        fields: ["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]
+                        fields: ["id", "title", "category", "bullets", "description", "Brand", "Color"]
                       }
                     },
                     ext: extJson
@@ -568,7 +568,7 @@ class App extends Component {
                     />
                     <ResultCard.Description>
                       {item.price + " $ | "}
-                      {item.attrs && item.attrs.Brand ? item.attrs.Brand : ""}
+                      {item.attrs && item.Brand ? item.Brand : ""}
                       {item.search_config ?" algo:" + item.search_config : ""}
                     </ResultCard.Description>
                     <button 
