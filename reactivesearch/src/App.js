@@ -4,9 +4,7 @@ import {
   DataSearch,
   MultiList,
   ReactiveList,
-  SingleRange,
   ResultCard,
-  SingleList
 } from "@appbaseio/reactivesearch";
 import AlgoPicker from './custom/AlgoPicker';
 import ShoppingCartButton from './custom/ShoppingCartButton';
@@ -107,21 +105,30 @@ function generateGuid() {
 };
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      searchError: null,
+    };
+  }
 
   componentDidMount() {
     this.observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting && getQueryId() ) {
                 console.log(`${entry.target.innerText} is now visible in the viewport!`);
-                const position = parseInt(entry.target.attributes.position.value, 10)
+                const position = entry.target.attributes.position ? parseInt(entry.target.attributes.position.value, 10) : 0;
                 const title = entry.target.attributes.title?.value || "";
-                const search_config = entry.target.attributes.algo?.value || null
-                var event = new UbiEvent(APPLICATION, 'impression', client_id, session_id, getQueryId(),
-                  new UbiEventAttributes('asin', entry.target.attributes.asin.value, title, {search_config: search_config}, {ordinal:  position}),
-                  'impression made on doc position ' + entry.target.attributes.position.value);
-                event.message_type = 'IMPRESSION';
-                console.log(event);
-                ubiClient.trackEvent(event);
+                const search_config = entry.target.attributes.algo?.value || null;
+                const asin = entry.target.attributes.asin?.value || "";
+                if (asin) {
+                  var event = new UbiEvent(APPLICATION, 'impression', client_id, session_id, getQueryId(),
+                    new UbiEventAttributes('asin', asin, title, {search_config: search_config}, {ordinal:  position}),
+                    'impression made on doc position ' + position);
+                  event.message_type = 'IMPRESSION';
+                  console.log(event);
+                  ubiClient.trackEvent(event);
+                }
                 // Optionally unobserve the button after visibility
                 this.observer.unobserve(entry.target);
             }
@@ -135,6 +142,33 @@ class App extends Component {
            this.observer.observe(node); // Observe the node when it is mounted
        }
    };
+
+  /**
+   * Handles search errors from the ReactiveSearch API.
+   * Extracts error messages from various error response formats and displays them to the user.
+   * 
+   * @param {Error|Object} error - The error object from ReactiveSearch, may contain response data
+   */
+  handleSearchError = (error) => {
+    // Extract error message from the error response
+    let errorMessage = "An error occurred during search";
+    
+    if (error && error.response) {
+      // Check if it's a 404 error with our custom error format
+      if (error.response.status === 404 && error.response.data) {
+        errorMessage = error.response.data.error || errorMessage;
+      } else if (error.response.data && error.response.data.error) {
+        errorMessage = error.response.data.error;
+      } else {
+        errorMessage = error.response.statusText || errorMessage;
+      }
+    } else if (error && error.message) {
+      errorMessage = error.message;
+    }
+    
+    console.error("Search error:", error);
+    this.setState({ searchError: errorMessage });
+  };
   
 
   render(){
@@ -147,6 +181,7 @@ class App extends Component {
       enableAppbase={false}
       recordAnalytics={true}
       searchStateHeader={true}
+      onError={this.handleSearchError}
     >
       <div style={{ height: "200px", width: "100%"}}>
         <img style={{ height: "100%", class: "center"  }} src={chorusLogo} />
@@ -174,10 +209,12 @@ class App extends Component {
         >
           <AlgoPicker
             title="Pick your Algo"
-            componentId="algopicker" />
+            componentId="algopicker"
+            eventServer={event_server}
+            />
             <MultiList
               componentId="supplier_name"
-              dataField="brand"
+              dataField="Brand.keyword"
               title="Filter by Brands"
               size={20}
               showSearch={false}
@@ -253,7 +290,7 @@ class App extends Component {
             componentId="searchbox"
             placeholder="Search for products, brands or ASIN"
             autosuggest={false}
-            dataField={["id", "title", "category", "bullet_points", "description", "brand", "color"]}
+            dataField={["id", "title", "category", "bullets", "description", "Brand", "Color"]}
             debounce={300}
             onKeyPress={
               function(value) {
@@ -265,7 +302,12 @@ class App extends Component {
               }
             }
             onValueChange={
-              function (value) {
+              (value) => {
+                // Clear any previous search errors when starting a new search
+                if (this.state.searchError) {
+                  this.setState({ searchError: null });
+                }
+                
                 // If you do not have the UBI plugin enabled in your search engine, then you need
                 // to track the query request yourself.
                 // const query = new UbiQueryRequest(APPLICATION, client_id, query_id, value, "_id", {});
@@ -297,6 +339,11 @@ class App extends Component {
                 if (algo === 'ab') {
                     config_a = document.getElementById('conf_a').value;
                     config_b = document.getElementById('conf_b').value;
+                } else if (algo === 'other') {
+                    var otherConfigElement = document.getElementById('other_config');
+                    if (otherConfigElement) {
+                        config_a = otherConfigElement.value;
+                    }
                 }
                 // getQueryId() is not a blocking operation, and sometimes the onKeyPress
                 // call to create the query_id hasn't finished, so we get back a null.
@@ -329,51 +376,43 @@ class App extends Component {
                     query_attributes: {}
                   }
                 };
-                if (algo === 'ab') {
-                  let extJ = {
-                    conf_a: config_a,
-                    conf_b: config_b,
-                    ubi: {
-                        query_id: getQueryId(),
-                        user_query: value,
-                        client_id: client_id,
-                        object_id_field: object_id_field,
-                        application: APPLICATION,
-                        query_attributes: {}
+                
+                // Common query structure for config-based searches
+                const commonQuery = {
+                  query: {
+                    multi_match: {
+                      query: value,
+                      fields: ["id", "title", "category", "bullets", "description", "Brand", "Color"]
                     }
-                  };
+                  }
+                };
+                
+                if (algo === 'ab') {
                   return {
-                    query: {
-                      multi_match: {
-                        query: value,
-                        fields: ["id", "title", "category", "bullet_points", "description", "brand", "color"]
-                      }
-                    },
-                    ext: extJ
+                    ...commonQuery,
+                    ext: {
+                      ...extJson,
+                      conf_a: config_a,
+                      conf_b: config_b
+                    }
                   }
                 }
-                else if (algo === 'agentic') {
-                  let extJ = {
-                    //conf_a: config_a,
-                    //conf_b: config_b,
-                    conf_a: "agentic",
-                    ubi: {
-                        query_id: getQueryId(),
-                        user_query: value,
-                        client_id: client_id,
-                        object_id_field: object_id_field,
-                        application: APPLICATION,
-                        query_attributes: {}
-                    }
-                  };
+                else if (algo === 'art_controlled') {
                   return {
-                    query: {
-                      multi_match: {
-                        query: value,
-                        fields: ["id", "title", "category", "bullets", "description", "attrs.Brand", "attrs.Color"]
-                      }
-                    },
-                    ext: extJ
+                    ...commonQuery,
+                    ext: {
+                      ...extJson,
+                      conf_a: "art_controlled"
+                    }
+                  }
+                }
+                else if (algo === 'other') {
+                  return {
+                    ...commonQuery,
+                    ext: {
+                      ...extJson,
+                      conf_a: config_a
+                    }
                   }
                 }                
                 else if (algo === "keyword") {
@@ -381,7 +420,7 @@ class App extends Component {
                     query: {
                       multi_match: {
                         query: value,
-                        fields: ["id", "title", "category", "bullet_points", "description", "brand", "color"]
+                        fields: ["id", "title", "category", "bullets", "description", "Brand", "Color"]
                       }
                     },
                     ext: extJson
@@ -432,19 +471,89 @@ class App extends Component {
               }
             }
           />
+          {this.state.searchError && (
+            <div
+              style={{
+                padding: "15px",
+                margin: "10px",
+                backgroundColor: "#fee",
+                border: "1px solid #fcc",
+                borderRadius: "4px",
+                color: "#c33",
+                textAlign: "center",
+              }}
+            >
+              <strong>Search Error:</strong> {this.state.searchError}
+              <button
+                onClick={() => this.setState({ searchError: null })}
+                style={{
+                  marginLeft: "10px",
+                  padding: "5px 10px",
+                  backgroundColor: "#c33",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "3px",
+                  cursor: "pointer",
+                }}
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
           <ReactiveList
             componentId="results"
             dataField="title"
             size={20}
-            excludeFields={["title_embedding", "reviews", "description", "bullet_points"]}
+            excludeFields={["title_embedding", "reviews", "description", "bullets"]}
             pagination={true}
             react={{
               and: ["searchbox", "supplier_name", "product_type"]
             }}
             style={{ textAlign: "center" }}
-            render={({ data }) => (
-              <ReactiveList.ResultCardsWrapper>
-                {data.map((item, index) => (
+            renderError={(error) => {
+              // Extract error message from various error formats
+              let errorMessage = "Unknown error";
+              
+              if (typeof error === "string") {
+                errorMessage = error;
+              } else if (error && error.message) {
+                errorMessage = error.message;
+              } else if (error && error.response) {
+                if (error.response.data && error.response.data.error) {
+                  errorMessage = error.response.data.error;
+                } else if (error.response.statusText) {
+                  errorMessage = error.response.statusText;
+                }
+              } else if (error && typeof error === "object") {
+                // If error is an object, try to extract a meaningful message
+                errorMessage = JSON.stringify(error);
+              }
+              
+              return (
+                <div
+                  style={{
+                    padding: "20px",
+                    textAlign: "center",
+                    color: "#c33",
+                  }}
+                >
+                  <strong>Error loading results:</strong> {errorMessage}
+                </div>
+              );
+            }}
+            render={({ data }) => {
+              // Ensure data is an array before mapping
+              if (!data || !Array.isArray(data)) {
+                return (
+                  <div style={{ padding: "20px", textAlign: "center", color: "#c33" }}>
+                    <strong>Error:</strong> Invalid data format received
+                  </div>
+                );
+              }
+              
+              return (
+                <ReactiveList.ResultCardsWrapper>
+                  {data.map((item, index) => (
                   <ResultCard key={item._id}>
                     <ResultCard.Image
                       style={{
@@ -459,16 +568,16 @@ class App extends Component {
                     />
                     <ResultCard.Description>
                       {item.price + " $ | "}
-                      {item.brand ? item.brand : ""}
+                      {item.attrs && item.Brand ? item.Brand : ""}
                       {item.search_config ?" algo:" + item.search_config : ""}
                     </ResultCard.Description>
                     <button 
                       style={{ fontSize:"14px", position:"relative" }}       
                       ref={this.handleRef}   
                       position={ index }
-                      asin={ item.asin }
-                      title={ item.title }
-                      algo={item.search_config}
+                      asin={ item.asin || "" }
+                      title={ item.title || "" }
+                      algo={item.search_config || ""}
                       onClick={
                         function(el) {
                           addToCart({ ...item, position: index, algo: item.search_config });
@@ -478,9 +587,10 @@ class App extends Component {
                       Add to <span style={{fontSize:24 }}> 🛒 </span><span> | rank: {index}</span>
                     </button>
                   </ResultCard>
-                ))}
-              </ReactiveList.ResultCardsWrapper>
-            )}
+                  ))}
+                </ReactiveList.ResultCardsWrapper>
+              );
+            }}
           />
         </div>
       </div>
