@@ -64,6 +64,11 @@ class AlgoPicker extends Component {
       selectedConfig: selectedValue === "other" ? this.state.selectedConfig : "",
     });
     console.log(this);
+    
+    // Notify parent component of algorithm change
+    if (this.props.onAlgoChange) {
+      this.props.onAlgoChange(selectedValue);
+    }
   };
 
   onChangeConfA = (event) => {

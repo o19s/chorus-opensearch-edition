@@ -109,6 +109,7 @@ class App extends Component {
     super(props);
     this.state = {
       searchError: null,
+      selectedAlgo: "keyword",
     };
   }
 
@@ -142,6 +143,10 @@ class App extends Component {
            this.observer.observe(node); // Observe the node when it is mounted
        }
    };
+
+  handleAlgoChange = (selectedAlgo) => {
+    this.setState({ selectedAlgo });
+  };
 
   /**
    * Handles search errors from the ReactiveSearch API.
@@ -211,6 +216,7 @@ class App extends Component {
             title="Pick your Algo"
             componentId="algopicker"
             eventServer={event_server}
+            onAlgoChange={this.handleAlgoChange}
             />
             <MultiList
               componentId="supplier_name"
@@ -218,6 +224,7 @@ class App extends Component {
               title="Filter by Brands"
               size={20}
               showSearch={false}
+              showCheckbox={this.state.selectedAlgo !== "other" && this.state.selectedAlgo !== "hybrid" && this.state.selectedAlgo !== "art_controlled"}
               onValueChange={
                 function(arr) {
                   console.log('filtering on brands');
@@ -252,6 +259,7 @@ class App extends Component {
               title="Filter by Product Types"
               size={20}
               showSearch={false}
+              showCheckbox={this.state.selectedAlgo !== "other" && this.state.selectedAlgo !== "hybrid" && this.state.selectedAlgo !== "art_controlled"}
               react={{
                 and: ["searchbox", "supplier_name"]
               }}
