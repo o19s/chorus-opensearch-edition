@@ -347,7 +347,7 @@ curl -s -X PUT "http://localhost:9200/_search/pipeline/hybrid-search-pipeline" \
 
 if $offline_lab; then
   echo -e "${MAJOR}Setting up Quepid${RESET}"
-  docker compose run --rm quepid bundle exec bin/rake db:setup
+  #docker compose run --rm quepid bundle exec bin/rake db:setup
   docker compose run quepid bundle exec thor user:create -a admin@choruselectronics.com "Chorus Admin" password
 fi
 

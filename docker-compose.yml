@@ -20,15 +20,6 @@ services:
       - "9090:9090"
     volumes:
       - ./middleware:/python-docker/
-  mysql:
-    container_name: mysql
-    image: amd64/mysql:8
-    ports:
-      - 3306:3306
-    environment:
-      - MYSQL_ROOT_PASSWORD=password
-    volumes:
-      - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
   opensearch:
     container_name: opensearch
@@ -95,7 +86,8 @@ services:
 
   quepid:
     container_name: quepid
-    image: o19s/quepid:8.3.5
+    image: o19s/quepid:8.4.0
+    platform: linux/amd64
     ports:
       - 4000:3000
     environment:
@@ -116,8 +108,28 @@ services:
       - EMAIL_PROVIDER=
       - QUEPID_DEFAULT_SCORER=DCG@10
       - SIGNUP_ENABLED=true
+    depends_on:
+      mysql:
+        condition: service_healthy
     links:
       - mysql
+      
+  mysql:
+    container_name: mysql
+    image: mysql:8.4.3
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    volumes:
+      - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+       
 
 volumes:
   opensearch-data:
