@@ -1,3 +1,5 @@
+volumes
+.env
 build/
 .idea/
 .vscode/

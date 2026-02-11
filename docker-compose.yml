@@ -20,7 +20,43 @@ services:
       - "9090:9090"
     volumes:
       - ./middleware:/python-docker/
-
+    
+  art:
+    container_name: art
+    build: ./art
+    ports:
+      - "8001:8001"    
+    environment:
+      AG_UI_ENABLE_PERSISTENCE: true
+      AG_UI_CORS_ORIGINS: '*'
+      AG_UI_AUTH_ENABLED: false
+      AG_UI_RELAX_VALIDATION: true
+      OPENSEARCH_URL: http://opensearch:9200
+    env_file: ".env"     
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
+    depends_on:
+      - opensearch
+      - phoenix
+  
+  phoenix:
+    image: arizephoenix/phoenix:12.6.1
+    ports:
+      - "6006:6006"  # UI and OTLP HTTP collector
+      - "4317:4317"  # OTLP gRPC collector
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:6006/healthz')"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
+#    networks:
+#      - monitoring_network
+    volumes:
+      - ./volumes/phoenix:/root/.phoenix
+    
   opensearch:
     container_name: opensearch
     build: ./opensearch/.

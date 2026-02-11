@@ -99,7 +99,7 @@ do
 	shift
 done
 
-services="opensearch opensearch-dashboards middleware reactivesearch"
+services="art opensearch opensearch-dashboards middleware reactivesearch"
 
 if $offline_lab; then
   services="${services} quepid"
@@ -206,7 +206,7 @@ echo "Created Model, get status with task id: $task_id"
 
 
 echo -e "${MAJOR}Waiting for the model to be registered.${RESET}"
-max_attempts=10
+max_attempts=20
 attempts=0
 
 # Wait for task to be COMPLETED
