@@ -1,5 +1,5 @@
-#FROM  opensearchproject/opensearch-dashboards:3.4.0
-FROM opensearchstaging/opensearch-dashboards:3.5.0
+FROM  opensearchproject/opensearch-dashboards:3.5.0
+#FROM opensearchstaging/opensearch-dashboards:3.5.0
 
 # Disable security.
 RUN /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards
