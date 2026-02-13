@@ -15,8 +15,11 @@ echo Deleting UBI indexes
 echo Creating UBI indexes using mappings
 curl -s -X POST "http://localhost:9200/_plugins/ubi/initialize"
 
+echo Updating UBI timestamps to current date
+docker run --rm -v "$(pwd)":/workspace -w /workspace python:3.9-slim python sample-data/update_ubi_timestamps.py sample-data/ubi_queries_events.ndjson build/ubi_queries_events_updated.ndjson
+
 echo Loading sample UBI data
-curl -o /dev/null -X POST "http://localhost:9200/index-name/_bulk?pretty" --data-binary @sample-data/ubi_queries_events.ndjson -H "Content-Type: application/x-ndjson"
+curl -o /dev/null -X POST "http://localhost:9200/index-name/_bulk?pretty" --data-binary @build/ubi_queries_events_updated.ndjson -H "Content-Type: application/x-ndjson"
 
 echo Refreshing UBI indexes to make indexed data available for query sampling
 curl -XPOST "http://localhost:9200/ubi_queries/_refresh"
