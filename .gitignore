@@ -1,4 +1,4 @@
-volume
+volumes
 art/strands-opensearch-agent/
 .env
 build/
