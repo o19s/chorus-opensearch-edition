@@ -92,7 +92,7 @@ services:
       - 9200:9200
       - 9600:9600 # required for Performance Analyzer
     volumes:
-      - ./volumes/opensearch-data:/usr/share/opensearch/data
+      - opensearch-data:/usr/share/opensearch/data
     healthcheck:
       test: [ "CMD", "wget", "http://localhost:9200" ]
       interval: 30s
@@ -168,3 +168,6 @@ services:
       start_period: 30s
     volumes:
       - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+
+volumes:
+  opensearch-data:
