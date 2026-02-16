@@ -32,17 +32,22 @@ services:
       AG_UI_AUTH_ENABLED: false
       AG_UI_RELAX_VALIDATION: true
       OPENSEARCH_URL: http://opensearch:9200
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://phoenix:6006
+      
     env_file: ".env"     
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
       interval: 5s
       timeout: 1s
       retries: 5
+    volumes:
+      - ./art/strands-opensearch-agent:/python-docker   
     depends_on:
       - opensearch
       - phoenix
   
   phoenix:
+    container_name: phoenix
     image: arizephoenix/phoenix:12.6.1
     ports:
       - "6006:6006"  # UI and OTLP HTTP collector
@@ -52,8 +57,6 @@ services:
       interval: 5s
       timeout: 1s
       retries: 5
-#    networks:
-#      - monitoring_network
     volumes:
       - ./volumes/phoenix:/root/.phoenix
     
@@ -89,7 +92,7 @@ services:
       - 9200:9200
       - 9600:9600 # required for Performance Analyzer
     volumes:
-      - opensearch-data:/usr/share/opensearch/data
+      - ./volumes/opensearch-data:/usr/share/opensearch/data
     healthcheck:
       test: [ "CMD", "wget", "http://localhost:9200" ]
       interval: 30s
@@ -165,7 +168,3 @@ services:
       start_period: 30s
     volumes:
       - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-       
-
-volumes:
-  opensearch-data:
