@@ -366,3 +366,17 @@ exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/search_conf
 }'
 
 SC_ART_CONTROLLED=`jq -r '.search_configuration_id' < build/RES`
+
+echo
+echo Upload ART Query Set
+
+exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/query_sets" \
+-H "Content-type: application/json" \
+--data-binary @sample-data/art_queryset.json
+
+echo
+echo Upload ART Judgments
+
+exe curl -s -X PUT "http://localhost:9200/_plugins/_search_relevance/judgments" \
+-H "Content-type: application/json" \
+--data-binary @sample-data/art_judgments.json

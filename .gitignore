@@ -1,3 +1,6 @@
+volumes
+art/strands-opensearch-agent/
+.env
 build/
 .idea/
 .vscode/

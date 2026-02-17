@@ -20,16 +20,46 @@ services:
       - "9090:9090"
     volumes:
       - ./middleware:/python-docker/
-  mysql:
-    container_name: mysql
-    image: amd64/mysql:8
+    
+  art:
+    container_name: art
+    build: ./art
     ports:
-      - 3306:3306
+      - "8001:8001"    
     environment:
-      - MYSQL_ROOT_PASSWORD=password
+      AG_UI_ENABLE_PERSISTENCE: true
+      AG_UI_CORS_ORIGINS: '*'
+      AG_UI_AUTH_ENABLED: false
+      AG_UI_RELAX_VALIDATION: true
+      OPENSEARCH_URL: http://opensearch:9200
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://phoenix:6006
+      
+    env_file: ".env"     
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
     volumes:
-      - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-
+      - ./art/strands-opensearch-agent:/python-docker   
+    depends_on:
+      - opensearch
+      - phoenix
+  
+  phoenix:
+    container_name: phoenix
+    image: arizephoenix/phoenix:12.6.1
+    ports:
+      - "6006:6006"  # UI and OTLP HTTP collector
+      - "4317:4317"  # OTLP gRPC collector
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:6006/healthz')"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
+    volumes:
+      - ./volumes/phoenix:/root/.phoenix
+    
   opensearch:
     container_name: opensearch
     build: ./opensearch/.
@@ -95,7 +125,8 @@ services:
 
   quepid:
     container_name: quepid
-    image: o19s/quepid:8.3.5
+    image: o19s/quepid:8.4.0
+    platform: linux/amd64
     ports:
       - 4000:3000
     environment:
@@ -116,8 +147,27 @@ services:
       - EMAIL_PROVIDER=
       - QUEPID_DEFAULT_SCORER=DCG@10
       - SIGNUP_ENABLED=true
+    depends_on:
+      mysql:
+        condition: service_healthy
     links:
       - mysql
+      
+  mysql:
+    container_name: mysql
+    image: mysql:8.4.3
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    volumes:
+      - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
 volumes:
   opensearch-data:

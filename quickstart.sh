@@ -99,7 +99,7 @@ do
 	shift
 done
 
-services="opensearch opensearch-dashboards middleware reactivesearch"
+services="art opensearch opensearch-dashboards middleware reactivesearch"
 
 if $offline_lab; then
   services="${services} quepid"
@@ -206,7 +206,7 @@ echo "Created Model, get status with task id: $task_id"
 
 
 echo -e "${MAJOR}Waiting for the model to be registered.${RESET}"
-max_attempts=10
+max_attempts=20
 attempts=0
 
 # Wait for task to be COMPLETED
@@ -347,7 +347,7 @@ curl -s -X PUT "http://localhost:9200/_search/pipeline/hybrid-search-pipeline" \
 
 if $offline_lab; then
   echo -e "${MAJOR}Setting up Quepid${RESET}"
-  docker compose run --rm quepid bundle exec bin/rake db:setup
+  #docker compose run --rm quepid bundle exec bin/rake db:setup
   docker compose run quepid bundle exec thor user:create -a admin@choruselectronics.com "Chorus Admin" password
 fi
 
