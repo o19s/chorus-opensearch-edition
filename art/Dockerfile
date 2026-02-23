@@ -3,7 +3,7 @@ FROM ghcr.io/astral-sh/uv:trixie
 WORKDIR /python-docker
 
 # Either clone https://github.com/o19s/agentic-relevance-tuning into ./art and copy:
-#COPY ./strands-opensearch-agent .
+#COPY ./agentic-relevance-tuning .
 
 # or:
 #RUN git clone https://github.com/o19s/agentic-relevance-tuning .
