@@ -41,7 +41,7 @@ services:
       timeout: 1s
       retries: 5
     volumes:
-      - ./art/strands-opensearch-agent:/python-docker   
+      - ./art/agentic-relevance-tuning:/python-docker   
     depends_on:
       - opensearch
       - phoenix
