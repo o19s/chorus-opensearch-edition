@@ -1,5 +1,6 @@
 volumes
 art/strands-opensearch-agent/
+art/agentic-relevance-tuning/
 .env
 build/
 .idea/
