@@ -10,7 +10,7 @@ explore.enabled: true
 
 chat:
   enabled: true
-  agUiUrl: "http://art:8001/runs"
+  agUiUrl: "http://opensearch-agent-server:8001/runs"
   
 contextProvider:
   enabled: true

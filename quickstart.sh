@@ -99,7 +99,7 @@ do
 	shift
 done
 
-services="art opensearch opensearch-dashboards middleware reactivesearch"
+services="art opensearch-agent-server opensearch opensearch-dashboards middleware reactivesearch"
 
 if $offline_lab; then
   services="${services} quepid"

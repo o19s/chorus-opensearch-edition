@@ -32,8 +32,7 @@ services:
       AG_UI_AUTH_ENABLED: false
       AG_UI_RELAX_VALIDATION: true
       OPENSEARCH_URL: http://opensearch:9200
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://phoenix:6006
-      
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://phoenix:6006      
     env_file: ".env"     
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
@@ -45,6 +44,31 @@ services:
     depends_on:
       - opensearch
       - phoenix
+      - opensearch-agent-server
+
+  opensearch-agent-server:
+    container_name: opensearch-agent-server
+    build: ./opensearch-agent-server
+    ports:
+      - "8002:8001"    
+    environment:
+      OPENSEARCH_URL: http://opensearch:9200 
+      #OPENSEARCH_USERNAME: admin
+      #OPENSEARCH_PASSWORD: admin
+      AG_UI_AUTH_ENABLED: false
+      AG_UI_CORS_ORIGINS: http://localhost:5601
+      AG_UI_LOG_FORMAT: human
+      AG_UI_LOG_LEVEL: INFO
+    env_file: ".env"     
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
+    volumes:
+      - ./opensearch-agent-server/opensearch-agent-server:/python-docker   
+    depends_on:
+      - opensearch
   
   phoenix:
     container_name: phoenix
