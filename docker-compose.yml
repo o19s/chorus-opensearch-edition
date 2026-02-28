@@ -21,9 +21,9 @@ services:
     volumes:
       - ./middleware:/python-docker/
     
-  art:
-    container_name: art
-    build: ./art
+  agentic-relevance-tuning:
+    container_name: agentic-relevance-tuning
+    build: ./agentic-relevance-tuning
     ports:
       - "8001:8001"    
     environment:
@@ -40,7 +40,7 @@ services:
       timeout: 1s
       retries: 5
     volumes:
-      - ./art/agentic-relevance-tuning:/python-docker   
+      - ./agentic-relevance-tuning/agentic-relevance-tuning:/python-docker   
     depends_on:
       - opensearch
       - phoenix

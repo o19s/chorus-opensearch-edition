@@ -1,5 +1,5 @@
 volumes
-art/agentic-relevance-tuning/
+agentic-relevance-tuning/agentic-relevance-tuning/
 opensearch-agent-server/opensearch-agent-server/
 .env
 build/

@@ -2,7 +2,7 @@ FROM ghcr.io/astral-sh/uv:trixie
 
 WORKDIR /python-docker
 
-# Either clone https://github.com/o19s/agentic-relevance-tuning into ./art and copy:
+# Either clone https://github.com/o19s/agentic-relevance-tuning into ./agentic-relevance-tuning and copy:
 COPY ./agentic-relevance-tuning .
 
 # or:
