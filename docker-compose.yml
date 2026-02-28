@@ -132,8 +132,6 @@ services:
       - 5601
     environment:
       OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
-      #DISABLE_SECURITY_PLUGIN: false
-      #DISABLE_SECURITY_DASHBOARDS_PLUGIN: false
     depends_on:
       - opensearch
       

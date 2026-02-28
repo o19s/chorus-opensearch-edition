@@ -7,8 +7,6 @@ opensearch.ssl.verificationMode: none
 # For secured OpenSearch cluster, uncomment and set credentials:
 opensearch.username: "admin"
 opensearch.password: "MyStr0ng!P@ssw0rd2024"
-#opensearch.username: "kibanaserver"
-#opensearch.password: "kibanaserver"
 
 data_source.enabled: true
 workspace.enabled: true
