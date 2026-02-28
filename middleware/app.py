@@ -16,11 +16,23 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from interleave import Interleave
 
 OTEL_COLLECTOR_ENDPOINT = os.getenv("OTEL_COLLECTOR_ENDPOINT", "http://dataprepper:21890/opentelemetry.proto.collector.trace.v1.TraceService/Export")
-OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "http://opensearch:9200")
+OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "https://opensearch:9200")
 OPENSEARCH_HOST = os.getenv("OPENSEARCH_HOST", "opensearch")
+OPENSEARCH_USERNAME = os.getenv("OPENSEARCH_USERNAME", "admin")
+OPENSEARCH_PASSWORD = os.getenv("OPENSEARCH_PASSWORD", "MyStr0ng!P@ssw0rd2024")
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
+
+# Shared auth tuple and OpenSearch client used for all direct OS calls
+os_auth = (OPENSEARCH_USERNAME, OPENSEARCH_PASSWORD)
+os_client = OpenSearch(
+    hosts=[{"host": OPENSEARCH_HOST, "port": 9200}],
+    http_auth=os_auth,
+    use_ssl=True,
+    verify_certs=False,
+    ssl_show_warn=False
+)
 
 # Basic configuration for logging
 logging.basicConfig(level=logging.INFO,
@@ -64,10 +76,12 @@ def search():
       res = requests.request(
           method          = request.method,
           url             = request.url.replace(request.host_url, f"{OPENSEARCH_ENDPOINT}/"),
-          headers         = {k:v for k,v in request.headers if k.lower() != "host"}, # exclude "host" header
+          headers         = {k:v for k,v in request.headers if k.lower() not in ("host", "authorization")},
           data            = request.get_data(),
           cookies         = request.cookies,
-          allow_redirects = False
+          allow_redirects = False,
+          auth            = os_auth,
+          verify          = False
       )
 
       excluded_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]
@@ -136,7 +150,7 @@ def ubi_events():
         # ]
 
         # Index the UBI event to OpenSearch.
-        client = OpenSearch(hosts=[{"host": OPENSEARCH_HOST, "port": 9200}])
+        client = os_client
 
         # Make OTel traces from UBI events in the request body.
 
@@ -233,7 +247,7 @@ def ubi_queries():
        
 
         # Index the UBI query to OpenSearch.
-        client = OpenSearch(hosts=[{"host": OPENSEARCH_HOST, "port": 9200}])
+        client = os_client
 
 
         # only one, but we use an array to make DataPrepper happy
@@ -295,7 +309,9 @@ def search_configurations():
             res = requests.get(
                 plugin_url,
                 headers={"Content-Type": "application/json"},
-                data=plugin_request_body
+                data=plugin_request_body,
+                auth=os_auth,
+                verify=False
             )
             
             if res.status_code != 200:
@@ -484,10 +500,12 @@ def ab_search():
         res = requests.request(
             method          = request.method,
             url             = request.url.replace(request.host_url, f"{OPENSEARCH_ENDPOINT}/").replace('_old', ''),
-            headers         = {k:v for k,v in request.headers if k.lower() != "host"}, # exclude "host" header
+            headers         = {k:v for k,v in request.headers if k.lower() not in ("host", "authorization")},
             data            = req_data,
             cookies         = request.cookies,
             allow_redirects = False,
+            auth            = os_auth,
+            verify          = False
         )
 
         excluded_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]

@@ -3,10 +3,10 @@ start_time=$(date +%s)
 timeout=60   # Some setups return a "yellow" and so this allows us to continue on...
 
 # Wait for opensearch to start...
-while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:9200/_cluster/health)" != "200" ]]; do printf ${DOT}; sleep 5; done
+while [[ "$(curl -s -k -u admin:MyStr0ng!P@ssw0rd2024 -o /dev/null -w ''%{http_code}'' https://localhost:9200/_cluster/health)" != "200" ]]; do printf ${DOT}; sleep 5; done
 
 # See if we can get a "green" status...
-while [[ "$(curl -s localhost:9200/_cluster/health | jq '."status"')" != "\"green\"" ]]; do
+while [[ "$(curl -s -k -u admin:MyStr0ng!P@ssw0rd2024 https://localhost:9200/_cluster/health | jq '."status"')" != "\"green\"" ]]; do
     printf "${DOT}"
     sleep 5
 
