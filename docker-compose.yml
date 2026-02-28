@@ -21,9 +21,9 @@ services:
     volumes:
       - ./middleware:/python-docker/
     
-  art:
-    container_name: art
-    build: ./art
+  agentic-relevance-tuning:
+    container_name: agentic-relevance-tuning
+    build: ./agentic-relevance-tuning
     ports:
       - "8001:8001"    
     environment:
@@ -32,8 +32,7 @@ services:
       AG_UI_AUTH_ENABLED: false
       AG_UI_RELAX_VALIDATION: true
       OPENSEARCH_URL: http://opensearch:9200
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://phoenix:6006
-      
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://phoenix:6006      
     env_file: ".env"     
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
@@ -41,10 +40,35 @@ services:
       timeout: 1s
       retries: 5
     volumes:
-      - ./art/agentic-relevance-tuning:/python-docker   
+      - ./agentic-relevance-tuning/agentic-relevance-tuning:/python-docker   
     depends_on:
       - opensearch
       - phoenix
+      - opensearch-agent-server
+
+  opensearch-agent-server:
+    container_name: opensearch-agent-server
+    build: ./opensearch-agent-server
+    ports:
+      - "8002:8001"    
+    environment:
+      OPENSEARCH_URL: http://opensearch:9200 
+      #OPENSEARCH_USERNAME: admin
+      #OPENSEARCH_PASSWORD: admin
+      AG_UI_AUTH_ENABLED: false
+      AG_UI_CORS_ORIGINS: http://localhost:5601
+      AG_UI_LOG_FORMAT: human
+      AG_UI_LOG_LEVEL: INFO
+    env_file: ".env"     
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
+    volumes:
+      - ./opensearch-agent-server/opensearch-agent-server:/python-docker   
+    depends_on:
+      - opensearch
   
   phoenix:
     container_name: phoenix
@@ -64,6 +88,7 @@ services:
     container_name: opensearch
     build: ./opensearch/.
     environment:
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: "MyStr0ng!P@ssw0rd2024"
       discovery.type: single-node
       node.name: opensearch
       cluster.name: opensearch
@@ -76,11 +101,10 @@ services:
       http.cors.allow-methods: OPTIONS,HEAD,GET,POST,PUT,DELETE
       http.cors.allow-credentials: true
       http.cors.allow-headers: X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization,test,access-control-allow-headers,x-search-query,X-Search-Id,X-Search-Filters,X-ubi-query-id,X-ubi-store,X-ubi-user-id,X-ubi-session-id,x-search-client,Access-Control-Expose-Headers
-      DISABLE_INSTALL_DEMO_CONFIG: true
-      DISABLE_SECURITY_PLUGIN: true # disable security plugin only for demo
-      OPENSEARCH_INITIAL_ADMIN_PASSWORD: Mysupersecretpassword_123
+      #DISABLE_INSTALL_DEMO_CONFIG: true
+      #DISABLE_SECURITY_PLUGIN: true # disable security plugin only for demo
       OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx4g"
-
+      
     ulimits:
       memlock:
         soft: -1
@@ -94,7 +118,7 @@ services:
     volumes:
       - opensearch-data:/usr/share/opensearch/data
     healthcheck:
-      test: [ "CMD", "wget", "http://localhost:9200" ]
+      test: [ "CMD", "wget", "-q", "--no-check-certificate", "--user=admin", "--password=MyStr0ng!P@ssw0rd2024", "https://localhost:9200" ]
       interval: 30s
       timeout: 10s
       retries: 50
@@ -107,9 +131,7 @@ services:
     expose:
       - 5601
     environment:
-      OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
-      DISABLE_SECURITY_PLUGIN: true
-      DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
+      OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
     depends_on:
       - opensearch
       

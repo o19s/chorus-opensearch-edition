@@ -1,16 +1,24 @@
 ---
 server.name: opensearch-dashboards
 server.host: "0.0.0.0"
-#opensearch.hosts: http://localhost:9200
+opensearch.hosts: https://localhost:9200
+opensearch.ssl.verificationMode: none
 
+# For secured OpenSearch cluster, uncomment and set credentials:
+opensearch.username: "admin"
+opensearch.password: "MyStr0ng!P@ssw0rd2024"
 
 data_source.enabled: true
 workspace.enabled: true
 explore.enabled: true
 
+uiSettings:
+  overrides:
+    "home:useNewHomePage": true
+
 chat:
   enabled: true
-  agUiUrl: "http://art:8001/runs"
+  agUiUrl: "http://opensearch-agent-server:8001/runs"
   
 contextProvider:
   enabled: true

@@ -19,6 +19,10 @@ log_to_file=false
 
 hostname_or_ip=false
 
+# OpenSearch connection settings
+OS_URL="https://localhost:9200"
+os_curl() { curl -k -u 'admin:MyStr0ng!P@ssw0rd2024' "$@"; }
+
 # Check for --log flag early so we can set up logging before other output
 for arg in "$@"; do
   if [[ "$arg" == "--log" ]] || [[ "$arg" == "-l" ]]; then
@@ -99,7 +103,7 @@ do
 	shift
 done
 
-services="art opensearch opensearch-dashboards middleware reactivesearch"
+services="agentic-relevance-tuning opensearch-agent-server opensearch opensearch-dashboards middleware reactivesearch"
 
 if $offline_lab; then
   services="${services} quepid"
@@ -140,7 +144,7 @@ echo -e "${MAJOR}Waiting for OpenSearch to start up and be online.${RESET}"
 ./opensearch/wait-for-os.sh # Wait for OpenSearch to be online
 
 echo -e "${MAJOR}Configuring the ML Commons plugin.${RESET}"
-curl -s -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: application/json' --data-binary '{
+os_curl -s -X PUT "$OS_URL/_cluster/settings" -H 'Content-Type: application/json' --data-binary '{
   "persistent": {
         "plugins": {
             "ml_commons": {
@@ -153,7 +157,7 @@ curl -s -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: appli
 }'
 
 echo -e "${MAJOR}Registering a model group.${RESET}"
-response=$(curl -s -X POST "http://localhost:9200/_plugins/_ml/model_groups/_register" \
+response=$(os_curl -s -X POST "$OS_URL/_plugins/_ml/model_groups/_register" \
   -H 'Content-Type: application/json' \
   --data-binary '{
     "name": "neural_search_model_group",
@@ -167,7 +171,7 @@ model_group_id=$(echo "$response" | jq -r '.model_group_id // empty' 2>/dev/null
 if [ -n "$model_group_id" ] && [ "$model_group_id" != "null" ]; then
   echo "Created Model Group with id: $model_group_id"
 else
-  response=$(curl -s -X POST "http://localhost:9200/_plugins/_ml/model_groups/_search" \
+  response=$(os_curl -s -X POST "$OS_URL/_plugins/_ml/model_groups/_search" \
     -H 'Content-Type: application/json' \
     --data-binary '{
       "query": {
@@ -189,7 +193,7 @@ else
 fi
 
 echo -e "${MAJOR}Registering a model in the model group.${RESET}"
-response=$(curl -s -X POST "http://localhost:9200/_plugins/_ml/models/_register" \
+response=$(os_curl -s -X POST "$OS_URL/_plugins/_ml/models/_register" \
   -H 'Content-Type: application/json' \
   --data-binary "{
      \"name\": \"huggingface/sentence-transformers/all-MiniLM-L6-v2\",
@@ -210,7 +214,7 @@ max_attempts=20
 attempts=0
 
 # Wait for task to be COMPLETED
-while [[ "$(curl -s localhost:9200/_plugins/_ml/tasks/$task_id | jq -r '.state')" != "COMPLETED" && $attempts -lt $max_attempts ]]; do
+while [[ "$(os_curl -s "$OS_URL/_plugins/_ml/tasks/$task_id" | jq -r '.state')" != "COMPLETED" && $attempts -lt $max_attempts ]]; do
     echo "Waiting for task to complete... attempt $((attempts + 1))/$max_attempts"
     sleep 5
     attempts=$((attempts + 1))
@@ -220,13 +224,13 @@ if [[ $attempts -ge $max_attempts ]]; then
     echo "Limit of attempts reached. Something went wrong with registering the model. Check OpenSearch logs."
     exit 1
 else
-    response=$(curl -s localhost:9200/_plugins/_ml/tasks/$task_id)
+    response=$(os_curl -s "$OS_URL/_plugins/_ml/tasks/$task_id")
     model_id=$(echo "$response" | jq -r '.model_id')
     echo "Task completed successfully! Model registered with id: $model_id"
 fi
 
 echo -e "${MAJOR}Deploying the model.${RESET}"
-response=$(curl -s -X POST "http://localhost:9200/_plugins/_ml/models/$model_id/_deploy")
+response=$(os_curl -s -X POST "$OS_URL/_plugins/_ml/models/$model_id/_deploy")
 
 # Extract the task_id from the JSON response
 deploy_task_id=$(echo "$response" | jq -r '.task_id')
@@ -237,7 +241,7 @@ echo -e "${MAJOR}Waiting for the model to be deployed.${RESET}"
 # Reset attempts
 attempts=0
 
-while [[ "$(curl -s localhost:9200/_plugins/_ml/tasks/$task_id | jq -r '.state')" != "COMPLETED" && $attempts -lt $max_attempts ]]; do
+while [[ "$(os_curl -s "$OS_URL/_plugins/_ml/tasks/$deploy_task_id" | jq -r '.state')" != "COMPLETED" && $attempts -lt $max_attempts ]]; do
     echo "Waiting for task to complete... attempt $((attempts + 1))/$max_attempts"
     sleep 5
     attempts=$((attempts + 1))
@@ -246,13 +250,13 @@ done
 if [[ $attempts -ge $max_attempts ]]; then
     echo "Limit of attempts reached. Something went wrong with deploying the model. Check OpenSearch logs."
 else
-    response=$(curl -s localhost:9200/_plugins/_ml/tasks/$task_id)
+    response=$(os_curl -s "$OS_URL/_plugins/_ml/tasks/$deploy_task_id")
     model_id=$(echo "$response" | jq -r '.model_id')
     echo "Task completed successfully! Model deployed with id: $model_id"
 fi
 
 echo -e "${MAJOR}Creating an ingest pipeline for embedding generation during index time.${RESET}"
-curl -s -X PUT "http://localhost:9200/_ingest/pipeline/embeddings-pipeline" \
+os_curl -s -X PUT "$OS_URL/_ingest/pipeline/embeddings-pipeline" \
   -H 'Content-Type: application/json' \
   --data-binary "{
      \"description\": \"A text embedding pipeline\",
@@ -269,22 +273,22 @@ curl -s -X PUT "http://localhost:9200/_ingest/pipeline/embeddings-pipeline" \
   }"
 
 echo -e "${MAJOR}Setting up User Behavior Insights indexes...\n${RESET}"
-curl -s -X POST "http://localhost:9200/_plugins/ubi/initialize"
+os_curl -s -X POST "$OS_URL/_plugins/ubi/initialize"
 
 echo -e "${MAJOR}Creating ecommerce index, defining its mapping & settings\n${RESET}"
-curl -s -X PUT "http://localhost:9200/ecommerce" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
+os_curl -s -X PUT "$OS_URL/ecommerce" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
 echo -e "\n"
 
 echo -e "${MAJOR}Indexing the product data, please wait...\n${RESET}"
 # Define the OpenSearch endpoint and content header
-OPENSEARCH_URL="http://localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items"
+OPENSEARCH_URL="$OS_URL/ecommerce/_bulk?pretty=false&filter_path=-items"
 CONTENT_TYPE="Content-Type: application/json"
 
 # Using pre-prepared shrunk sample data for faster indexing
 echo "Processing ./sample-data/esci_us_ecommerce_shrunk.ndjson"
 
 # Send the file to OpenSearch using curl
-curl -X POST "$OPENSEARCH_URL" -H "$CONTENT_TYPE" --data-binary @./sample-data/esci_us_ecommerce_shrunk.ndjson
+os_curl -X POST "$OPENSEARCH_URL" -H "$CONTENT_TYPE" --data-binary @./sample-data/esci_us_ecommerce_shrunk.ndjson
 
 # Check the response code to see if the request was successful
 if [[ $? -ne 0 ]]; then
@@ -294,7 +298,7 @@ else
 fi
 
 echo -e "${MAJOR}Creating pipelines for neural search and hybrid search\n${RESET}"
-curl -s -X PUT "http://localhost:9200/_search/pipeline/neural-search-pipeline" \
+os_curl -s -X PUT "$OS_URL/_search/pipeline/neural-search-pipeline" \
   -H 'Content-Type: application/json' \
   --data-binary "{
      \"description\": \"Neural Only Search\",
@@ -311,7 +315,7 @@ curl -s -X PUT "http://localhost:9200/_search/pipeline/neural-search-pipeline" \
   ]
   }"
 
-curl -s -X PUT "http://localhost:9200/_search/pipeline/hybrid-search-pipeline" \
+os_curl -s -X PUT "$OS_URL/_search/pipeline/hybrid-search-pipeline" \
   -H 'Content-Type: application/json' \
   --data-binary "{
      \"request_processors\": [
@@ -352,11 +356,11 @@ if $offline_lab; then
 fi
 
 echo -e "${MAJOR}Updating the indexed data with embeddings...\n${RESET}"
-update_docs_task_id=$(curl -s -X POST "http://localhost:9200/ecommerce/_update_by_query?pipeline=embeddings-pipeline&wait_for_completion=false" | jq -r '.task')
+update_docs_task_id=$(os_curl -s -X POST "$OS_URL/ecommerce/_update_by_query?pipeline=embeddings-pipeline&wait_for_completion=false" | jq -r '.task')
 
 echo -e "${MAJOR}This process runs in the background. Plese give it a couple of minutes. You can check the progress with the following curl command:
 
-curl -s GET http://localhost:9200/_tasks/$update_docs_task_id\n${RESET}"
+os_curl -s GET https://localhost:9200/_tasks/$update_docs_task_id\n${RESET}"
 
 echo -e "${MAJOR}Installing User Behavior Insights Dashboards...\n${RESET}"
 curl -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H "osd-xsrf: true" --form file=@opensearch-dashboards/ubi_dashboard.ndjson > /dev/null
@@ -370,6 +374,8 @@ echo -e "${MAJOR}Fetching latest Search Result Quality Evaluation Dashboard, sam
 curl -s -o build/search_dashboard.ndjson https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/search_dashboard.ndjson
 # Install script
 curl -s -o build/install_dashboards.sh https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/install_dashboards.sh
+# Patch downloaded script to use HTTPS with credentials
+sed -i.bu "s/curl -s/curl -k -s -u 'admin:MyStr0ng!P@ssw0rd2024'/g" build/install_dashboards.sh
 # sample data
 curl -s -o build/sample_data.ndjson https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/sample_data.ndjson
 # mappings for search quality metrics sample data index
@@ -377,7 +383,7 @@ curl -s -o build/srw_metrics_mappings.json https://raw.githubusercontent.com/o19
 
 echo -e "${MAJOR}Installing Search Result Quality Evaluation Dashboard...\n${RESET}"
 chmod +x build/install_dashboards.sh
-./build/install_dashboards.sh http://localhost:9200 http://localhost:5601
+./build/install_dashboards.sh https://localhost:9200 http://localhost:5601
 
 ## configure the SRW search configurations
 echo -e "${MAJOR}Creating Search Relevance entities...\n${RESET}"
