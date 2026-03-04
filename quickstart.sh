@@ -103,7 +103,7 @@ do
 	shift
 done
 
-services="agentic-relevance-tuning opensearch-agent-server opensearch opensearch-dashboards middleware reactivesearch"
+services="opensearch-agent-server opensearch opensearch-dashboards middleware reactivesearch"
 
 if $offline_lab; then
   services="${services} quepid"
