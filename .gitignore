@@ -1,6 +1,6 @@
 volumes
-agentic-relevance-tuning/agentic-relevance-tuning/
 opensearch-agent-server/opensearch-agent-server/
+opensearch-mcp-server-py/opensearch-mcp-server-py/
 .env
 build/
 .idea/

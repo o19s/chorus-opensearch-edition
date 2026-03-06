@@ -46,6 +46,29 @@ services:
     depends_on:
       - opensearch
   
+  opensearch-mcp-server-py:
+    container_name: opensearch-mcp-server-py
+    build: ./opensearch-mcp-server-py
+    ports:
+      - "9900:9900"    
+    environment:
+      OPENSEARCH_URL: https://opensearch:9200 
+      OPENSEARCH_USERNAME: admin
+      OPENSEARCH_PASSWORD: MyStr0ng!P@ssw0rd2024
+      OPENSEARCH_SSL_VERIFY: false
+      OPENSEARCH_ENABLED_CATEGORIES: search_relevance 
+      OPENSEARCH_HEADER_AUTH: true
+    env_file: ".env"     
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
+    volumes:
+      - ./opensearch-mcp-server-py/opensearch-mcp-server-py:/python-docker   
+    depends_on:
+      - opensearch
+  
   phoenix:
     container_name: phoenix
     image: arizephoenix/phoenix:12.6.1

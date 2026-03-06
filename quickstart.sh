@@ -103,7 +103,7 @@ do
 	shift
 done
 
-services="opensearch-agent-server opensearch opensearch-dashboards middleware reactivesearch"
+services="opensearch-mcp-server-py opensearch-agent-server opensearch opensearch-dashboards middleware reactivesearch"
 
 if $offline_lab; then
   services="${services} quepid"
