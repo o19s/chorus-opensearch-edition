@@ -127,10 +127,12 @@ services:
     container_name: opensearch-dashboards
     ports:
       - 5601:5601
-    expose:
-      - 5601
+      - 5603:5603
     environment:
       OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
+    volumes:
+      - ./opensearch-dashboards/OpenSearch-Dashboards:/home/opensearch-dashboards
+      - ./opensearch-dashboards/opensearch_dashboards.yml:/home/opensearch-dashboards/config/opensearch_dashboards.yml            
     depends_on:
       - opensearch
       

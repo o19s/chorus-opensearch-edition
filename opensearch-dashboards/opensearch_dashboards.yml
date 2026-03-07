@@ -1,10 +1,11 @@
 ---
 server.name: opensearch-dashboards
 server.host: "0.0.0.0"
-opensearch.hosts: https://localhost:9200
+opensearch.hosts: ["https://opensearch:9200"]
 opensearch.ssl.verificationMode: none
+opensearch.requestHeadersWhitelist: ["securitytenant","Authorization"]
 
-# For secured OpenSearch cluster, uncomment and set credentials:
+# OpenSearch credentials
 opensearch.username: "admin"
 opensearch.password: "MyStr0ng!P@ssw0rd2024"
 

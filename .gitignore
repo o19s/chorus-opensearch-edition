@@ -1,6 +1,7 @@
 volumes
 opensearch-agent-server/opensearch-agent-server/
 opensearch-mcp-server-py/opensearch-mcp-server-py/
+opensearch-dashboards/OpenSearch-Dashboards/
 .env
 build/
 .idea/
