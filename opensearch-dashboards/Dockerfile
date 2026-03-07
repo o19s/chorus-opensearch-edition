@@ -2,6 +2,7 @@ FROM node:20.19.0
 
 # You need to clone https://github.com/opensearch-project/OpenSearch-Dashboards into ./opensearch-dashboards
 # Then you need to go to ./opensearch-dashboards/OpenSearch-Dashboards/plugins and then clone https://github.com/opensearch-project/security-dashboards-plugin
+# Then you need to go to ./opensearch-dashboards/OpenSearch-Dashboards/plugins and then clone https://github.com/opensearch-project/dashboards-search-relevance
 # To make things work!
 
 RUN apt-get update && \
