@@ -84,7 +84,7 @@ echo "STEP 2: Creating users..."
 USERNAME="pete"
 FULL_NAME="Pete the Product Manager"
 USER_PASSWORD="MyStr0ng!P@ssw0rd2024"
-BACKEND_ROLES='["kibana_user"]'
+BACKEND_ROLES='["kibana_user", "readall", "product_manager"]'
 OPENSEARCH_ROLES='["kibana_user", "readall", "product_manager"]'
 
 echo ""
@@ -110,7 +110,7 @@ echo "✓ User '${USERNAME}' created successfully!"
 USERNAME="rumi"
 FULL_NAME="Rumi the Relevance Engineer"
 USER_PASSWORD="MyStr0ng!P@ssw0rd2024"
-BACKEND_ROLES='["kibana_user"]'
+BACKEND_ROLES='["kibana_user", "readall", "relevance_engineer"]'
 OPENSEARCH_ROLES='["kibana_user", "readall", "relevance_engineer"]'
 
 echo ""
