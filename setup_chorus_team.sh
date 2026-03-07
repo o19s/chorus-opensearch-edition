@@ -138,6 +138,78 @@ echo "✓ User '${USERNAME}' created successfully!"
 
 echo ""
 echo "=========================================="
+echo "STEP 3: Creating/Finding Search Workspace"
+echo "=========================================="
+
+# Check if Search workspace already exists
+echo ""
+echo "Checking for existing 'Search' workspace..."
+
+EXISTING_WORKSPACES=$(curl -s -X POST \
+  "http://localhost:5601/api/workspaces/_list" \
+  -H "Content-Type: application/json" \
+  -H "osd-xsrf: true" \
+  -u "${ADMIN_USER}:${ADMIN_PASSWORD}" \
+  -d '{
+    "search": "Search",
+    "perPage": 100,
+    "page": 1
+  }')
+
+# Try to extract existing workspace ID
+WORKSPACE_ID=$(echo "$EXISTING_WORKSPACES" | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+if [ -n "$WORKSPACE_ID" ]; then
+  echo "✓ Found existing 'Search' workspace"
+  echo "  Workspace ID: ${WORKSPACE_ID}"
+  echo "  URL: http://localhost:5601/w/${WORKSPACE_ID}/app/home"
+else
+  # Create new Search workspace
+  echo "Creating new 'Search' workspace..."
+  
+  WORKSPACE_RESPONSE=$(curl -s -X POST \
+    "http://localhost:5601/api/workspaces" \
+    -H "Content-Type: application/json" \
+    -H "osd-xsrf: true" \
+    -u "${ADMIN_USER}:${ADMIN_PASSWORD}" \
+    -d '{
+      "attributes": {
+        "name": "Search",
+        "description": "Search relevance workspace for testing and optimization",
+        "features": ["use-case-search"],
+        "color": "#0073E6"
+      }
+    }')
+
+  echo "$WORKSPACE_RESPONSE"
+
+  # Extract workspace ID from response
+  WORKSPACE_ID=$(echo "$WORKSPACE_RESPONSE" | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
+
+  if [ -n "$WORKSPACE_ID" ]; then
+    echo ""
+    echo "✓ Workspace 'Search' created successfully!"
+    echo "  Workspace ID: ${WORKSPACE_ID}"
+    echo "  URL: http://localhost:5601/w/${WORKSPACE_ID}/app/home"
+  else
+    echo ""
+    echo "⚠ Workspace creation failed. Response: $WORKSPACE_RESPONSE"
+  fi
+fi
+
+# Save workspace ID to a file for future reference
+if [ -n "$WORKSPACE_ID" ]; then
+  echo "$WORKSPACE_ID" > .workspace_id
+  echo ""
+  echo "✓ Workspace ID saved to .workspace_id file"
+fi
+
+# ==========================================
+# Summary
+# ==========================================
+
+echo ""
+echo "=========================================="
 echo "Setup Complete!"
 echo "=========================================="
 echo ""
@@ -150,11 +222,19 @@ echo "  • pete (Pete the Product Manager)"
 echo "    - Username: pete"
 echo "    - Password: MyStr0ng!P@ssw0rd2024"
 echo "    - Roles: kibana_user, readall, product_manager"
+echo "    - Workspace Access: Read-only"
 echo ""
 echo "  • rumi (Rumi the Relevance Engineer)"
 echo "    - Username: rumi"
 echo "    - Password: MyStr0ng!P@ssw0rd2024"
 echo "    - Roles: kibana_user, readall, relevance_engineer"
+echo "    - Workspace Access: Full access (read/write)"
+echo ""
+echo "Workspace Created:"
+echo "  • Search (use-case-search)"
+if [ -n "$WORKSPACE_ID" ]; then
+  echo "    - Direct URL: http://localhost:5601/w/${WORKSPACE_ID}/app/home"
+fi
 echo ""
 echo "Login at: http://localhost:5601"
 echo "=========================================="
