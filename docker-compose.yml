@@ -40,8 +40,8 @@ services:
       interval: 5s
       timeout: 1s
       retries: 5
-    volumes:
-      - ./opensearch-agent-server/opensearch-agent-server:/python-docker   
+    #volumes:
+      #- ./opensearch-agent-server/opensearch-agent-server:/python-docker   
     depends_on:
       - opensearch
       - opensearch-mcp-server-py
@@ -62,8 +62,8 @@ services:
       interval: 5s
       timeout: 1s
       retries: 5
-    volumes:
-      - ./opensearch-mcp-server-py/opensearch-mcp-server-py:/python-docker   
+    #volumes:
+    #  - ./opensearch-mcp-server-py/opensearch-mcp-server-py:/python-docker   
     depends_on:
       - opensearch
   
