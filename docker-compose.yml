@@ -27,10 +27,9 @@ services:
     ports:
       - "8001:8001"    
     environment:
-      OPENSEARCH_URL: https://opensearch:9200 
-      OPENSEARCH_USERNAME: admin
-      OPENSEARCH_PASSWORD: MyStr0ng!P@ssw0rd2024
-      OPENSEARCH_SSL_VERIFY: false
+      OPENSEARCH_URL: https://opensearch:9200 # needed?
+      OPENSEARCH_SSL_VERIFY: false # needed?
+      MCP_SERVER_URL: http://opensearch-mcp-server-py:3001/mcp
       AG_UI_AUTH_ENABLED: false
       AG_UI_CORS_ORIGINS: http://localhost:5601
       AG_UI_LOG_FORMAT: human
@@ -45,16 +44,15 @@ services:
       - ./opensearch-agent-server/opensearch-agent-server:/python-docker   
     depends_on:
       - opensearch
+      - opensearch-mcp-server-py
   
   opensearch-mcp-server-py:
     container_name: opensearch-mcp-server-py
     build: ./opensearch-mcp-server-py
     ports:
-      - "9900:9900"    
+      - "3001:3001"    
     environment:
       OPENSEARCH_URL: https://opensearch:9200 
-      OPENSEARCH_USERNAME: admin
-      OPENSEARCH_PASSWORD: MyStr0ng!P@ssw0rd2024
       OPENSEARCH_SSL_VERIFY: false
       OPENSEARCH_ENABLED_CATEGORIES: search_relevance 
       OPENSEARCH_HEADER_AUTH: true
@@ -87,21 +85,17 @@ services:
     container_name: opensearch
     build: ./opensearch/.
     environment:
-      OPENSEARCH_INITIAL_ADMIN_PASSWORD: "MyStr0ng!P@ssw0rd2024"
       discovery.type: single-node
       node.name: opensearch
       cluster.name: opensearch
       discovery.seed_hosts: opensearch
       bootstrap.memory_lock: true
-      # plugins.security.disabled: "true"
       http.cors.enabled: true
       # Warning: this is opening it up to all cross domains
       http.cors.allow-origin: "*"
       http.cors.allow-methods: OPTIONS,HEAD,GET,POST,PUT,DELETE
       http.cors.allow-credentials: true
       http.cors.allow-headers: X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization,test,access-control-allow-headers,x-search-query,X-Search-Id,X-Search-Filters,X-ubi-query-id,X-ubi-store,X-ubi-user-id,X-ubi-session-id,x-search-client,Access-Control-Expose-Headers
-      #DISABLE_INSTALL_DEMO_CONFIG: true
-      #DISABLE_SECURITY_PLUGIN: true # disable security plugin only for demo
       OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx4g"
       
     ulimits:
@@ -116,6 +110,13 @@ services:
       - 9600:9600 # required for Performance Analyzer
     volumes:
       - opensearch-data:/usr/share/opensearch/data
+      - ./opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
+      - ./opensearch/security/esnode.pem:/usr/share/opensearch/config/esnode.pem
+      - ./opensearch/security/esnode-key.pem:/usr/share/opensearch/config/esnode-key.pem
+      - ./opensearch/security/kirk.pem:/usr/share/opensearch/config/kirk.pem
+      - ./opensearch/security/kirk-key.pem:/usr/share/opensearch/config/kirk-key.pem
+      - ./opensearch/security/root-ca.pem:/usr/share/opensearch/config/root-ca.pem
+      - ./opensearch/security/internal_users.yml:/usr/share/opensearch/config/opensearch-security/internal_users.yml
     healthcheck:
       test: [ "CMD", "wget", "-q", "--no-check-certificate", "--user=admin", "--password=MyStr0ng!P@ssw0rd2024", "https://localhost:9200" ]
       interval: 30s

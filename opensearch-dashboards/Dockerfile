@@ -22,7 +22,7 @@ cd /home/opensearch-dashboards
 # Check if node_modules exists, if not run bootstrap
 if [ ! -d "node_modules" ] || [ ! -f ".bootstrapped" ]; then
     echo "Running yarn osd bootstrap..."
-    yarn osd bootstrap --allow-root
+    yarn osd bootstrap --allow-root --single-version=loose
     touch .bootstrapped
 fi
 

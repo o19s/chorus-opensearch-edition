@@ -143,6 +143,7 @@ docker compose up -d --build ${services}
 echo -e "${MAJOR}Waiting for OpenSearch to start up and be online.${RESET}"
 ./opensearch/wait-for-os.sh # Wait for OpenSearch to be online
 
+
 echo -e "${MAJOR}Configuring the ML Commons plugin.${RESET}"
 os_curl -s -X PUT "$OS_URL/_cluster/settings" -H 'Content-Type: application/json' --data-binary '{
   "persistent": {
@@ -271,6 +272,9 @@ os_curl -s -X PUT "$OS_URL/_ingest/pipeline/embeddings-pipeline" \
       }
     ]
   }"
+  
+echo -e "${MAJOR}Creating Chorus Team permissions...\n${RESET}"
+./setup_chorus_team.sh
 
 echo -e "${MAJOR}Setting up User Behavior Insights indexes...\n${RESET}"
 os_curl -s -X POST "$OS_URL/_plugins/ubi/initialize"
@@ -388,10 +392,6 @@ chmod +x build/install_dashboards.sh
 ## configure the SRW search configurations
 echo -e "${MAJOR}Creating Search Relevance entities...\n${RESET}"
 ./search_relevance.sh
-
-## configure the Chorus Team permissions
-echo -e "${MAJOR}Creating Chorus Team permissions...\n${RESET}"
-./setup_chorus_team.sh
 
 
 # we start dataprepper as the last service to prevent it from creating the ubi_queries index using the wrong mappings.

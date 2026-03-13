@@ -11,4 +11,4 @@ WORKDIR /python-docker
 #RUN git clone https://github.com/opensearch-project/opensearch-mcp-server-py .
 
 # We are mounting via volumes so we can edit.
-CMD [ "uv", "run", "-m", "mcp_server_opensearch","--transport", "stream"]
+CMD [ "uv", "run", "-m", "mcp_server_opensearch","--transport", "stream", "--port", "3001"]
