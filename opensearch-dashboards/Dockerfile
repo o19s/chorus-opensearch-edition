@@ -23,12 +23,13 @@ set -e
 
 cd /home/opensearch-dashboards
 
-# Fix ownership of directories that need write access
-# Suppress errors for files that can't be changed (like .git objects)
-chown -R opensearch-dashboards:opensearch-dashboards /home/opensearch-dashboards/.cache 2>/dev/null || true
-chown -R opensearch-dashboards:opensearch-dashboards /home/opensearch-dashboards/.yarn 2>/dev/null || true
-chown -R opensearch-dashboards:opensearch-dashboards /home/opensearch-dashboards/.config 2>/dev/null || true
-chown -R opensearch-dashboards:opensearch-dashboards /home/opensearch-dashboards/node_modules 2>/dev/null || true
+# Fix ownership - need to handle the entire directory tree for yarn bootstrap to work
+# This is necessary because yarn needs to write to packages/*/node_modules during bootstrap
+# We suppress errors for .git objects which can't be changed, but that's harmless
+echo "Fixing permissions..."
+
+# Fix the entire directory tree, suppressing errors from .git directories
+chown -R opensearch-dashboards:opensearch-dashboards /home/opensearch-dashboards 2>/dev/null || true
 
 # Check if node_modules exists, if not run bootstrap
 if [ ! -d "node_modules" ] || [ ! -f ".bootstrapped" ]; then
