@@ -133,7 +133,10 @@ services:
       OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
     volumes:
       - ./opensearch-dashboards/OpenSearch-Dashboards:/home/opensearch-dashboards
-      - ./opensearch-dashboards/opensearch_dashboards.yml:/home/opensearch-dashboards/config/opensearch_dashboards.yml            
+      - ./opensearch-dashboards/opensearch_dashboards.yml:/home/opensearch-dashboards/config/opensearch_dashboards.yml
+      - opensearch-dashboards-node-modules:/home/opensearch-dashboards/node_modules
+      - opensearch-dashboards-cache:/home/opensearch-dashboards/.cache
+      - opensearch-dashboards-yarn:/home/opensearch-dashboards/.yarn            
     depends_on:
       - opensearch
       
@@ -195,3 +198,6 @@ services:
 
 volumes:
   opensearch-data:
+  opensearch-dashboards-node-modules:
+  opensearch-dashboards-cache:
+  opensearch-dashboards-yarn:

@@ -272,9 +272,6 @@ os_curl -s -X PUT "$OS_URL/_ingest/pipeline/embeddings-pipeline" \
       }
     ]
   }"
-  
-echo -e "${MAJOR}Creating Chorus Team permissions...\n${RESET}"
-./setup_chorus_team.sh
 
 echo -e "${MAJOR}Setting up User Behavior Insights indexes...\n${RESET}"
 os_curl -s -X POST "$OS_URL/_plugins/ubi/initialize"
@@ -366,6 +363,9 @@ echo -e "${MAJOR}This process runs in the background. Plese give it a couple of 
 
 os_curl -s GET https://localhost:9200/_tasks/$update_docs_task_id\n${RESET}"
 
+echo -e "${MAJOR}Waiting for OpenSearch Dashboards to start up and be online.${RESET}"
+./opensearch-dashboards/wait-for-dashboards.sh
+
 echo -e "${MAJOR}Installing User Behavior Insights Dashboards...\n${RESET}"
 curl -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H "osd-xsrf: true" --form file=@opensearch-dashboards/ubi_dashboard.ndjson > /dev/null
 
@@ -393,9 +393,11 @@ chmod +x build/install_dashboards.sh
 echo -e "${MAJOR}Creating Search Relevance entities...\n${RESET}"
 ./search_relevance.sh
 
-
 # we start dataprepper as the last service to prevent it from creating the ubi_queries index using the wrong mappings.
 echo -e "${MAJOR}Starting Dataprepper...\n${RESET}"
 docker compose up -d --build dataprepper --remove-orphans
+
+echo -e "${MAJOR}Creating Chorus Team permissions...\n${RESET}"
+./setup_chorus_team.sh
 
 echo -e "${MAJOR}Welcome to Chorus OpenSearch Edition!${RESET}"
