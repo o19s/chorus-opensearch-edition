@@ -34,8 +34,14 @@ chown -R opensearch-dashboards:opensearch-dashboards /home/opensearch-dashboards
 # Check if node_modules exists, if not run bootstrap
 if [ ! -d "node_modules" ] || [ ! -f ".bootstrapped" ]; then
     echo "Running yarn osd bootstrap..."
-    su opensearch-dashboards -c "yarn osd bootstrap --single-version=loose"
-    touch .bootstrapped
+    if su opensearch-dashboards -c "yarn osd bootstrap --single-version=loose"; then
+        touch .bootstrapped
+        echo "Bootstrap completed successfully!"
+    else
+        echo "ERROR: Bootstrap failed! Please check the logs above."
+        echo "To retry, remove the container and try again."
+        exit 1
+    fi
 fi
 
 # Start OpenSearch Dashboards in dev mode
