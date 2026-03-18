@@ -393,11 +393,13 @@ chmod +x build/install_dashboards.sh
 echo -e "${MAJOR}Creating Search Relevance entities...\n${RESET}"
 ./search_relevance.sh
 
+echo -e "${MAJOR}Creating Chorus Team roles and users...\n${RESET}"
+./setup_chorus_team.sh
+
 # we start dataprepper as the last service to prevent it from creating the ubi_queries index using the wrong mappings.
 echo -e "${MAJOR}Starting Dataprepper...\n${RESET}"
 docker compose up -d --build dataprepper --remove-orphans
 
-echo -e "${MAJOR}Creating Chorus Team permissions...\n${RESET}"
-./setup_chorus_team.sh
+
 
 echo -e "${MAJOR}Welcome to Chorus OpenSearch Edition!${RESET}"
