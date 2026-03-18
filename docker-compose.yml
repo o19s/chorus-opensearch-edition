@@ -124,19 +124,20 @@ services:
       retries: 50
 
   opensearch-dashboards:
-    build: ./opensearch-dashboards/.
+    #build: ./opensearch-dashboards/.
     container_name: opensearch-dashboards
+    image: dep4b/ericstuff:osd
     ports:
       - 5601:5601
       - 5603:5603
     environment:
       OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
     volumes:
-      - ./opensearch-dashboards/OpenSearch-Dashboards:/home/opensearch-dashboards
+      #- ./opensearch-dashboards/OpenSearch-Dashboards:/home/opensearch-dashboards
       - ./opensearch-dashboards/opensearch_dashboards.yml:/home/opensearch-dashboards/config/opensearch_dashboards.yml
-      - opensearch-dashboards-node-modules:/home/opensearch-dashboards/node_modules
-      - opensearch-dashboards-cache:/home/opensearch-dashboards/.cache
-      - opensearch-dashboards-yarn:/home/opensearch-dashboards/.yarn            
+      #- opensearch-dashboards-node-modules:/home/opensearch-dashboards/node_modules
+      #- opensearch-dashboards-cache:/home/opensearch-dashboards/.cache
+      #- opensearch-dashboards-yarn:/home/opensearch-dashboards/.yarn            
     depends_on:
       - opensearch
       

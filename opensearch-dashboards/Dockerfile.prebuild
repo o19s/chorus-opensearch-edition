@@ -1,0 +1,50 @@
+FROM node:20.19.0
+
+# Dockerfile for pre-building OpenSearch Dashboards with bootstrap completed
+# This creates a ready-to-run image that doesn't need to bootstrap at runtime
+# 
+# Prerequisites:
+# 1. Clone https://github.com/opensearch-project/OpenSearch-Dashboards 
+#    into ./opensearch-dashboards/OpenSearch-Dashboards
+# 2. Clone https://github.com/opensearch-project/security-dashboards-plugin
+#    into ./opensearch-dashboards/OpenSearch-Dashboards/plugins/security-dashboards-plugin
+# 3. Clone https://github.com/opensearch-project/dashboards-search-relevance
+#    into ./opensearch-dashboards/OpenSearch-Dashboards/plugins/dashboards-search-relevance
+#
+# Build: docker build -f Dockerfile.prebuild -t chorus-opensearch-dashboards:prebuild .
+# Run: docker run -p 5601:5601 chorus-opensearch-dashboards:prebuild
+
+RUN apt-get update && \
+    apt-get -y install npm && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create user with home directory
+RUN groupadd -r opensearch-dashboards && \
+    useradd -r -g opensearch-dashboards -m opensearch-dashboards
+
+# Copy the entire OpenSearch Dashboards source tree into the image
+COPY --chown=opensearch-dashboards:opensearch-dashboards ./OpenSearch-Dashboards /home/opensearch-dashboards/
+
+WORKDIR /home/opensearch-dashboards
+
+# Create entrypoint script as root before switching users
+RUN cat > /usr/local/bin/docker-entrypoint.sh <<'EOF'
+#!/bin/bash
+set -e
+cd /home/opensearch-dashboards
+echo "Starting OpenSearch Dashboards..."
+exec yarn start --no-base-path
+EOF
+
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Switch to opensearch-dashboards user for building and running
+USER opensearch-dashboards
+
+# Run bootstrap during image build (this takes 10-20 minutes)
+RUN yarn osd bootstrap --single-version=loose && \
+    echo "Bootstrap completed during image build" > .bootstrapped
+
+EXPOSE 5601 5603
+
+CMD ["/usr/local/bin/docker-entrypoint.sh"]
