@@ -103,6 +103,15 @@ do
 	shift
 done
 
+# Check if .env file exists, if not copy from .env.example and prompt user
+if [ ! -f .env ]; then
+  echo -e "${MAJOR}No .env file found. Copying .env.example to .env${RESET}"
+  cp .env.example .env
+  echo -e "${ERROR}Please configure the .env file with your settings before running quickstart.sh again.${RESET}"
+  echo -e "${MAJOR}Edit .env and then re-run this script.${RESET}"
+  exit 1  
+fi
+
 services="opensearch-mcp-server-py opensearch-agent-server opensearch opensearch-dashboards middleware reactivesearch"
 
 if $offline_lab; then
