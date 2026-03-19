@@ -9,9 +9,12 @@ chorus-ubi-otel-pipeline:
       batch_size: 1
   sink:
     - opensearch:
-        hosts: [ "http://opensearch:9200" ]
+        hosts: [ "https://opensearch:9200" ]
         index_type: custom
         index: otel_ubi_events
+        username: "admin"
+        password: "MyStr0ng!P@ssw0rd2024"  
+        insecure: true      
 #    - stdout:
 chorus-ubi-pipeline:
   source:
@@ -20,7 +23,10 @@ chorus-ubi-pipeline:
       ssl: false
   sink:
     - opensearch:
-        hosts: [ "http://opensearch:9200" ]
+        hosts: [ "https://opensearch:9200" ]
         index_type: custom
         index: ubi_queries
+        username: "admin"
+        password: "MyStr0ng!P@ssw0rd2024"
+        insecure: true
     - stdout:
