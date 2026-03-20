@@ -108,7 +108,7 @@ if [ ! -f .env ]; then
   echo -e "${MAJOR}No .env file found. Copying .env.example to .env${RESET}"
   cp .env.example .env
   echo -e "${ERROR}Please configure the .env file with your settings before running quickstart.sh again.${RESET}"
-  echo -e "${MAJOR}Edit .env and then re-run this script.${RESET}"
+  echo -e "${MAJOR}Exiting....${RESET}"
   exit 1  
 fi
 
