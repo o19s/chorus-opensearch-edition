@@ -8,7 +8,7 @@ Chorus
 
 *Towards an open source tool stack for e-commerce search*
 
-**This is a fork of [chorus-elasticsearch-edition](https://github.com/querqy/chorus-elasticsearch-edition). Refer to that repository for more information on Chorus.**
+**This is a fork of [chorus-elasticsearch-edition](https://github.com/querqy/chorus-elasticsearch-edition) that has evolved significantly. Refer to that repository for more information on Chorus.**
 
 Chorus makes deploying powerful ecommerce search easier by shifting the **buy vs build** decision in favour of **build**, so you can own your search! Chorus deals with three issues:
 
@@ -65,7 +65,7 @@ To start your environment, but still run each command to set up the integrations
 docker compose up --build -d
 ```
 
-The quickstart script will launch OpenSearch, download and index the sample product data for the _ecommerce_ index:
+The quickstart script will launch OpenSearch, download and index the sample product data for the _ecommerce_ index, set up Search Relevance Workbench data and set up the sample Chorus users:
 
 ```
 ./quickstart.sh
