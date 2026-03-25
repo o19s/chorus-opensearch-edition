@@ -96,7 +96,7 @@ echo -e "${INFO}This will take 15-30 minutes as it runs yarn osd bootstrap...${R
 echo ""
 
 # Build the image
-if docker buildx build --platform linux/amd64 -f Dockerfile.prebuild -t "$FULL_IMAGE_NAME" .; then
+if docker buildx build --platform linux/amd64,linux/arm64 -f Dockerfile.prebuild -t "$FULL_IMAGE_NAME" .; then
     echo ""
     echo -e "${SUCCESS}✓ Image built successfully!${RESET}"
     echo -e "${INFO}Image: ${FULL_IMAGE_NAME}${RESET}"
