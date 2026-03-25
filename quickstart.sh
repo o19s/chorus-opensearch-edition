@@ -112,7 +112,7 @@ if [ ! -f .env ]; then
   exit 1  
 fi
 
-services="opensearch-mcp-server-py opensearch-agent-server opensearch opensearch-dashboards middleware reactivesearch"
+services="opensearch-dashboards opensearch-mcp-server-py opensearch-agent-server opensearch middleware reactivesearch"
 
 if $offline_lab; then
   services="${services} quepid"
@@ -136,8 +136,8 @@ if $stop; then
   exit
 fi
 
+docker compose down -t 30 -v
 if $shutdown; then
-  docker compose down -v
   exit
 fi
 
@@ -370,7 +370,7 @@ update_docs_task_id=$(os_curl -s -X POST "$OS_URL/ecommerce/_update_by_query?pip
 
 echo -e "${MAJOR}This process runs in the background. Plese give it a couple of minutes. You can check the progress with the following curl command:
 
-os_curl -s GET https://localhost:9200/_tasks/$update_docs_task_id\n${RESET}"
+curl -k -u 'admin:MyStr0ng!P@ssw0rd2024' -s GET https://localhost:9200/_tasks/$update_docs_task_id\n${RESET}"
 
 echo -e "${MAJOR}Waiting for OpenSearch Dashboards to start up and be online.${RESET}"
 ./opensearch-dashboards/wait-for-dashboards.sh

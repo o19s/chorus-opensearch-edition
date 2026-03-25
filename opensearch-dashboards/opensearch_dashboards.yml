@@ -19,7 +19,9 @@ uiSettings:
 
 chat:
   enabled: true
+  forwardCredentials: true
   agUiUrl: "http://opensearch-agent-server:8001/runs"
+#  fileUploadEnabled: true
   
 contextProvider:
   enabled: true

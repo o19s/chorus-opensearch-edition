@@ -16,7 +16,9 @@ echo "Setting up Chorus Team in OpenSearch"
 echo "=========================================="
 
 
-# Create product_manager role - read-only access to search-relevance-search-config index
+# Create product_manager role - read-write access to data indices, read-only on config
+# This demonstrates that product managers can work with data but cannot modify search configuration
+# Only relevance engineers have write access to search-relevance-search-config
 echo ""
 echo "Creating role: product_manager"
 curl -k -X PUT \
@@ -25,22 +27,47 @@ curl -k -X PUT \
   -u "${ADMIN_USER}:${ADMIN_PASSWORD}" \
   -d '{
     "cluster_permissions": [
-      "cluster_composite_ops_ro"
+      "cluster_composite_ops",
+      "indices_monitor",
+      "cluster:admin/opensearch/search_relevance/*"
     ],
-    "index_permissions": [{
-      "index_patterns": [
-        "search-relevance-search-config"
-      ],
-      "allowed_actions": [
-        "indices:admin/mappings/get",
-        "indices:admin/get"
-      ]
-    }]
+    "index_permissions": [
+      {
+        "index_patterns": [
+          "ecommerce",
+          "ecommerce_*",
+          "products",
+          "products_*",
+          "logs-*",
+          ".kibana*",
+          ".opensearch-dashboards*",
+          "search-relevance-*",
+          "ubi_*"
+        ],
+        "allowed_actions": [
+          "indices:data/read/*",
+          "indices:data/write/*",
+          "indices:admin/mappings/get",
+          "indices:admin/get",
+          "indices:admin/refresh",
+          "indices:admin/validate/query"
+        ]
+      },
+      {
+        "index_patterns": [
+          "search-relevance-search-config"
+        ],
+        "allowed_actions": [
+          "indices:data/read/*",
+          "indices:admin/mappings/get",
+          "indices:admin/get"
+        ]
+      }
+    ]
   }'
-  #"indices:data/read/*",
 
 
-# Create relevance_engineer role - full access to search-relevance-search-config index
+# Create relevance_engineer role - full access to all indices and cluster operations
 echo ""
 echo "Creating role: relevance_engineer"
 curl -k -X PUT \
@@ -49,12 +76,11 @@ curl -k -X PUT \
   -u "${ADMIN_USER}:${ADMIN_PASSWORD}" \
   -d '{
     "cluster_permissions": [
-      "cluster_composite_ops",
-      "indices_monitor"
+      "cluster:*"
     ],
     "index_permissions": [{
       "index_patterns": [
-        "search-relevance-search-config"
+        "*"
       ],
       "allowed_actions": [
         "indices:*"

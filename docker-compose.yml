@@ -83,7 +83,9 @@ services:
     
   opensearch:
     container_name: opensearch
-    build: ./opensearch/.
+    image: opensearchstaging/opensearch:3.6.0
+    #build: ./opensearch/.
+    
     environment:
       discovery.type: single-node
       node.name: opensearch
@@ -117,6 +119,8 @@ services:
       - ./opensearch/security/kirk-key.pem:/usr/share/opensearch/config/kirk-key.pem
       - ./opensearch/security/root-ca.pem:/usr/share/opensearch/config/root-ca.pem
       - ./opensearch/security/internal_users.yml:/usr/share/opensearch/config/opensearch-security/internal_users.yml
+      - ./opensearch/security/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml
+      #- ./opensearch/security/opensearch-security-3.6.0.0-SNAPSHOT.jar:/usr/share/opensearch/plugins/opensearch-security/opensearch-security-3.6.0.0.jar
     healthcheck:
       test: [ "CMD", "wget", "-q", "--no-check-certificate", "--user=admin", "--password=MyStr0ng!P@ssw0rd2024", "https://localhost:9200" ]
       interval: 30s
@@ -124,17 +128,18 @@ services:
       retries: 50
 
   opensearch-dashboards:
-    #build: ./opensearch-dashboards/.
     container_name: opensearch-dashboards
-    image: dep4b/ericstuff:osd
+    image: opensearchstaging/opensearch-dashboards:3.6.0
+    #build: ./opensearch-dashboards/.
+    
     ports:
       - 5601:5601
       - 5603:5603
     environment:
       OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
     volumes:
+      - ./opensearch-dashboards/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
       #- ./opensearch-dashboards/OpenSearch-Dashboards:/home/opensearch-dashboards
-      - ./opensearch-dashboards/opensearch_dashboards.yml:/home/opensearch-dashboards/config/opensearch_dashboards.yml
       #- opensearch-dashboards-node-modules:/home/opensearch-dashboards/node_modules
       #- opensearch-dashboards-cache:/home/opensearch-dashboards/.cache
       #- opensearch-dashboards-yarn:/home/opensearch-dashboards/.yarn            
