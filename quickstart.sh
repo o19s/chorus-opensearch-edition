@@ -110,6 +110,30 @@ if [ ! -f .env ]; then
   echo -e "${ERROR}Please configure the .env file with your settings before running quickstart.sh again.${RESET}"
   echo -e "${MAJOR}Exiting....${RESET}"
   exit 1  
+else
+  # Validate all keys from .env.example exist in .env
+  missing_keys=()
+  while IFS='=' read -r key value || [ -n "$key" ]; do
+    # Skip comments and empty lines
+    [[ "$key" =~ ^[[:space:]]*# ]] && continue
+    [[ -z "$key" ]] && continue
+    # Remove leading/trailing whitespace from key
+    key=$(echo "$key" | xargs)
+    # Check if key exists in .env
+    if ! grep -q "^${key}=" .env; then
+      missing_keys+=("$key")
+    fi
+  done < .env.example
+  
+  if [ ${#missing_keys[@]} -gt 0 ]; then
+    echo -e "${ERROR}Missing required keys in .env file:${RESET}"
+    for key in "${missing_keys[@]}"; do
+      echo -e "${ERROR}  - $key${RESET}"
+    done
+    echo -e "${MAJOR}Please add these keys to your .env file (see .env.example for reference).${RESET}"
+    echo -e "${MAJOR}Exiting....${RESET}"
+    exit 1
+  fi
 fi
 
 services="opensearch-dashboards opensearch-mcp-server-py opensearch-agent-server opensearch middleware reactivesearch"
