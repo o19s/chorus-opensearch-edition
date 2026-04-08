@@ -98,7 +98,7 @@ BACKEND_ROLES='["kibana_user", "readall", "product_manager"]'
 OPENSEARCH_ROLES='["kibana_user", "readall", "product_manager"]'
 
 echo ""
-echo "Creating user: ${USERNAME} (${FULL_NAME})"
+echo "Creating user: ${USERNAME} (${FULL_NAME}) w/ password ${ADMIN_PASSWORD}"
 
 curl -k -X PUT \
   "${OPENSEARCH_HOST}/_plugins/_security/api/internalusers/${USERNAME}" \
@@ -123,7 +123,7 @@ BACKEND_ROLES='["kibana_user", "readall", "relevance_engineer"]'
 OPENSEARCH_ROLES='["kibana_user", "readall", "relevance_engineer"]'
 
 echo ""
-echo "Creating user: ${USERNAME} (${FULL_NAME})"
+echo "Creating user: ${USERNAME} (${FULL_NAME}) w/ password ${ADMIN_PASSWORD}"
 
 curl -k -X PUT \
   "${OPENSEARCH_HOST}/_plugins/_security/api/internalusers/${USERNAME}" \
@@ -149,7 +149,7 @@ BACKEND_ROLES='["kibana_user", "readall", "product_manager"]'
 OPENSEARCH_ROLES='["kibana_user", "readall", "product_manager"]'
 
 echo ""
-echo "Creating user: ${USERNAME} (${FULL_NAME})"
+echo "Creating user: ${USERNAME} (${FULL_NAME}) w/ password ${ADMIN_PASSWORD}"
 
 curl -k -X PUT \
   "${OPENSEARCH_HOST}/_plugins/_security/api/internalusers/${USERNAME}" \
