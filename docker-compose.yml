@@ -128,7 +128,7 @@ services:
 
   opensearch-dashboards:
     container_name: opensearch-dashboards
-    image: opensearchstaging/opensearch-dashboards:3.7.0
+    #image: opensearchstaging/opensearch-dashboards:3.7.0
     build: ./opensearch-dashboards/.
     
     ports:

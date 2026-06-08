@@ -28,18 +28,21 @@ contextProvider:
 
 # Login page customization (Security plugin basic auth)
 opensearch_security.ui.basicauth.login.title: "Chorus OpenSearch Edition"
-opensearch_security.ui.basicauth.login.subtitle: "Sign in as rumi, pete, admin, with the password MyStr0ng!P@ssw0rd2024"
+opensearch_security.ui.basicauth.login.subtitle: "Sign in as either 'rumi', 'pete', or 'admin', with the password MyStr0ng!P@ssw0rd2024"
 opensearch_security.ui.basicauth.login.showbrandimage: true
-opensearch_security.ui.basicauth.login.brandimage: "/ui/assets/chorus-logo.png"
+opensearch_security.ui.basicauth.login.brandimage: "/ui/chorus-logo.png"
 opensearch_security.ui.basicauth.login.buttonstyle: ""
 
 # Full-page branding (nav, favicon, loading screen)
+# Assets have transparent backgrounds, so they work on both light and dark themes
+# — darkModeUrl is omitted and falls back to defaultUrl per OSD docs.
 opensearchDashboards.branding:
   applicationTitle: "Chorus OpenSearch Edition"
   logo:
-    defaultUrl: "/ui/assets/chorus-logo.png"
-  mark:
-    defaultUrl: "/ui/assets/chorus-logo.png"
+    defaultUrl: "/ui/chorus-logo.png"
+  # `mark` (collapsed-nav square) intentionally omitted — the only swirl-only
+  # asset available is a 16x16 .ico that's too small to upscale cleanly. The
+  # OpenSearch default mark is used until a higher-res swirl is provided.
   loadingLogo:
-    defaultUrl: "/ui/assets/chorus-logo.png"
-  faviconUrl: "/ui/assets/chorus-logo.png"
+    defaultUrl: "/ui/chorus-logo.png"
+  faviconUrl: "/ui/chorus-favicon.ico"
