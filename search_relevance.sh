@@ -33,7 +33,11 @@ curl -k -u 'admin:MyStr0ng!P@ssw0rd2024' -XPOST "$OS_URL/ubi_queries/_refresh"
 echo
 curl -k -u 'admin:MyStr0ng!P@ssw0rd2024' -XPOST "$OS_URL/ubi_events/_refresh"
 
-read -r -d '' QUERY_BODY << EOF
+# `read -d '' VAR << EOF` always exits non-zero (read returns 1 when it hits
+# EOF without finding the -d delimiter — '' matches NUL, which heredocs never
+# contain). The variable IS set correctly; only the exit code is misleading.
+# Without `|| true` this terminates the script under `set -e`.
+read -r -d '' QUERY_BODY << EOF || true
 {
   "query": {
     "match_all": {}
