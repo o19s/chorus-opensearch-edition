@@ -40,9 +40,6 @@ opensearchDashboards.branding:
   applicationTitle: "Chorus OpenSearch Edition"
   logo:
     defaultUrl: "/ui/chorus-logo.png"
-  # `mark` (collapsed-nav square) intentionally omitted — the only swirl-only
-  # asset available is a 16x16 .ico that's too small to upscale cleanly. The
-  # OpenSearch default mark is used until a higher-res swirl is provided.
   loadingLogo:
     defaultUrl: "/ui/chorus-logo.png"
   faviconUrl: "/ui/chorus-favicon.ico"
