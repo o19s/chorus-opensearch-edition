@@ -1,4 +1,5 @@
-#!/bin/bash -e
+#!/bin/bash
+set -euo pipefail
 
 # This script starts up Chorus and runs through the basic setup tasks.
 
@@ -400,11 +401,18 @@ curl -k -u 'admin:MyStr0ng!P@ssw0rd2024' -s GET https://localhost:9200/_tasks/$u
 echo -e "${MAJOR}Waiting for OpenSearch Dashboards to start up and be online.${RESET}"
 ./opensearch-dashboards/wait-for-dashboards.sh
 
-echo -e "${MAJOR}Installing User Behavior Insights Dashboards...\n${RESET}"
-curl -u 'admin:MyStr0ng!P@ssw0rd2024' -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H "osd-xsrf: true" --form file=@opensearch-dashboards/ubi_dashboard.ndjson > /dev/null
+# Create (or look up) the "Chorus Production" workspace BEFORE importing dashboards
+# so each import can use the workspace-scoped URL and the dashboards show up in the
+# workspace UI rather than only in the global namespace.
+echo -e "${MAJOR}Looking up / creating Chorus Production workspace...${RESET}"
+WORKSPACE_ID=$(./setup_chorus_workspace.sh)
+WS_IMPORT_URL="http://localhost:5601/w/${WORKSPACE_ID}/api/saved_objects/_import?overwrite=true"
 
-echo -e "${MAJOR}Installing Team Draft Interleaving Dashboards...\n${RESET}"
-curl -u 'admin:MyStr0ng!P@ssw0rd2024' -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H "osd-xsrf: true" --form file=@opensearch-dashboards/tdi_dashboard.ndjson > /dev/null
+echo -e "${MAJOR}Installing User Behavior Insights Dashboards into workspace...\n${RESET}"
+curl -u 'admin:MyStr0ng!P@ssw0rd2024' -X POST "$WS_IMPORT_URL" -H "osd-xsrf: true" --form file=@opensearch-dashboards/ubi_dashboard.ndjson > /dev/null
+
+echo -e "${MAJOR}Installing Team Draft Interleaving Dashboards into workspace...\n${RESET}"
+curl -u 'admin:MyStr0ng!P@ssw0rd2024' -X POST "$WS_IMPORT_URL" -H "osd-xsrf: true" --form file=@opensearch-dashboards/tdi_dashboard.ndjson > /dev/null
 
 echo -e "${MAJOR}Fetching latest Search Result Quality Evaluation Dashboard, sample data and install script...\n${RESET}"
 
@@ -421,9 +429,11 @@ curl -s -o build/sample_data.ndjson https://raw.githubusercontent.com/o19s/opens
 # mappings for search quality metrics sample data index
 curl -s -o build/srw_metrics_mappings.json https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/srw_metrics_mappings.json
 
-echo -e "${MAJOR}Installing Search Result Quality Evaluation Dashboard...\n${RESET}"
+echo -e "${MAJOR}Installing Search Result Quality Evaluation Dashboard into workspace...\n${RESET}"
 chmod +x build/install_dashboards.sh
-./build/install_dashboards.sh https://localhost:9200 http://localhost:5601
+# Pass the workspace-scoped OSD URL so install_dashboards.sh's POST to
+# "$opensearch_dashboard/api/saved_objects/_import" lands in the workspace.
+./build/install_dashboards.sh https://localhost:9200 "http://localhost:5601/w/${WORKSPACE_ID}"
 
 ## configure the SRW search configurations
 echo -e "${MAJOR}Creating Search Relevance entities...\n${RESET}"

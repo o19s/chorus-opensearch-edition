@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # This script sets up sample data to exercise the features of the Search Relevance Workbench.
 #
@@ -7,8 +8,11 @@
 # OpenSearch connection settings
 OS_URL="https://localhost:9200"
 
-# Helper script for capturing return values from curl commands
-exe() { (set -x ; curl -k -u 'admin:MyStr0ng!P@ssw0rd2024' "$@") | jq | tee build/RES; echo; }
+# Helper script for capturing return values from curl commands.
+# -f makes curl exit non-zero on HTTP 4xx/5xx; combined with pipefail above,
+# any auth/404/5xx failure terminates the script instead of producing "null"
+# IDs that silently corrupt the downstream experiment config.
+exe() { (set -x ; curl -fsSk -u 'admin:MyStr0ng!P@ssw0rd2024' "$@") | jq | tee build/RES; echo; }
 
 
 echo Deleting UBI indexes
