@@ -41,7 +41,10 @@ curl -k -X PUT \
           "logs-*",
           ".kibana*",
           ".opensearch-dashboards*",
-          "search-relevance-*",
+          "search-relevance-experiment*",
+          "search-relevance-judgment*",
+          "search-relevance-queryset*",
+          "search-relevance-evaluation-result*",
           "ubi_*"
         ],
         "allowed_actions": [
