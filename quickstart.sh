@@ -160,10 +160,11 @@ if $stop; then
   exit
 fi
 
-docker compose down -t 30 -v
 if $shutdown; then
+  docker compose down -t 30 -v
   exit
 fi
+docker compose down -t 30
 
 # Using pre-prepared sample data instead of downloading and transforming
 echo -e "${MAJOR}Using pre-prepared sample data for quicker startup\n${RESET}"
