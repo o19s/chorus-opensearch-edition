@@ -401,10 +401,10 @@ echo -e "${MAJOR}Waiting for OpenSearch Dashboards to start up and be online.${R
 ./opensearch-dashboards/wait-for-dashboards.sh
 
 echo -e "${MAJOR}Installing User Behavior Insights Dashboards...\n${RESET}"
-curl -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H "osd-xsrf: true" --form file=@opensearch-dashboards/ubi_dashboard.ndjson > /dev/null
+curl -u 'admin:MyStr0ng!P@ssw0rd2024' -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H "osd-xsrf: true" --form file=@opensearch-dashboards/ubi_dashboard.ndjson > /dev/null
 
 echo -e "${MAJOR}Installing Team Draft Interleaving Dashboards...\n${RESET}"
-curl -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H "osd-xsrf: true" --form file=@opensearch-dashboards/tdi_dashboard.ndjson > /dev/null
+curl -u 'admin:MyStr0ng!P@ssw0rd2024' -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" -H "osd-xsrf: true" --form file=@opensearch-dashboards/tdi_dashboard.ndjson > /dev/null
 
 echo -e "${MAJOR}Fetching latest Search Result Quality Evaluation Dashboard, sample data and install script...\n${RESET}"
 
@@ -412,8 +412,10 @@ echo -e "${MAJOR}Fetching latest Search Result Quality Evaluation Dashboard, sam
 curl -s -o build/search_dashboard.ndjson https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/search_dashboard.ndjson
 # Install script
 curl -s -o build/install_dashboards.sh https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/install_dashboards.sh
-# Patch downloaded script to use HTTPS with credentials
-sed -i.bu "s/curl -s/curl -k -s -u 'admin:MyStr0ng!P@ssw0rd2024'/g" build/install_dashboards.sh
+# Patch downloaded script: prepend auth (and -k for HTTPS) to every curl invocation.
+# Matches `curl ` at the start of a line so it catches both `curl -s …` (OS calls)
+# and `curl -X POST …` (the OSD saved_objects/_import call) regardless of flags.
+sed -i.bu "s|^curl |curl -k -u 'admin:MyStr0ng!P@ssw0rd2024' |g" build/install_dashboards.sh
 # sample data
 curl -s -o build/sample_data.ndjson https://raw.githubusercontent.com/o19s/opensearch-search-quality-evaluation/refs/heads/main/opensearch-dashboard-prototyping/sample_data.ndjson
 # mappings for search quality metrics sample data index

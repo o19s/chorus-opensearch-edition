@@ -5,7 +5,9 @@ from opensearchpy import OpenSearch
 import os
 
 OPENSEARCH_HOST = os.getenv("OPENSEARCH_HOST", "opensearch")
-OPENSEARCH_PORT = os.getenv("OPENSEARCH_PORT", 9200)
+OPENSEARCH_PORT = int(os.getenv("OPENSEARCH_PORT", 9200))
+OPENSEARCH_USERNAME = os.getenv("OPENSEARCH_USERNAME", "admin")
+OPENSEARCH_PASSWORD = os.getenv("OPENSEARCH_PASSWORD", "MyStr0ng!P@ssw0rd2024")
 SEARCH_CONFIGS_INDEX = os.getenv("SEARCH_CONFIGS_INDEX", 'search-relevance-search-config')
 UBI_EVENTS_INDEX = os.getenv("UBI_EVENTS_INDEX", 'ubi_events')
 EMPTY_RESULT = {
@@ -29,8 +31,14 @@ EMPTY_RESULT = {
 
 class Interleave:
     def __init__(self):
-        self.client = OpenSearch(hosts=[{'host': OPENSEARCH_HOST, 'port': OPENSEARCH_PORT}],
-                                 http_compress=True, use_ssl=False)
+        self.client = OpenSearch(
+            hosts=[{'host': OPENSEARCH_HOST, 'port': OPENSEARCH_PORT}],
+            http_compress=True,
+            http_auth=(OPENSEARCH_USERNAME, OPENSEARCH_PASSWORD),
+            use_ssl=True,
+            verify_certs=False,
+            ssl_show_warn=False,
+        )
         self.label_a = 'TeamA'
         self.label_b = 'TeamB'
 
