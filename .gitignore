@@ -1,6 +1,7 @@
 volumes
-art/strands-opensearch-agent/
-art/agentic-relevance-tuning/
+opensearch-agent-server/opensearch-agent-server/
+opensearch-mcp-server-py/opensearch-mcp-server-py/
+opensearch-dashboards/OpenSearch-Dashboards/
 .env
 build/
 .idea/
@@ -16,3 +17,4 @@ __pycache__/
 
 reactivesearch/node_modules
 RES
+.workspace_id

@@ -2,9 +2,10 @@ services:
 
   dataprepper:
     depends_on:
-      - opensearch
+      opensearch:
+        condition: service_healthy
     container_name: dataprepper
-    image: opensearchproject/data-prepper:2.8.0
+    image: opensearchproject/data-prepper:2.15.1
     ports:
       - "4900:4900"
       - "2021:2021"
@@ -21,65 +22,78 @@ services:
     volumes:
       - ./middleware:/python-docker/
     
-  art:
-    container_name: art
-    build: ./art
+  opensearch-agent-server:
+    container_name: opensearch-agent-server
+    build: ./opensearch-agent-server
     ports:
       - "8001:8001"    
     environment:
-      AG_UI_ENABLE_PERSISTENCE: true
-      AG_UI_CORS_ORIGINS: '*'
+      OPENSEARCH_URL: https://opensearch:9200 # needed?
+      OPENSEARCH_SSL_VERIFY: false # needed?
+      MCP_SERVER_URL: http://opensearch-mcp-server-py:3001/mcp/
       AG_UI_AUTH_ENABLED: false
-      AG_UI_RELAX_VALIDATION: true
-      OPENSEARCH_URL: http://opensearch:9200
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://phoenix:6006
-      
+      AG_UI_CORS_ORIGINS: http://localhost:5601
+      AG_UI_LOG_FORMAT: human
+      AG_UI_LOG_LEVEL: INFO
     env_file: ".env"     
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
       interval: 5s
       timeout: 1s
       retries: 5
-    volumes:
-      - ./art/agentic-relevance-tuning:/python-docker   
+    #volumes:
+      #- ./opensearch-agent-server/opensearch-agent-server:/python-docker
     depends_on:
-      - opensearch
-      - phoenix
+      opensearch:
+        condition: service_healthy
+      opensearch-mcp-server-py:
+        condition: service_healthy
   
-  phoenix:
-    container_name: phoenix
-    image: arizephoenix/phoenix:12.6.1
+  opensearch-mcp-server-py:
+    container_name: opensearch-mcp-server-py
+    build: ./opensearch-mcp-server-py
     ports:
-      - "6006:6006"  # UI and OTLP HTTP collector
-      - "4317:4317"  # OTLP gRPC collector
+      - "3001:3001"    
+    environment:
+      OPENSEARCH_URL: https://opensearch:9200 
+      OPENSEARCH_SSL_VERIFY: false
+      OPENSEARCH_ENABLED_CATEGORIES: search_relevance 
+      OPENSEARCH_HEADER_AUTH: true
+    env_file: ".env"
     healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:6006/healthz')"]
+      # `/mcp` returns 307 (redirect to `/mcp/`). curl -sf considers 3xx success
+      # and the 307 only fires once the MCP route is fully registered — so this
+      # tests both "HTTP server up" AND "MCP route mounted", not just port-open.
+      test: ["CMD", "curl", "-sf", "-o", "/dev/null", "http://localhost:3001/mcp"]
       interval: 5s
-      timeout: 1s
-      retries: 5
-    volumes:
-      - ./volumes/phoenix:/root/.phoenix
-    
+      timeout: 2s
+      retries: 10
+      start_period: 30s
+    #volumes:
+    #  - ./opensearch-mcp-server-py/opensearch-mcp-server-py:/python-docker
+    depends_on:
+      opensearch:
+        condition: service_healthy
+
   opensearch:
     container_name: opensearch
-    build: ./opensearch/.
+    image: opensearchstaging/opensearch:3.7.0
+    #build: ./opensearch/.
+    
     environment:
       discovery.type: single-node
       node.name: opensearch
       cluster.name: opensearch
       discovery.seed_hosts: opensearch
       bootstrap.memory_lock: true
-      # plugins.security.disabled: "true"
       http.cors.enabled: true
       # Warning: this is opening it up to all cross domains
       http.cors.allow-origin: "*"
       http.cors.allow-methods: OPTIONS,HEAD,GET,POST,PUT,DELETE
       http.cors.allow-credentials: true
       http.cors.allow-headers: X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization,test,access-control-allow-headers,x-search-query,X-Search-Id,X-Search-Filters,X-ubi-query-id,X-ubi-store,X-ubi-user-id,X-ubi-session-id,x-search-client,Access-Control-Expose-Headers
-      DISABLE_INSTALL_DEMO_CONFIG: true
-      DISABLE_SECURITY_PLUGIN: true # disable security plugin only for demo
-      OPENSEARCH_INITIAL_ADMIN_PASSWORD: Mysupersecretpassword_123
       OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx4g"
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
 
     ulimits:
       memlock:
@@ -93,26 +107,41 @@ services:
       - 9600:9600 # required for Performance Analyzer
     volumes:
       - opensearch-data:/usr/share/opensearch/data
+      - ./opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
+      - ./opensearch/security/esnode.pem:/usr/share/opensearch/config/esnode.pem
+      - ./opensearch/security/esnode-key.pem:/usr/share/opensearch/config/esnode-key.pem
+      - ./opensearch/security/kirk.pem:/usr/share/opensearch/config/kirk.pem
+      - ./opensearch/security/kirk-key.pem:/usr/share/opensearch/config/kirk-key.pem
+      - ./opensearch/security/root-ca.pem:/usr/share/opensearch/config/root-ca.pem
+      - ./opensearch/security/internal_users.yml:/usr/share/opensearch/config/opensearch-security/internal_users.yml
+      - ./opensearch/security/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml
     healthcheck:
-      test: [ "CMD", "wget", "http://localhost:9200" ]
+      test: ["CMD-SHELL", "curl -skf -u admin:MyStr0ng!P@ssw0rd2024 https://localhost:9200 >/dev/null"]
       interval: 30s
       timeout: 10s
       retries: 50
+      start_period: 60s
 
   opensearch-dashboards:
-    build: ./opensearch-dashboards/.
     container_name: opensearch-dashboards
+    #image: opensearchstaging/opensearch-dashboards:3.7.0
+    build: ./opensearch-dashboards/.
+    
     ports:
       - 5601:5601
-    expose:
-      - 5601
+      - 5603:5603
     environment:
-      OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
-      DISABLE_SECURITY_PLUGIN: true
-      DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
+      OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
+    volumes:
+      - ./opensearch-dashboards/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
+      #- ./opensearch-dashboards/OpenSearch-Dashboards:/home/opensearch-dashboards
+      #- opensearch-dashboards-node-modules:/home/opensearch-dashboards/node_modules
+      #- opensearch-dashboards-cache:/home/opensearch-dashboards/.cache
+      #- opensearch-dashboards-yarn:/home/opensearch-dashboards/.yarn
     depends_on:
-      - opensearch
-      
+      opensearch:
+        condition: service_healthy
+
   reactivesearch:
     container_name: reactivesearch
     build: ./reactivesearch/.
@@ -171,3 +200,6 @@ services:
 
 volumes:
   opensearch-data:
+  opensearch-dashboards-node-modules:
+  opensearch-dashboards-cache:
+  opensearch-dashboards-yarn:

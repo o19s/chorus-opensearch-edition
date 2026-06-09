@@ -1,16 +1,52 @@
 ---
 server.name: opensearch-dashboards
 server.host: "0.0.0.0"
-#opensearch.hosts: http://localhost:9200
+opensearch.hosts: ["https://opensearch:9200"]
+opensearch.ssl.verificationMode: none
+opensearch.requestHeadersWhitelist: ["securitytenant","Authorization"]
 
+# OpenSearch credentials
+opensearch.username: "admin"
+opensearch.password: "MyStr0ng!P@ssw0rd2024"
+
+# Fixed cookie-signing password so session cookies stay valid across container
+# recreations. Without this, OSD generates a random key on each startup and any
+# browser cookie from a prior run becomes invalid — which surfaces as 500
+# "Authentication Exception" errors on GET / until the user clears cookies.
+# Must be at least 32 characters. Rotate (and restart OSD) to force re-login.
+opensearch_security.cookie.password: "chorus-osd-cookie-signing-key-please-rotate"
 
 data_source.enabled: true
 workspace.enabled: true
 explore.enabled: true
 
+uiSettings:
+  overrides:
+    "home:useNewHomePage": true
+
 chat:
   enabled: true
-  agUiUrl: "http://art:8001/runs"
+  forwardCredentials: true
+  agUiUrl: "http://opensearch-agent-server:8001/runs"
+#  fileUploadEnabled: true
   
 contextProvider:
   enabled: true
+
+# Login page customization (Security plugin basic auth)
+opensearch_security.ui.basicauth.login.title: "Chorus OpenSearch Edition"
+opensearch_security.ui.basicauth.login.subtitle: "Sign in as either 'rumi', 'pete', or 'admin', with the password MyStr0ng!P@ssw0rd2024"
+opensearch_security.ui.basicauth.login.showbrandimage: true
+opensearch_security.ui.basicauth.login.brandimage: "/ui/chorus-logo.png"
+opensearch_security.ui.basicauth.login.buttonstyle: ""
+
+# Full-page branding (nav, favicon, loading screen)
+# Assets have transparent backgrounds, so they work on both light and dark themes
+# — darkModeUrl is omitted and falls back to defaultUrl per OSD docs.
+opensearchDashboards.branding:
+  applicationTitle: "Chorus OpenSearch Edition"
+  logo:
+    defaultUrl: "/ui/chorus-logo.png"
+  loadingLogo:
+    defaultUrl: "/ui/chorus-logo.png"
+  faviconUrl: "/ui/chorus-favicon.ico"

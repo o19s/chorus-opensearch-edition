@@ -1,13 +1,15 @@
 # Security
 
-**We have disabled security in OpenSearch for now.**
-
 This table contains the username and password combinations for each of the components. We distinguish between technical users and admin users.
 
-| Component     | Username                    | Password     | Origin               | Usage          |
-|---------------|-----------------------------|--------------|----------------------|----------------|
-| Quepid        | admin@choruselectronics.com | password     | `quickstart.sh`      | Admin User     |
-| MySQL         | root                        | password     | `docker-compose.yml` | Admin User     |
+| Component     | Username                    | Password              | Origin                | Usage          |
+|---------------|-----------------------------|-----------------------|-----------------------|----------------|
+| Quepid        | admin@choruselectronics.com | password              | `quickstart.sh`       | Admin User     |
+| MySQL         | root                        | password              | `docker-compose.yml`  | Admin User     |
+| OpenSearch    | admin                       | MyStr0ng!P@ssw0rd2024 | `docker-compose.yml`  | Admin User     |
+| OS Dashboard  | pete                        | MyStr0ng!P@ssw0rd2024 | `setup_chorus_team.sh`| Product Manager|
+| OS Dashboard  | rumi                        | MyStr0ng!P@ssw0rd2024 | `setup_chorus_team.sh`| Relevance Engr |
+| OS Dashboard  | eddie                       | MyStr0ng!P@ssw0rd2024 | `setup_chorus_team.sh`| Expert User    |
 
 # Webapp and CORS
 

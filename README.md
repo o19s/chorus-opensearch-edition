@@ -8,7 +8,7 @@ Chorus
 
 *Towards an open source tool stack for e-commerce search*
 
-**This is a fork of [chorus-elasticsearch-edition](https://github.com/querqy/chorus-elasticsearch-edition). Refer to that repository for more information on Chorus.**
+**This is a fork of [chorus-elasticsearch-edition](https://github.com/querqy/chorus-elasticsearch-edition) that has evolved significantly. Refer to that repository for more information on Chorus.**
 
 Chorus makes deploying powerful ecommerce search easier by shifting the **buy vs build** decision in favour of **build**, so you can own your search! Chorus deals with three issues:
 
@@ -31,7 +31,8 @@ Want to stay up-to-date with the community? Visit https://querqy.org/ to learn m
 * OpenSearch Dashboards runs at http://localhost:5601/app/home |  http://chorus-opensearch-edition.dev.o19s.com:5601/app/home
 * OpenSearch Data Prepper runs at http://localhost:2021/ |  http://chorus-opensearch-edition.dev.o19s.com:2021/
 * Quepid runs at http://localhost:4000  |  http://chorus-opensearch-edition.dev.o19s.com:4000
-* Phoenix runs at http://localhost:6006  |  http://chorus-opensearch-edition.dev.o19s.com:6006
+* OpenSearch Agent Server runs at http://localhost:8001  |  http://chorus-opensearch-edition.dev.o19s.com:8001
+* OpenSearch MCP Tools Server runs at http://localhost:3001  |  http://chorus-opensearch-edition.dev.o19s.com:3001
 
 # 5 Minutes to Run Chorus!
 
@@ -63,7 +64,7 @@ To start your environment, but still run each command to set up the integrations
 docker compose up --build -d
 ```
 
-The quickstart script will launch OpenSearch, download and index the sample product data for the _ecommerce_ index:
+The quickstart script will launch OpenSearch, download and index the sample product data for the _ecommerce_ index, set up Search Relevance Workbench data and set up the sample Chorus users:
 
 ```
 ./quickstart.sh
