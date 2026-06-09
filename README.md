@@ -31,7 +31,6 @@ Want to stay up-to-date with the community? Visit https://querqy.org/ to learn m
 * OpenSearch Dashboards runs at http://localhost:5601/app/home |  http://chorus-opensearch-edition.dev.o19s.com:5601/app/home
 * OpenSearch Data Prepper runs at http://localhost:2021/ |  http://chorus-opensearch-edition.dev.o19s.com:2021/
 * Quepid runs at http://localhost:4000  |  http://chorus-opensearch-edition.dev.o19s.com:4000
-* Phoenix runs at http://localhost:6006  |  http://chorus-opensearch-edition.dev.o19s.com:6006
 * OpenSearch Agent Server runs at http://localhost:8001  |  http://chorus-opensearch-edition.dev.o19s.com:8001
 * OpenSearch MCP Tools Server runs at http://localhost:3001  |  http://chorus-opensearch-edition.dev.o19s.com:3001
 

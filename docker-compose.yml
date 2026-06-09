@@ -66,21 +66,7 @@ services:
     #  - ./opensearch-mcp-server-py/opensearch-mcp-server-py:/python-docker
     depends_on:
       - opensearch
-  
-  phoenix:
-    container_name: phoenix
-    image: arizephoenix/phoenix:12.6.1
-    ports:
-      - "6006:6006"  # UI and OTLP HTTP collector
-      - "4317:4317"  # OTLP gRPC collector
-    healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:6006/healthz')"]
-      interval: 5s
-      timeout: 1s
-      retries: 5
-    volumes:
-      - ./volumes/phoenix:/root/.phoenix
-    
+
   opensearch:
     container_name: opensearch
     image: opensearchstaging/opensearch:3.7.0
