@@ -53,7 +53,7 @@ export default function Home() {
 
         <main className="flex-1 flex flex-col h-full overflow-hidden border border-gray-200 rounded-lg pt-4 px-4 pb-2 shadow-sm bg-gray-50">
           <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
-            {/* min-h-[1200px] simulates content height so you can see the local scroll working */}
+           
             <div className="min-h-300 flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-300 rounded bg-gray-100">
               Product Grid Placeholder (Scroll inside here)
             </div>

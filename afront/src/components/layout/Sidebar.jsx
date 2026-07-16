@@ -1,5 +1,5 @@
 export default function Sidebar() {
-  // Static dummy data matching image_5a0f9f.png
+  
   const staticFilters = [
     { id: 1, name: "Clothing, Shoes & Jewelry", count: 1871, checked: true },
     { id: 2, name: "Home & Kitchen", count: 1029, checked: false },
