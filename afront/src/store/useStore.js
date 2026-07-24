@@ -19,11 +19,16 @@ const initialClientId =
   sessionStorage.getItem("client_id") || "CLIENT-" + generateGuid();
 sessionStorage.setItem("client_id", initialClientId);
 
+const initialSessionId =
+  sessionStorage.getItem("session_id") || "SESSION-" + generateGuid();
+sessionStorage.setItem("session_id", initialSessionId);
+
 const event_server = "http://localhost:9090";
 const ubiClient = new UbiClient(event_server);
 
 export const useStore = create((set, get) => ({
   clientId: initialClientId,
+  sessionId: initialSessionId,
   queryId: null,
   searchQuery: "",
   results: [],

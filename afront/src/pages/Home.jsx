@@ -73,12 +73,12 @@ export default function Home() {
       </header>
 
       <div className="flex-1 flex overflow-hidden min-h-0 pl-6 pt-1 pr-1 pb-1 gap-14">
-        <aside className="w-full md:w-72 shrink-0 h-full overflow-y-auto pr-2 custom-scrollbar">
+        <aside className="w-full md:w-72 shrink-0 h-full overflow-y-auto pr-2">
           <Sidebar />
         </aside>
 
         <main className="flex-1 flex flex-col h-full overflow-hidden border border-gray-200 rounded-lg pt-4 px-4 pb-2 shadow-sm bg-gray-50">
-          <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-2 ">
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {results.map((item, index) => (
                 <div

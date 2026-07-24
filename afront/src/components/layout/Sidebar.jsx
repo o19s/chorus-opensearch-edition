@@ -8,7 +8,7 @@ export default function Sidebar() {
     <div className="flex flex-col gap-6 w-full pr-2 select-none">
       <div className="flex flex-col gap-2">
         <h3 className="font-bold text-sm text-gray-800">Pick your Algo</h3>
-        <select className="border border-gray-300 rounded p-1 text-sm bg-white w-full max-w-37.5">
+        <select className="border border-gray-300 rounded p-1 text-sm bg-white w-full max-w-[150px]">
           <option value="default">Keyword</option>
           <option value="neural">Neural</option>
           <option value="hybrid">Hybrid</option>
@@ -19,7 +19,7 @@ export default function Sidebar() {
         <h3 className="font-bold text-sm text-gray-800">
           Filter by Product Types
         </h3>
-        <div className="flex flex-col pr-1 max-h-96 overflow-y-auto border border-transparent custom-scrollbar">
+        <div className="flex flex-col pr-1 max-h-96 overflow-y-auto border border-transparent">
           {productTypes.map((bucket, index) => (
             <label
               key={index}
