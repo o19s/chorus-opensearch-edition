@@ -178,6 +178,10 @@ echo -e "${MAJOR}Compiling the ubi-hits-search-pipeline OpenSearch plugin...${RE
 (cd ubi-hits-search-pipeline-plugin && ./gradlew build --console=plain)
 cp ubi-hits-search-pipeline-plugin/build/distributions/ubi-hits-search-pipeline-*.zip ./opensearch/ubi-hits-search-pipeline.zip
 
+echo -e "${MAJOR}Compiling the inner-hits-search-pipeline OpenSearch plugin...${RESET}"
+(cd inner-hits-search-pipeline-plugin && ./gradlew build --console=plain)
+cp inner-hits-search-pipeline-plugin/build/distributions/inner-hits-search-pipeline-*.zip ./opensearch/inner-hits-search-pipeline.zip
+
 docker compose up -d --build ${services}
 
 echo -e "${MAJOR}Waiting for OpenSearch to start up and be online.${RESET}"
@@ -323,6 +327,16 @@ os_curl -s -X PUT "$OS_URL/_search/pipeline/capture-replay-index" \
     "description": "Expands ubi_queries query_response_hit_ids into individual search hits",
     "response_processors": [
       { "ubi_hits_to_docs": {} }
+    ]
+  }'
+echo -e "\n"
+
+os_curl -s -X PUT "$OS_URL/_search/pipeline/capture-replay-inner-index" \
+  -H 'Content-Type: application/json' \
+  --data-binary '{
+    "description": "Maps inner hits to search hits",
+    "response_processors": [
+      { "inner_hits_to_docs": { "inner_hits_documents_field": "documents" } }
     ]
   }'
 echo -e "\n"

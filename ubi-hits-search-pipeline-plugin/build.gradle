@@ -36,11 +36,11 @@ jar {
 
 processResources {
     expand(
-        'name': pluginName,
-        'description': 'Expands ubi_queries query_response_hit_ids into individual search hits',
-        'version': version,
-        'opensearchVersion': opensearchVersion,
-        'className': 'org.opensearch.search.pipeline.ubi.UbiHitsPlugin'
+            'name': pluginName,
+            'description': 'Expands ubi_queries query_response_hit_ids into individual search hits',
+            'version': version,
+            'opensearchVersion': opensearchVersion,
+            'className': 'org.opensearch.search.pipeline.ubi.UbiHitsPlugin'
     )
 }
 
