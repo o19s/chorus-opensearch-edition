@@ -6,7 +6,7 @@ opensearch-dashboards/OpenSearch-Dashboards/
 build/
 .gradle/
 .idea/
-opensearch/ubi-hits-search-pipeline.zip
+opensearch/*.zip
 .vscode/
 *.bu
 *.DS_Store
