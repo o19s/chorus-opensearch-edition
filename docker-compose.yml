@@ -77,9 +77,9 @@ services:
 
   opensearch:
     container_name: opensearch
-    image: opensearchstaging/opensearch:3.7.0
+    image: opensearchproject/opensearch:3.8.0
     #build: ./opensearch/.
-    
+
     environment:
       discovery.type: single-node
       node.name: opensearch
@@ -124,7 +124,7 @@ services:
 
   opensearch-dashboards:
     container_name: opensearch-dashboards
-    #image: opensearchstaging/opensearch-dashboards:3.7.0
+    #image: opensearchproject/opensearch-dashboards:3.8.0
     build: ./opensearch-dashboards/.
     
     ports:
