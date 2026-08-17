@@ -6,9 +6,9 @@ group = 'org.opensearch.search.pipeline.ubi'
 version = '1.0.0'
 
 // Must match the OpenSearch version running in this repo's docker-compose.yml
-// (opensearchstaging/opensearch:3.7.0). A plugin built against any other
+// (opensearchstaging/opensearch:3.8.0). A plugin built against any other
 // version will be rejected at node startup with a version mismatch error.
-ext.opensearchVersion = '3.7.0'
+ext.opensearchVersion = '3.8.0'
 
 repositories {
     mavenCentral()
