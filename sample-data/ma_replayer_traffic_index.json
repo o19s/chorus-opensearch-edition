@@ -1,0 +1,56 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "source_request_hosts": {"type": "keyword"},
+      "source_request_path": {"type": "keyword"},
+      "source_request_method": {"type": "keyword"},
+      "source_request_payload": {"type": "object", "enabled": false},
+      "source_request_is_query": {"type": "boolean"},
+      "source_request_has_user_query": {"type": "boolean"},
+      "source_request_user_query": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "user_query": {"type": "keyword"},
+      "source_response_status_code": {"type": "integer"},
+      "source_response_time_ms": {"type": "integer"},
+      "source_response_payload": {"type": "text", "index": false},
+      "source_response_documents": {"type": "nested", "dynamic": false},
+
+      "target_request_hosts": {"type": "keyword"},
+      "target_request_path": {"type": "keyword"},
+      "target_request_method": {"type": "keyword"},
+      "target_request_payload": {"type": "object", "enabled": false},
+      "target_response_status_code": {"type": "integer"},
+      "target_response_time_ms": {"type": "integer"},
+      "target_response_payload": {"type": "text", "index": false},
+      "target_response_documents": {"type": "nested", "dynamic": false},
+
+      "target_request_is_query": {"type": "boolean"},
+      "target_request_has_user_query": {"type": "boolean"},
+      "target_request_user_query": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+
+      "connectionId": {"type": "keyword"},
+      "num_requests": {"type": "integer"},
+      "num_errors": {"type": "integer"}
+    }
+  }
+}

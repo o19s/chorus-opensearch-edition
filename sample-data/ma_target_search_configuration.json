@@ -1,0 +1,7 @@
+{
+  "name": "target-response-user-query-search",
+  "description": "Search by target user query and return target response documents",
+  "index": "ma_replayer_traffic",
+  "query": "{\"_source\":false,\"query\":{\"bool\":{\"filter\":[{\"term\":{\"user_query\":{\"value\":\"%SearchText%\"}}},{\"nested\":{\"path\":\"target_response_documents\",\"query\":{\"match_all\":{}},\"inner_hits\":{\"name\":\"documents\",\"_source\":true,\"size\":100}}}]}}}",
+  "searchPipeline": "capture-replay-inner-index"
+}
