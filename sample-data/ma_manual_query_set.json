@@ -1,0 +1,17 @@
+{
+  "name": "Query set of wireless headphones",
+  "description": "This query set uses UBI random sampling",
+  "sampling": "manual",
+  "querySetQueries": [
+    {"queryText": "wireless headphones", "connectionId": "conn-301"},
+    {"queryText": "wireless headphones", "connectionId": "conn-302"},
+    {"queryText": "wireless headphones", "connectionId": "conn-303"},
+    {"queryText": "wireless headphones", "connectionId": "conn-304"},
+    {"queryText": "wireless headphones", "connectionId": "conn-305"},
+    {"queryText": "wireless headphones", "connectionId": "conn-306"},
+    {"queryText": "wireless headphones", "connectionId": "conn-307"},
+    {"queryText": "wireless headphones", "connectionId": "conn-308"},
+    {"queryText": "wireless headphones", "connectionId": "conn-309"},
+    {"queryText": "wireless headphones", "connectionId": "conn-310"}
+  ]
+}
