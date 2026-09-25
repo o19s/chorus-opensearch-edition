@@ -6,8 +6,10 @@ import {
   ReactiveList,
   ResultCard,
 } from "@appbaseio/reactivesearch";
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import AlgoPicker from './custom/AlgoPicker';
 import ShoppingCartButton from './custom/ShoppingCartButton';
+import ProductDetail from './ProductDetail';
 import { UbiEvent } from './ubi/ubi';
 import { UbiEventAttributes } from './ubi/ubi'
 import { UbiQueryRequest } from './ubi/ubi';
@@ -17,7 +19,7 @@ import chorusLogo from './assets/chorus-logo.png';
 const event_server = "http://localhost:9090"; // Middleware
 //const event_server = "http://localhost:2021"; // DataPrepper
 //const search_server = "http://localhost:9200"; // OpenSearch
-const search_server = "http://localhost:9090"; // Send all queries through Middleware
+export const search_server = "http://localhost:9090"; // Send all queries through Middleware
 
 const APPLICATION = "Chorus";
 const client_id = ((sessionStorage.hasOwnProperty('client_id')) ?
@@ -33,29 +35,21 @@ const ubiClient = new  UbiClient(event_server);
 
 clearQueryId(); // Clear out any existing query_id from the session.
 
-function addToCart(item) {
+export function addToCart(item) {
   let shopping_cart = sessionStorage.getItem("shopping_cart");
   shopping_cart = parseInt(shopping_cart, 10) || 0
   shopping_cart++;
   sessionStorage.setItem("shopping_cart", shopping_cart);
   var cart = document.getElementById("cart");
-  cart.textContent = shopping_cart;
+  if (cart) {
+    cart.textContent = shopping_cart;
+  }
   if (getQueryId()) {
-    // Since we do not have a traditional detail page, which is where you would track
-    // a "click" for Click Through Rate and other traditional implicit judgement based metrics
-    // we are re-purposing add to cart to mean both click and add_to_cart.
-    var event = new UbiEvent(APPLICATION, 'click', client_id, session_id, getQueryId(), 
-      new UbiEventAttributes('asin', item.asin, item.title, {search_config: item.algo}, {ordinal:  item.position}),
-      item.title + ' (' + item.id + ')');
-    
-    event.message_type = 'CLICK_THROUGH';
-    
-    ubiClient.trackEvent(event);
-    console.log(event);    
-    
+
+    const ordinalPos = item.position !== undefined ? item.position : -1;
     // Now track the add_to_cart conversion event.
     var event = new UbiEvent(APPLICATION, 'add_to_cart', client_id, session_id, getQueryId(), 
-      new UbiEventAttributes('asin', item.asin, item.title, {search_config: item.algo}, {ordinal:  item.position}),
+      new UbiEventAttributes('asin', item.asin, item.title, {search_config: item.algo}, {ordinal: ordinalPos}),
       item.title + ' (' + item.id + ')');
     
     event.message_type = 'CONVERSION';
@@ -64,6 +58,18 @@ function addToCart(item) {
     console.log(event);
   }
 
+}
+
+export function trackClick(item,index){
+	if(getQueryId()){
+		var event = new UbiEvent(APPLICATION, 'click', client_id, session_id, getQueryId(), 
+          new UbiEventAttributes('asin', item.asin, item.title, {search_config: item.algo}, {ordinal: index}),
+          item.title + ' (' + item.id + ')');
+    
+        event.message_type = 'CLICK_THROUGH';
+        ubiClient.trackEvent(event);
+        console.log("Real click tracked:", event);
+	}
 }
 
 /**
@@ -104,7 +110,7 @@ function generateGuid() {
   return id;
 };
 
-class App extends Component {
+class SearchPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -563,24 +569,34 @@ class App extends Component {
                 <ReactiveList.ResultCardsWrapper>
                   {data.map((item, index) => (
                   <ResultCard key={item._id}>
-                    <ResultCard.Image
-                      style={{
-                        backgroundSize: "cover",
-                        backgroundImage: `url(${item.image})`
-                      }}
-                    />
-                    <ResultCard.Title
-                      dangerouslySetInnerHTML={{
-                        __html: item.title
-                      }}
-                    />
+                    <Link 
+     					to={`/product/${item.asin}`}
+      					onClick={() => trackClick({...item, algo: item.search_config}, index)}
+						style={{ display: "contents" }}
+					>
+      					<ResultCard.Image
+        						style={{
+          							backgroundSize: "cover",
+          							backgroundImage: `url(${item.image})`
+        						}}
+     					/>
+  					</Link>
+                    <ResultCard.Title>
+  						<Link 
+							to={`/product/${item.asin}`}
+   							onClick={() => trackClick({...item, algo: item.search_config}, index)}
+    						style={{ textDecoration: 'none', color: '#007185', fontWeight: 'bold' }}
+  						>
+    						<span dangerouslySetInnerHTML={{ __html: item.title }} />
+  						</Link>
+					</ResultCard.Title>
                     <ResultCard.Description>
                       {item.price + " $ | "}
                       {item.attrs && item.Brand ? item.Brand : ""}
                       {item.search_config ?" algo:" + item.search_config : ""}
                     </ResultCard.Description>
                     <button 
-                      style={{ fontSize:"14px", position:"relative" }}       
+                      style={{ fontSize:"14px", position:"relative",zIndex: 2}}       
                       ref={this.handleRef}   
                       position={ index }
                       asin={ item.asin || "" }
@@ -605,4 +621,14 @@ class App extends Component {
     </ReactiveBase>
   );
 }}
-export default App;
+
+export default function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<SearchPage />} />
+        <Route path="/product/:asin" element={<ProductDetail />} />
+      </Routes>
+    </Router>
+  );
+}
