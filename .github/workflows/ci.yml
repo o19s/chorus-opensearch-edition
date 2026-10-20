@@ -1,0 +1,59 @@
+name: Frontend CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Playwright Tests
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./reactivesearch
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Start backend services and seed real data
+      working-directory: ./
+      run: |
+        touch .env
+        docker compose up -d opensearch middleware
+        
+        echo "Waiting for OpenSearch to boot..."
+        chmod +x ./opensearch/wait-for-os.sh
+        ./opensearch/wait-for-os.sh
+        
+        echo "Creating index schema..."
+        curl -k -u 'admin:MyStr0ng!P@ssw0rd2024' -X PUT "https://localhost:9200/ecommerce" -H 'Content-Type: application/json' --data-binary @./opensearch/schema.json
+        
+        echo "Uploading sample products..."
+        curl -k -u 'admin:MyStr0ng!P@ssw0rd2024' -X POST "https://localhost:9200/ecommerce/_bulk?pretty=false&filter_path=-items" -H 'Content-Type: application/json' --data-binary @./sample-data/esci_us_ecommerce_shrunk.ndjson
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Install dependencies
+      run: yarn install
+
+    - name: Install Playwright Chromium Only
+      run: npx playwright install chromium --with-deps
+
+    - name: Start the React app in the background
+      run: yarn start &
+      env:
+        PORT: 3000
+        NODE_OPTIONS: --openssl-legacy-provider
+
+    - name: Wait for React to start and Middleware to start
+      run: npx wait-on http://localhost:3000 tcp:localhost:9090 --timeout 120000
+
+    - name: Run Playwright tests
+      run: npx playwright test

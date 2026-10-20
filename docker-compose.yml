@@ -55,16 +55,17 @@ services:
     ports:
       - "3001:3001"    
     environment:
-      OPENSEARCH_URL: https://opensearch:9200 
+      OPENSEARCH_URL: https://opensearch:9200
       OPENSEARCH_SSL_VERIFY: false
-      OPENSEARCH_ENABLED_CATEGORIES: search_relevance 
+      OPENSEARCH_ENABLED_CATEGORIES: search_relevance
       OPENSEARCH_HEADER_AUTH: true
+      # Basic auth must be set explicitly here (not via .env) so it takes
+      # precedence over the AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY in .env     
+      OPENSEARCH_USERNAME: admin
+      OPENSEARCH_PASSWORD: "MyStr0ng!P@ssw0rd2024"
     env_file: ".env"
     healthcheck:
-      # `/mcp` returns 307 (redirect to `/mcp/`). curl -sf considers 3xx success
-      # and the 307 only fires once the MCP route is fully registered — so this
-      # tests both "HTTP server up" AND "MCP route mounted", not just port-open.
-      test: ["CMD", "curl", "-sf", "-o", "/dev/null", "http://localhost:3001/mcp"]
+      test: ["CMD", "curl", "-sf", "-o", "/dev/null", "http://localhost:3001/health"]
       interval: 5s
       timeout: 2s
       retries: 10

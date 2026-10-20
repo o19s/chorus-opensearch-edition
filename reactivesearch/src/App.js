@@ -22,12 +22,17 @@ const event_server = "http://localhost:9090"; // Middleware
 export const search_server = "http://localhost:9090"; // Send all queries through Middleware
 
 const APPLICATION = "Chorus";
-const client_id = ((sessionStorage.hasOwnProperty('client_id')) ?
-          sessionStorage.getItem('client_id')
-          : 'CLIENT-' + generateGuid());
-const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
-          sessionStorage.getItem('session_id')
-          : 'SESSION-' + generateGuid());
+let client_id = localStorage.getItem('client_id');
+if (!client_id) {
+  client_id = 'CLIENT-' + generateGuid();
+  localStorage.setItem('client_id', client_id);
+}
+
+let session_id = sessionStorage.getItem('session_id');
+if (!session_id) {
+  session_id = 'SESSION-' + generateGuid();
+  sessionStorage.setItem('session_id', session_id);
+}
 
 const object_id_field = 'asin'; // When we refer to a object by it's ID, this describes what the ID field represents
 
@@ -36,40 +41,43 @@ const ubiClient = new  UbiClient(event_server);
 clearQueryId(); // Clear out any existing query_id from the session.
 
 export function addToCart(item) {
-  let shopping_cart = sessionStorage.getItem("shopping_cart");
-  shopping_cart = parseInt(shopping_cart, 10) || 0
+  // Update item count
+  let shopping_cart = parseInt(sessionStorage.getItem("shopping_cart"), 10) || 0;
   shopping_cart++;
   sessionStorage.setItem("shopping_cart", shopping_cart);
-  var cart = document.getElementById("cart");
-  if (cart) {
-    cart.textContent = shopping_cart;
-  }
-  if (getQueryId()) {
 
+  //Save the actual item data to sessionStorage
+  let cartItems = JSON.parse(sessionStorage.getItem("shopping_cart_items") || "[]");
+  cartItems.push(item);
+  sessionStorage.setItem("shopping_cart_items", JSON.stringify(cartItems));
+
+  //Dispatch a custom event for React to listen to
+  window.dispatchEvent(new Event('cart_updated'));
+
+  if (getQueryId()) {
     const ordinalPos = item.position !== undefined ? item.position : -1;
     // Now track the add_to_cart conversion event.
-    var event = new UbiEvent(APPLICATION, 'add_to_cart', client_id, session_id, getQueryId(), 
+    var event = new UbiEvent(APPLICATION, 'add_to_cart', client_id, session_id, getQueryId(),
       new UbiEventAttributes('asin', item.asin, item.title, {search_config: item.algo}, {ordinal: ordinalPos}),
-      item.title + ' (' + item.id + ')');
+      item.title + ' (' + item.asin + ')');
     
     event.message_type = 'CONVERSION';
     
     ubiClient.trackEvent(event);
     console.log(event);
   }
-
 }
 
 export function trackClick(item,index){
-	if(getQueryId()){
-		var event = new UbiEvent(APPLICATION, 'click', client_id, session_id, getQueryId(), 
-          new UbiEventAttributes('asin', item.asin, item.title, {search_config: item.algo}, {ordinal: index}),
-          item.title + ' (' + item.id + ')');
-    
-        event.message_type = 'CLICK_THROUGH';
-        ubiClient.trackEvent(event);
-        console.log("Real click tracked:", event);
-	}
+  if(getQueryId()){
+    var event = new UbiEvent(APPLICATION, 'click', client_id, session_id, getQueryId(),
+      new UbiEventAttributes('asin', item.asin, item.title, {search_config: item.algo}, {ordinal: index}),
+      item.title + ' (' + item.asin + ')');
+
+    event.message_type = 'CLICK_THROUGH';
+    ubiClient.trackEvent(event);
+    console.log("Real click tracked:", event);
+  }
 }
 
 /**
@@ -195,7 +203,7 @@ class SearchPage extends Component {
       onError={this.handleSearchError}
     >
       <div style={{ height: "200px", width: "100%"}}>
-        <img style={{ height: "100%", class: "center"  }} src={chorusLogo} />
+        <img style={{ height: "100%" }}  src={chorusLogo} alt="Chorus Logo" />
         <div style={{float:"right"}}>
           <small>
             <code>Your Client ID: {client_id}</code>
@@ -226,7 +234,7 @@ class SearchPage extends Component {
             />
             <MultiList
               componentId="supplier_name"
-              dataField="Brand.keyword"
+              dataField="brand.keyword"
               title="Filter by Brands"
               size={20}
               showSearch={false}
@@ -304,7 +312,7 @@ class SearchPage extends Component {
             componentId="searchbox"
             placeholder="Search for products, brands or ASIN"
             autosuggest={false}
-            dataField={["id", "title", "category", "bullets", "description", "Brand", "Color"]}
+            dataField={["asin", "title", "category", "bullet_points", "description", "brand", "color"]}
             debounce={300}
             onKeyPress={
               function(value) {
@@ -396,7 +404,7 @@ class SearchPage extends Component {
                   query: {
                     multi_match: {
                       query: value,
-                      fields: ["id", "title", "category", "bullets", "description", "Brand", "Color"]
+                      fields: ["asin", "title", "category", "bullet_points", "description", "brand", "color"]
                     }
                   }
                 };
@@ -434,7 +442,7 @@ class SearchPage extends Component {
                     query: {
                       multi_match: {
                         query: value,
-                        fields: ["id", "title", "category", "bullets", "description", "Brand", "Color"]
+                        fields: ["asin", "title", "category", "bullet_points", "description", "brand", "color"]
                       }
                     },
                     ext: extJson
@@ -591,8 +599,8 @@ class SearchPage extends Component {
   						</Link>
 					</ResultCard.Title>
                     <ResultCard.Description>
-                      {item.price + " $ | "}
-                      {item.attrs && item.Brand ? item.Brand : ""}
+                      {item.price != null ? `${item.price} $ | ` : ""}
+                      {item.brand}
                       {item.search_config ?" algo:" + item.search_config : ""}
                     </ResultCard.Description>
                     <button 
@@ -604,6 +612,7 @@ class SearchPage extends Component {
                       algo={item.search_config || ""}
                       onClick={
                         function(el) {
+                          trackClick({ ...item, algo: item.search_config }, index);
                           addToCart({ ...item, position: index, algo: item.search_config });
                         }
                       }
