@@ -1,4 +1,3 @@
-//Test 
 import React, { Component } from "react";
 import {
   ReactiveBase,
@@ -44,8 +43,6 @@ function addToCart(item) {
   let cartItems = JSON.parse(sessionStorage.getItem("shopping_cart_items") || "[]");
   cartItems.push(item);
   sessionStorage.setItem("shopping_cart_items", JSON.stringify(cartItems));
-
-  console.log("addToCart clicked! New count:", shopping_cart);
 
   //Dispatch a custom event for React to listen to
   window.dispatchEvent(new Event('cart_updated'));
