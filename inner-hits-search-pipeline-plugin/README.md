@@ -4,8 +4,8 @@ An OpenSearch search pipeline response processor, `ubi_hits_to_docs`, that expan
 `query_response_hit_ids` array on a `ubi_queries` hit into individual search hits — one per id —
 as if OpenSearch had matched that many separate documents.
 
-Built against OpenSearch **3.7.0** to match the version in this repo's `docker-compose.yml`
-(`opensearchstaging/opensearch:3.7.0`). A plugin built against any other version will be rejected
+Built against OpenSearch **3.8.0** to match the version in this repo's `docker-compose.yml`
+(`opensearchstaging/opensearch:3.8.0`). A plugin built against any other version will be rejected
 at node startup.
 
 Deliberately depends only on the core `server` jar (`org.opensearch:opensearch`), never on
@@ -24,7 +24,7 @@ no manual steps needed for a normal run. It does this by:
 2. Copying that zip to `./opensearch/ubi-hits-search-pipeline.zip` (gitignored — it's a build
    artifact, regenerated on every quickstart run).
 3. `docker compose up -d --build` then builds `opensearch/Dockerfile`, which `COPY`s that zip in
-   and runs `opensearch-plugin install` on it, so the resulting `opensearchstaging/opensearch:3.7.0`
+   and runs `opensearch-plugin install` on it, so the resulting `opensearchstaging/opensearch:3.8.0`
    image (tagged locally, per `docker-compose.yml`'s `build: ./opensearch/.`) has the plugin
    pre-installed.
 

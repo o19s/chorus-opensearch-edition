@@ -391,3 +391,127 @@ echo Upload ART Judgments
 exe -s -X PUT "$OS_URL/_plugins/_search_relevance/judgments" \
 -H "Content-type: application/json" \
 --data-binary @sample-data/art_judgments.json
+
+echo "Setting up MA replayer traffic index"
+
+# Delete the index if it exists
+(curl -k -u 'admin:MyStr0ng!P@ssw0rd2024' -s -X DELETE \
+  "$OS_URL/ma_replayer_traffic" > /dev/null) || true
+
+# Create the MA replayer traffic index
+exe -s -X PUT "$OS_URL/ma_replayer_traffic" \
+  -H "Content-Type: application/json" \
+  --data-binary @sample-data/ma_replayer_traffic_index.json
+
+echo "Loading MA replayer traffic sample data"
+
+exe -s -X POST "$OS_URL/ma_replayer_traffic/_bulk" \
+  -H "Content-Type: application/x-ndjson" \
+  --data-binary @sample-data/ma_replayer_traffic.ndjson
+
+exe -s -X POST "$OS_URL/ma_replayer_traffic/_refresh"
+
+echo "MA replayer traffic document count:"
+exe -s -X GET "$OS_URL/ma_replayer_traffic/_count"
+
+echo "Create MA sample query set"
+
+exe -s -X POST "$OS_URL/_plugins/_search_relevance/query_sets" \
+  -H "Content-type: application/json" \
+  --data-binary @sample-data/ma_random_sampling_query_set.json
+
+QUERY_SET_MA=`jq -r '.query_set_id' < build/RES`
+
+echo "Create MA source-response search configuration"
+
+exe -s -X PUT "$OS_URL/_plugins/_search_relevance/search_configurations" \
+  -H "Content-Type: application/json" \
+  --data-binary @sample-data/ma_source_search_configuration.json
+
+SC_MA_SOURCE=`jq -r '.search_configuration_id' < build/RES`
+
+echo "Create MA target-response search configuration"
+
+exe -s -X PUT "$OS_URL/_plugins/_search_relevance/search_configurations" \
+  -H "Content-Type: application/json" \
+  --data-binary @sample-data/ma_target_search_configuration.json
+
+SC_MA_TARGET=`jq -r '.search_configuration_id' < build/RES`
+
+echo "Create MA source/target response comparison experiment"
+
+exe -s -X PUT "$OS_URL/_plugins/_search_relevance/experiments" \
+  -H "Content-Type: application/json" \
+  -d"{
+    \"name\": \"Source / Target Response Documents Comparison\",
+    \"description\": \"Compares the source and target response documents of individual replayed requests\",
+    \"type\": \"PAIRWISE_COMPARISON\",
+    \"querySetId\": \"$QUERY_SET_MA\",
+    \"size\": 10,
+    \"searchConfigurationList\": [
+      \"$SC_MA_SOURCE\",
+      \"$SC_MA_TARGET\"
+    ]
+  }"
+
+EX_MA=`jq -r '.experiment_id' < build/RES`
+
+echo "MA comparison experiment id: $EX_MA"
+
+echo
+echo "Loading MA replayer traffic data with different connectionIds"
+
+exe -s -X POST "$OS_URL/ma_replayer_traffic/_bulk" \
+  -H "Content-Type: application/x-ndjson" \
+  --data-binary @sample-data/ma_replayer_traffic_connectionid.ndjson
+
+exe -s -X POST "$OS_URL/ma_replayer_traffic/_refresh"
+
+echo
+echo "Create query set with user_query + connectionId"
+
+exe -s -X PUT "$OS_URL/_plugins/_search_relevance/query_sets" \
+  -H "Content-Type: application/json" \
+  --data-binary @sample-data/ma_manual_query_set.json
+
+QUERY_SET_CONNECTION_ID=`jq -r '.query_set_id' < build/RES`
+
+echo
+echo "Create source-response user-query + connectionId search configuration"
+
+exe -s -X PUT "$OS_URL/_plugins/_search_relevance/search_configurations" \
+  -H "Content-Type: application/json" \
+  --data-binary @sample-data/ma_source_search_configuration_connectionid.json
+
+SC_MA_SOURCE_CONNECTION_ID=`jq -r '.search_configuration_id' < build/RES`
+
+echo
+echo "Create target-response user-query + connectionId search configuration"
+
+exe -s -X PUT "$OS_URL/_plugins/_search_relevance/search_configurations" \
+  -H "Content-Type: application/json" \
+  --data-binary @sample-data/ma_target_search_configuration_connectionid.json
+
+SC_MA_TARGET_CONNECTION_ID=`jq -r '.search_configuration_id' < build/RES`
+
+echo
+echo "Create source/target response comparison experiment"
+
+exe -s -X PUT "$OS_URL/_plugins/_search_relevance/experiments" \
+  -H "Content-Type: application/json" \
+  -d"{
+    \"name\": \"Documents Comparison for wireless headphones\",
+    \"description\": \"Compares the source and target response documents of individual replayed requests for wireless headphones queries\",
+    \"type\": \"PAIRWISE_COMPARISON\",
+    \"querySetId\": \"$QUERY_SET_CONNECTION_ID\",
+    \"size\": 10,
+    \"searchConfigurationList\": [
+      \"$SC_MA_SOURCE_CONNECTION_ID\",
+      \"$SC_MA_TARGET_CONNECTION_ID\"
+    ]
+  }"
+
+EX_CONNECTION_ID=`jq -r '.experiment_id' < build/RES`
+
+echo
+echo "ConnectionId comparison experiment id: $EX_CONNECTION_ID"

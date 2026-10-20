@@ -1,0 +1,7 @@
+{
+  "name": "MA sample query set",
+  "description": "This query set uses UBI random sampling",
+  "sampling": "random",
+  "querySetSize": 10,
+  "ubiQueriesIndex": "ma_replayer_traffic"
+}

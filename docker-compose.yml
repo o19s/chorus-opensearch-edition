@@ -77,12 +77,12 @@ services:
 
   opensearch:
     container_name: opensearch
-    # Must NOT be tagged opensearchstaging/opensearch:3.7.0 (the base image the
+    # Must NOT be tagged opensearchstaging/opensearch:3.8.0 (the base image the
     # Dockerfile's FROM line pulls from) — reusing that tag makes our own build
     # output shadow the upstream base image locally, so the next build's FROM
     # resolves to our already-patched image instead of the pristine upstream one,
     # and the plugin install step fails with "plugin directory already exists".
-    image: chorus/opensearch-with-ubi-plugin:3.7.0
+    image: chorus/opensearch-with-ubi-plugin:3.8.0
     build: ./opensearch/.
 
     environment:
@@ -129,7 +129,7 @@ services:
 
   opensearch-dashboards:
     container_name: opensearch-dashboards
-    #image: opensearchstaging/opensearch-dashboards:3.7.0
+    #image: opensearchstaging/opensearch-dashboards:3.8.0
     build: ./opensearch-dashboards/.
     
     ports:
