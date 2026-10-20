@@ -576,7 +576,7 @@ class App extends Component {
                     />
                     <ResultCard.Description>
                       {item.price != null ? `${item.price} $ | ` : ""}
-      				  {item.brand}
+                      {item.brand}
                       {item.search_config ?" algo:" + item.search_config : ""}
                     </ResultCard.Description>
                     <button 
