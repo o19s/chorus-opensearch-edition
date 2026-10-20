@@ -25,5 +25,9 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "wait-on": "^9.1.0"
+  }
 }

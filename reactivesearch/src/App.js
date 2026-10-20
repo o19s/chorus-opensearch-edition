@@ -39,12 +39,19 @@ const ubiClient = new  UbiClient(event_server);
 clearQueryId(); // Clear out any existing query_id from the session.
 
 function addToCart(item) {
-  let shopping_cart = sessionStorage.getItem("shopping_cart");
-  shopping_cart = parseInt(shopping_cart, 10) || 0
+  // Update item count
+  let shopping_cart = parseInt(sessionStorage.getItem("shopping_cart"), 10) || 0;
   shopping_cart++;
   sessionStorage.setItem("shopping_cart", shopping_cart);
-  var cart = document.getElementById("cart");
-  cart.textContent = shopping_cart;
+
+  //Save the actual item data to sessionStorage
+  let cartItems = JSON.parse(sessionStorage.getItem("shopping_cart_items") || "[]");
+  cartItems.push(item);
+  sessionStorage.setItem("shopping_cart_items", JSON.stringify(cartItems));
+
+  //Dispatch a custom event for React to listen to
+  window.dispatchEvent(new Event('cart_updated'));
+
   if (getQueryId()) {
     // Since we do not have a traditional detail page, which is where you would track
     // a "click" for Click Through Rate and other traditional implicit judgement based metrics
@@ -68,7 +75,6 @@ function addToCart(item) {
     ubiClient.trackEvent(event);
     console.log(event);
   }
-
 }
 
 /**
