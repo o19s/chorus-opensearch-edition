@@ -95,18 +95,19 @@ def search():
 
       response = search_response
 
+      # Always strip cost from every hit, regardless of whether this caller sent
+      # UBI context - the browser must never see it. Caching it for later margin
+      # lookups is the only part that needs a query_id to key off of.
       ubi_query_id = search_response.get("ext", {}).get("ubi", {}).get("query_id")
-      if ubi_query_id is not None:
-          for hit in response["hits"]["hits"]:
-              asin = hit["_source"]["asin"]
-              cost = hit["_source"]["cost"]
-              
-              # Strip out of the sensitive data from what is sent to browser
-              del hit["_source"]["cost"]
-      
-              # Cache cost for product based on QueryId + ASIN
-              cache[f"{ubi_query_id}-{asin}"] = cost
-  
+      for hit in response.get("hits", {}).get("hits", []):
+          source = hit.get("_source", {})
+          if "cost" in source:
+              cost = source.pop("cost")
+              asin = source.get("asin")
+              if ubi_query_id is not None and asin is not None:
+                  # Cache cost for product based on QueryId + ASIN
+                  cache[f"{ubi_query_id}-{asin}"] = cost
+
       response = flask.Response(json.dumps(search_response), res.status_code, headers=headers)
   
       return response
