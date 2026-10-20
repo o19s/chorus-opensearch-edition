@@ -20,12 +20,17 @@ const event_server = "http://localhost:9090"; // Middleware
 const search_server = "http://localhost:9090"; // Send all queries through Middleware
 
 const APPLICATION = "Chorus";
-const client_id = ((sessionStorage.hasOwnProperty('client_id')) ?
-          sessionStorage.getItem('client_id')
-          : 'CLIENT-' + generateGuid());
-const session_id = ((sessionStorage.hasOwnProperty('session_id')) ?
-          sessionStorage.getItem('session_id')
-          : 'SESSION-' + generateGuid());
+let client_id = localStorage.getItem('client_id');
+if (!client_id) {
+  client_id = 'CLIENT-' + generateGuid();
+  localStorage.setItem('client_id', client_id);
+}
+
+let session_id = sessionStorage.getItem('session_id');
+if (!session_id) {
+  session_id = 'SESSION-' + generateGuid();
+  sessionStorage.setItem('session_id', session_id);
+}
 
 const object_id_field = 'asin'; // When we refer to a object by it's ID, this describes what the ID field represents
 
@@ -220,7 +225,7 @@ class App extends Component {
             />
             <MultiList
               componentId="supplier_name"
-              dataField="Brand.keyword"
+              dataField="brand.keyword"
               title="Filter by Brands"
               size={20}
               showSearch={false}
@@ -298,7 +303,7 @@ class App extends Component {
             componentId="searchbox"
             placeholder="Search for products, brands or ASIN"
             autosuggest={false}
-            dataField={["id", "title", "category", "bullets", "description", "Brand", "Color"]}
+            dataField={["asin", "title", "category", "bullet_points", "description", "brand", "color"]}
             debounce={300}
             onKeyPress={
               function(value) {
@@ -390,7 +395,7 @@ class App extends Component {
                   query: {
                     multi_match: {
                       query: value,
-                      fields: ["id", "title", "category", "bullets", "description", "Brand", "Color"]
+                      fields: ["asin", "title", "category", "bullet_points", "description", "brand", "color"]
                     }
                   }
                 };
@@ -428,7 +433,7 @@ class App extends Component {
                     query: {
                       multi_match: {
                         query: value,
-                        fields: ["id", "title", "category", "bullets", "description", "Brand", "Color"]
+                        fields: ["asin", "title", "category", "bullet_points", "description", "brand", "color"]
                       }
                     },
                     ext: extJson
