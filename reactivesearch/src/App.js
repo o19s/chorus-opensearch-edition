@@ -51,7 +51,7 @@ function addToCart(item) {
     // we are re-purposing add to cart to mean both click and add_to_cart.
     var event = new UbiEvent(APPLICATION, 'click', client_id, session_id, getQueryId(), 
       new UbiEventAttributes('asin', item.asin, item.title, {search_config: item.algo}, {ordinal:  item.position}),
-      item.title + ' (' + item.id + ')');
+      item.title + ' (' + item.asin + ')');
     
     event.message_type = 'CLICK_THROUGH';
     
@@ -61,7 +61,7 @@ function addToCart(item) {
     // Now track the add_to_cart conversion event.
     var event = new UbiEvent(APPLICATION, 'add_to_cart', client_id, session_id, getQueryId(), 
       new UbiEventAttributes('asin', item.asin, item.title, {search_config: item.algo}, {ordinal:  item.position}),
-      item.title + ' (' + item.id + ')');
+      item.title + ' (' + item.asin + ')');
     
     event.message_type = 'CONVERSION';
     
@@ -194,7 +194,7 @@ class App extends Component {
       onError={this.handleSearchError}
     >
       <div style={{ height: "200px", width: "100%"}}>
-        <img style={{ height: "100%", class: "center"  }} src={chorusLogo} />
+        <img style={{ height: "100%" }}  src={chorusLogo} alt="Chorus Logo" />
         <div style={{float:"right"}}>
           <small>
             <code>Your Client ID: {client_id}</code>
@@ -303,7 +303,7 @@ class App extends Component {
             componentId="searchbox"
             placeholder="Search for products, brands or ASIN"
             autosuggest={false}
-			dataField={["asin", "title", "category", "bullet_points", "description", "brand", "color"]}
+            dataField={["asin", "title", "category", "bullet_points", "description", "brand", "color"]}
             debounce={300}
             onKeyPress={
               function(value) {
@@ -580,8 +580,8 @@ class App extends Component {
                       }}
                     />
                     <ResultCard.Description>
-                      {item.price + " $ | "}
-      				  {item.attrs && item.Brand ? item.Brand : ""}
+                      {item.price != null ? `${item.price} $ | ` : ""}
+                      {item.brand}
                       {item.search_config ?" algo:" + item.search_config : ""}
                     </ResultCard.Description>
                     <button 
