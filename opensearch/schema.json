@@ -54,6 +54,16 @@
           "parameters": {}
         }
       },
+	  "image_embedding": {
+        "type": "knn_vector",
+        "dimension": 512,
+        "method": {
+          "engine": "lucene",
+          "space_type": "cosinesimil",
+          "name": "hnsw",
+          "parameters": {}
+        }
+      },
       "bullet_points": {
         "type": "text",
         "analyzer": "english_stemmed"
