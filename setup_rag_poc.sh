@@ -145,7 +145,7 @@ os_curl -X PUT "$OS_URL/_search/pipeline/rag_pipeline" -H 'Content-Type: applica
     {
       \"normalization-processor\": {
         \"normalization\": { \"technique\": \"min_max\" },
-        \"combination\": { \"technique\": \"arithmetic_mean\", \"parameters\": { \"weights\": [0.55, 0.45] } }
+        \"combination\": { \"technique\": \"arithmetic_mean\", \"parameters\": { \"weights\": [0.35, 0.65] } }
       }
     }
   ],

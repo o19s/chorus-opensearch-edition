@@ -96,6 +96,7 @@
       font-weight: 600;
       color: #111827;
       display: -webkit-box;
+      line-clamp: 2;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
@@ -142,7 +143,7 @@
 
   <div id="chatFeed">
     <div class="msg assistant">
-      <div class="bubble">Hey ! How can I help you ? Ask for any product recommonedations.</div>
+      <div class="bubble">Hey! How can I help you? Ask for any product recommendations.</div>
     </div>
   </div>
 
@@ -160,50 +161,14 @@
 
   <script>
     let chatHistory = [];
-    let currentTopic = "";
-
-    const STOP_WORDS = new Set([
-      "i", "want", "need", "a", "an", "the", "to", "for", "my", "myself", "me",
-      "please", "can", "you", "show", "suggest", "find", "give", "get", "looking",
-      "some", "any", "type", "of", "good", "best", "buy", "is", "are", "who", "years", "old"
-    ]);
 
     function resetSession() {
       chatHistory = [];
-      currentTopic = "";
       document.getElementById("chatFeed").innerHTML = `
         <div class="msg assistant">
           <div class="bubble">Session cleared! Ask a new shopping question to start fresh.</div>
         </div>
       `;
-    }
-
-    function extractCoreKeywords(text) {
-      const cleaned = text.toLowerCase()
-        .replace(/\bbycycle\b/g, "bicycle bike")
-        .replace(/\bstudy table\b/g, "study table computer writing desk")
-        .replace(/[^\w\s]/g, " ");
-      const tokens = cleaned.split(/\s+/).filter(w => w.length > 1 && !STOP_WORDS.has(w));
-      return tokens.length > 0 ? tokens.join(" ") : text;
-    }
-
-    function isFollowUpMessage(text) {
-      if (chatHistory.length === 0) return false;
-      const lower = text.toLowerCase().trim();
-      const newSearchStarters = /^(show me|suggest|find|search|i want|i need|looking for|gift for|buy|get me)\b/;
-      const followUpCues = /\b(but|instead|which|that|those|these|it|them|one|first|second|third|fourth|#1|#2|#3|#4|cheaper|expensive|better|other|more|why|what about|how about)\b/;
-
-      if (newSearchStarters.test(lower) && !/\b(instead|other|another|different)\b/.test(lower)) {
-        return false;
-      }
-      return followUpCues.test(lower);
-    }
-
-    function humaniseOutput(rawText) {
-      return (rawText || "")
-        .replace(/SEARCH RESULT \d+:\s*/gi, "• ")
-        .replace(/\b(Item|Title):\s*/gi, "")
-        .trim();
     }
 
     async function sendMessage() {
@@ -228,19 +193,17 @@
       feed.appendChild(botDiv);
       feed.scrollTop = feed.scrollHeight;
 
-      const isFollowUp = isFollowUpMessage(userText);
-      const coreQuery = extractCoreKeywords(userText);
+      const recentContext = chatHistory.slice(-2).map(turn =>
+        `User: "${turn.user}" | Retrieved Items: ${turn.products}`
+      ).join("\n");
 
-      if (!isFollowUp) {
-        currentTopic = coreQuery;
-      } else {
-        currentTopic = `${currentTopic} ${coreQuery}`;
-      }
+      const searchQuery = chatHistory.length > 0
+        ? `${chatHistory[chatHistory.length - 1].user} ${userText}`
+        : userText;
 
-      const lastTurn = chatHistory.length > 0 ? chatHistory[chatHistory.length - 1] : null;
-      const contextualQuestion = (isFollowUp && lastTurn)
-        ? `Shopper's earlier request: "${lastTurn.user}" (Products shown: ${lastTurn.products}). Shopper's follow-up: "${userText}". Respond conversationally like a helpful human store assistant.`
-        : `Shopper says: "${userText}". Respond conversationally in 2-4 friendly sentences recommending the best matching items from the context (or politely suggest the closest alternative from the context if their exact item isn't available).`;
+      const contextualQuestion = recentContext
+        ? `Recent conversation history:\n${recentContext}\n\nCurrent shopper message: "${userText}"\nUse the conversation history if this is a follow-up question; otherwise answer the current message directly using the retrieved context.`
+        : userText;
 
       const payload = {
         size: 4,
@@ -249,7 +212,7 @@
             queries: [
               {
                 multi_match: {
-                  query: currentTopic,
+                  query: userText,
                   type: "best_fields",
                   fuzziness: "AUTO",
                   fields: ["title^4", "category^3", "bullet_points^2", "brand^2", "description"]
@@ -258,7 +221,7 @@
               {
                 neural: {
                   title_embedding: {
-                    query_text: currentTopic,
+                    query_text: searchQuery,
                     k: 10
                   }
                 }
@@ -268,7 +231,7 @@
         },
         ext: {
           generative_qa_parameters: {
-            llm_model: "gpt-3.5-turbo",
+            llm_model: "qwen2.5:1.5b",
             llm_question: contextualQuestion,
             context_size: 4,
             timeout: 180
@@ -288,9 +251,9 @@
         const hits = data?.hits?.hits || [];
 
         if (rawAnswer) {
-          botDiv.querySelector(".bubble").textContent = humaniseOutput(rawAnswer);
+          botDiv.querySelector(".bubble").textContent = rawAnswer.trim();
         } else {
-          botDiv.querySelector(".bubble").textContent = "⚠️ Error:\n" + JSON.stringify(data.error || data, null, 2);
+          botDiv.querySelector(".bubble").textContent = "Error:\n" + JSON.stringify(data.error || data, null, 2);
         }
 
         if (hits.length > 0) {
@@ -300,12 +263,12 @@
             const s = hit._source || {};
             const imgUrl = s.image_url || s.image || "";
             const price = s.price ? `$${Number(s.price).toFixed(2)}` : "Price N/A";
-            const rating = s.rating ? `⭐ ${s.rating}` : "";
+            const rating = s.rating ? `(${s.rating}/5)` : "";
             const card = document.createElement("div");
             card.className = "card";
             card.innerHTML = `
               ${imgUrl ? `<img src="${imgUrl}" alt="" />` : ""}
-              <div class="brand">#${i + 1} • ${s.brand || "Product"} ${rating}</div>
+              <div class="brand">#${i + 1} ${s.brand || "Product"} ${rating}</div>
               <div class="title">${s.title || s.asin}</div>
               <div class="price">${price}</div>
             `;
