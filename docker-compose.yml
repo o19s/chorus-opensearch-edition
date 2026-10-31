@@ -199,8 +199,23 @@ services:
     volumes:
       - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
+  ollama:
+    container_name: ollama
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
+  clip:
+    container_name: clip
+    build: ./clip-server
+    ports:
+      - "8000:8000"
+
 volumes:
   opensearch-data:
   opensearch-dashboards-node-modules:
   opensearch-dashboards-cache:
   opensearch-dashboards-yarn:
+  ollama-data:
